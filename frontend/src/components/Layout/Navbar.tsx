@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Trophy, User, LogOut, Code, LayoutGrid } from 'lucide-react';
+import { User, LogOut } from 'lucide-react';
+import logoImg from '../../assets/image.png';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -17,8 +18,8 @@ const Navbar = () => {
     <nav className="fixed top-0 left-0 right-0 z-[1000] h-[80px] flex items-center justify-between px-10 bg-[#050810]/80 backdrop-blur-xl border-b border-white/5">
       <div className="flex items-center gap-4">
         <Link to="/dashboard" className="flex items-center gap-3 text-white no-underline group">
-          <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center border border-primary/20 group-hover:border-primary/50 transition-all">
-            <Trophy className="text-primary drop-shadow-[0_0_8px_rgba(var(--primary-glow))]" size={24} />
+          <div className="h-12 w-auto bg-transparent rounded-lg flex items-center justify-center transition-all overflow-hidden py-0.5">
+            <img src={logoImg} alt="Logo" className="h-full w-auto object-contain" />
           </div>
           <div className="flex flex-col">
             <span className="font-outfit font-black text-lg tracking-tight leading-none">KIET Deemed to be University</span>

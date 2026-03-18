@@ -4,7 +4,7 @@
   "description": "Department Coding Analytics Platform",
   "main": "dist/server.js",
   "scripts": {
-    "start": "node dist/server.js",
+    "start": "node dist/server.js & node dist/workers/index.js",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "worker": "ts-node src/workers/index.ts",
     "worker:prod": "node dist/workers/index.js",
