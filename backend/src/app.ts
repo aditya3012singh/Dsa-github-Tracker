@@ -4,9 +4,14 @@ import { errorHandler } from './middleware/errorHandler';
 import studentRoutes from './routes/student.routes';
 import leaderboardRoutes from './routes/leaderboard.routes';
 import authRoutes from './routes/auth.routes';
+import morgan from 'morgan';
+import { logger } from './utils/logger';
 
 const app = express();
 
+app.use(morgan('combined', { 
+  stream: { write: (message) => logger.info(message.trim()) } 
+}));
 app.use(cors());
 app.use(express.json());
 
