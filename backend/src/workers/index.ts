@@ -52,7 +52,7 @@ const worker = new Worker('statsFetchQueue', async (job: Job) => {
   }
 }, {
   connection: redisConnection as any,
-  concurrency: 10 // Process 10 jobs concurrently
+  concurrency: 3 // Reduced for free tier (512MB RAM) stability
 });
 
 worker.on('completed', (job: Job) => {
