@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Student {
+  id               String       @id @default(uuid())
+  name             String
+  rollNo           String       @unique
+  email            String?      @unique
+  branch           String
+  year             Int
+  leetcodeHandle   String?
+  codeforcesHandle String?
+  gfgHandle        String?
+  codechefHandle   String?
+  githubHandle     String?
+  password         String
+  resetToken       String?   @unique
+  resetTokenExpiry DateTime?
+  createdAt        DateTime  @default(now())
+  codingStats      CodingStats?
+  fetchJobs        FetchJob[]
+}
+
+model CodingStats {
+  id                  String   @id @default(uuid())
+  studentId           String   @unique
+  leetcodeSolved      Int      @default(0)
+  leetcodeEasy        Int      @default(0)
+  leetcodeMedium      Int      @default(0)
+  leetcodeHard        Int      @default(0)
+  codeforcesRating    Int      @default(0)
+  codeforcesMaxRating Int      @default(0)
+  codechefRating      Int      @default(0)
+  gfgSolved           Int      @default(0)
+  overallScore        Float    @default(0)
+  updatedAt           DateTime @updatedAt
+  codechefSolved      Int      @default(0)
+  githubContributions Int      @default(0)
+  githubFollowers     Int      @default(0)
+  githubFollowing     Int      @default(0)
+  githubRepos         Int      @default(0)
+  student             Student  @relation(fields: [studentId], references: [id])
+}
+
+model FetchJob {
+  id        String   @id @default(uuid())
+  studentId String
+  platform  String
+  status    String
+  lastRun   DateTime @default(now())
+  student   Student  @relation(fields: [studentId], references: [id])
+
+  @@unique([studentId, platform])
+}
