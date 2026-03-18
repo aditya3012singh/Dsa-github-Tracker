@@ -2,8 +2,9 @@ import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../config/db';
 import { redisConnection } from '../config/redis';
 import { calculateOverallScore } from '../utils/scoring';
+import { AuthRequest } from '../middleware/auth';
 
-export const getLeaderboard = async (req: Request, res: Response, next: NextFunction) => {
+export const getLeaderboard = async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 100;
@@ -29,7 +30,6 @@ export const getLeaderboard = async (req: Request, res: Response, next: NextFunc
       leaderboard = students.map((student: any) => {
         const stats = student.codingStats;
         
-        // Calculate totalSolved and score using utility
         const totalSolved = (stats?.leetcodeSolved || 0) + (stats?.gfgSolved || 0) + (stats?.codechefSolved || 0);
         const score = calculateOverallScore(stats);
 
@@ -136,6 +136,18 @@ export const getLeaderboard = async (req: Request, res: Response, next: NextFunc
       return order === 'desc' ? valB - valA : valA - valB;
     });
 
+    // Find requesting user rank in the FULL sorted list
+    let userRankInfo = null;
+    if (req.user) {
+      const index = leaderboard.findIndex(s => s.id === req.user?.id);
+      if (index !== -1) {
+        userRankInfo = {
+          rank: index + 1,
+          student: leaderboard[index]
+        };
+      }
+    }
+
     const paginatedData = leaderboard.slice(skip, skip + limit);
 
     res.json({ 
@@ -146,6 +158,7 @@ export const getLeaderboard = async (req: Request, res: Response, next: NextFunc
       order,
       search,
       total: leaderboard.length,
+      userRank: userRankInfo,
       data: paginatedData, 
       source: cachedLeaderboard ? 'cache' : 'db' 
     });

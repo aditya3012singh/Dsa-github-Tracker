@@ -66,16 +66,16 @@ const Leaderboard = () => {
 
       {/* ── Page Header ── */}
       <header className="flex flex-col items-center gap-3 text-center px-4">
-        <h1 className="text-[4rem] sm:text-[5.5rem] font-black font-outfit uppercase tracking-tighter text-white leading-none drop-shadow-[0_0_30px_rgba(255,255,255,0.15)]">
+        <h1 className="text-[2rem] sm:text-[2rem] font-black font-outfit  text-white leading-none drop-shadow-[0_0_30px_rgba(255,255,255,0.15)]">
           Leaderboard
         </h1>
-        <p className="text-base text-text-dim uppercase tracking-[0.3em] font-semibold">
+        <p className="text-base text-text-dim uppercase tracking-[0.2em] font-semibold">
           KIET Deemed to be University — DSA Rankings
         </p>
       </header>
 
       {/* ── Controls Row: Sort + Filters ── */}
-      <div className="flex flex-wrap justify-center gap-4 px-4">
+      <div className="flex flex-wrap justify-center gap-5 px-4">
         {/* Sort by dropdown */}
         <DropdownSelect
           label="Sort By"
@@ -89,7 +89,7 @@ const Leaderboard = () => {
 
 
         {/* Year filter */}
-        <DropdownSelect
+        <DropdownSelect 
           label="Year"
           value={yearFilter}
           onChange={(val) => { setYearFilter(val); setPage(1); }}
@@ -137,16 +137,16 @@ const Leaderboard = () => {
       {!isLoading && topThree.length > 0 && (
         <section className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-[98%] mx-auto w-full px-8">
           {topThree[0] && <HighlightCard student={topThree[0]} rank={1} color="#FFD700" />}
-          {topThree[1] && <HighlightCard student={topThree[1]} rank={2} color="#E2E8F0" />}
-          {topThree[2] && <HighlightCard student={topThree[2]} rank={3} color="#FDBA74" />}
+          {topThree[1] && <HighlightCard student={topThree[1]} rank={2} color="#94a3b8" />}
+          {topThree[2] && <HighlightCard student={topThree[2]} rank={3} color="#cd7f32" />}
         </section>
       )}
 
       {/* ── Main Table Area ── */}
-      <div className="flex flex-col gap-8 max-w-[98%] mx-auto w-full px-8">
+      <div className="flex flex-col gap-8 max-w-[98%] mx-auto w-full px-2">
         {/* Controls Container */}
-        <div className="flex flex-col md:flex-row gap-6 items-stretch md:items-center bg-white/[0.02] border border-white/5 p-6 rounded-3xl backdrop-blur-md">
-          <div className="relative flex-1">
+        <div className="flex flex-col md:flex-row gap-6 items-stretch md:items-center bg-white/[0.02] border border-white/5 p-2 rounded-3xl backdrop-blur-md">
+          <div className="relative flex-1 bg-black">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
             <input
               type="text"
@@ -166,7 +166,7 @@ const Leaderboard = () => {
               <RefreshCw className={`${isFetching ? 'animate-spin' : ''} group-hover:text-primary`} size={20} />
             </button>
 
-            <button
+            {/* <button
               onClick={handleSyncAll}
               disabled={isSyncing || syncDone}
               className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[14px] font-bold border transition-all disabled:opacity-50 ${syncDone
@@ -176,20 +176,20 @@ const Leaderboard = () => {
             >
               {isSyncing ? <div className="w-4 h-4 border-2 border-current/30 border-t-current rounded-full animate-spin" /> : syncDone ? <CheckCircle size={18} /> : <Zap size={18} />}
               <span>{isSyncing ? 'Syncing...' : syncDone ? 'Queued' : 'Sync All'}</span>
-            </button>
+            </button> */}
           </div>
         </div>
 
         {/* Active sort indicator */}
-        <div className="flex items-center gap-2 text-sm text-text-dim">
+        {/* <div className="flex items-center gap-2 text-sm text-text-dim">
           <span>Sorted by</span>
           <span className="text-primary font-bold">{activeSortLabel}</span>
           <span className="opacity-40">·</span>
           <span>{tableStudents.length} students</span>
-        </div>
+        </div> */}
 
         {/* Table */}
-        <div className="glass-card overflow-hidden rounded-2xl border border-white/5">
+        <div className="glass-card overflow-hidden rounded-2xl border border-white/5 bg-black">
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-left">
               <thead>
@@ -201,14 +201,81 @@ const Leaderboard = () => {
                   <th className="px-6 py-5 text-white">Branch</th>
                   <th className="px-6 py-5 text-white">Sec</th>
                   <th className="px-6 py-5 text-white whitespace-nowrap">Roll No.</th>
-                  <SortTh label="LeetCode" sortKey="leetcode" sortBy={sortBy} order={order} onSort={(k: any) => { setSortBy(k); setOrder('desc'); }} />
-                  <SortTh label="Codeforces" sortKey="codeforces" sortBy={sortBy} order={order} onSort={(k: any) => { setSortBy(k); setOrder('desc'); }} />
-                  <SortTh label="CodeChef" sortKey="codechef" sortBy={sortBy} order={order} onSort={(k: any) => { setSortBy(k); setOrder('desc'); }} />
-                  <SortTh label="GfG" sortKey="gfg" sortBy={sortBy} order={order} onSort={(k: any) => { setSortBy(k); setOrder('desc'); }} />
-                  <SortTh label="GitHub" sortKey="github" sortBy={sortBy} order={order} onSort={(k: any) => { setSortBy(k); setOrder('desc'); }} />
+                  <SortTh 
+                    label={<div className="flex items-center gap-2"><img src="https://img.icons8.com/?size=100&id=9L16NypUzu38&format=png&color=FFFFFF" className="w-4 h-4 object-contain opacity-80" alt="" /><span>LeetCode</span></div>} 
+                    sortKey="leetcode" sortBy={sortBy} order={order} onSort={(k: any) => { setSortBy(k); setOrder('desc'); }} 
+                  />
+                  <SortTh 
+                    label={<div className="flex items-center gap-2"><img src="https://img.icons8.com/?size=100&id=jldAN67IAsrW&format=png&color=FFFFFF" className="w-4 h-4 object-contain opacity-80" alt="" /><span>Codeforces</span></div>} 
+                    sortKey="codeforces" sortBy={sortBy} order={order} onSort={(k: any) => { setSortBy(k); setOrder('desc'); }} 
+                  />
+                  <SortTh 
+                    label={<div className="flex items-center gap-2"><img src="https://img.icons8.com/?size=100&id=4z2zrIWYmGqx&format=png&color=FFFFFF" className="w-4 h-4 object-contain opacity-80" alt="" /><span>CodeChef</span></div>} 
+                    sortKey="codechef" sortBy={sortBy} order={order} onSort={(k: any) => { setSortBy(k); setOrder('desc'); }} 
+                  />
+                  <SortTh 
+                    label={<div className="flex items-center gap-2"><img src="https://img.icons8.com/?size=100&id=AbQBhN9v62Ob&format=png&color=FFFFFF" className="w-4 h-4 object-contain opacity-80" alt="" /><span>GfG</span></div>} 
+                    sortKey="gfg" sortBy={sortBy} order={order} onSort={(k: any) => { setSortBy(k); setOrder('desc'); }} 
+                  />
+                  <SortTh 
+                    label={<div className="flex items-center gap-2"><img src="https://img.icons8.com/?size=100&id=efFfwotdkiU5&format=png&color=FFFFFF" className="w-4 h-4 object-contain opacity-80" alt="" /><span>GitHub</span></div>} 
+                    sortKey="github" sortBy={sortBy} order={order} onSort={(k: any) => { setSortBy(k); setOrder('desc'); }} 
+                  />
                 </tr>
               </thead>
               <tbody>
+                {/* Pinned User Rank */}
+                {!isLoading && data?.userRank && (
+                  <tr
+                    onClick={() => navigate(`/profile/${data.userRank.student.id}`)}
+                    className="group cursor-pointer transition-all duration-300 border-b-2 border-primary/30 bg-primary/10 hover:bg-primary/20"
+                  >
+                    <td className="px-8 py-6 whitespace-nowrap text-center relative">
+                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary shadow-[0_0_10px_rgba(var(--primary-rgb),0.5)]" />
+                      <span className="text-[15px] font-black text-primary animate-pulse">YOUR RANK: #{data.userRank.rank}</span>
+                    </td>
+                    <td className="px-8 py-6 whitespace-nowrap">
+                      <span className="font-black text-[17px] text-white tracking-tight">{data.userRank.student.name}</span>
+                    </td>
+                    <td className="px-8 py-6">
+                      <span className="text-[17px] font-black font-outfit text-primary">
+                        {data.userRank.student.totalSolved}
+                      </span>
+                    </td>
+                    <td className="px-8 py-6">
+                      <span className="text-[15px] font-semibold text-slate-100">Year {data.userRank.student.year}</span>
+                    </td>
+                    <td className="px-8 py-6">
+                      <span className="text-[15px] font-medium text-slate-100">
+                        {(data.userRank.student.branch || '—').replace(/[\d\s]+[A-Z]$/i, '').trim() || data.userRank.student.branch || '—'}
+                      </span>
+                    </td>
+                    <td className="px-8 py-6">
+                      <span className="text-[15px] font-bold text-slate-400">
+                        {(data.userRank.student.branch || '').match(/([A-Za-z])$/)?.[1]?.toUpperCase() || '—'}
+                      </span>
+                    </td>
+                    <td className="px-8 py-6">
+                      <span className="font-mono text-[15px] text-slate-100 whitespace-nowrap tracking-tight">{data.userRank.student.rollNo}</span>
+                    </td>
+                    <td className="px-8 py-6">
+                      <PlatformCell value={data.userRank.student.leetcode.total} href={`https://leetcode.com/${data.userRank.student.leetcode.handle}`} color="#FFA116" active={sortBy === 'leetcode'} />
+                    </td>
+                    <td className="px-8 py-6">
+                      <PlatformCell value={data.userRank.student.codeforces.rating} href={`https://codeforces.com/profile/${data.userRank.student.codeforces.handle}`} color="#4dabf7" active={sortBy === 'codeforces'} suffix="pts" />
+                    </td>
+                    <td className="px-8 py-6">
+                      <PlatformCell value={data.userRank.student.codechef.rating} href={`https://www.codechef.com/users/${data.userRank.student.codechef.handle}`} color="#e8a87c" active={sortBy === 'codechef'} />
+                    </td>
+                    <td className="px-8 py-6">
+                      <PlatformCell value={data.userRank.student.gfg.total} href={`https://www.geeksforgeeks.org/user/${data.userRank.student.gfg.handle}/`} color="#69db7c" active={sortBy === 'gfg'} />
+                    </td>
+                    <td className="px-8 py-6">
+                      <PlatformCell value={data.userRank.student.github.contributions} href={`https://github.com/${data.userRank.student.github.handle}`} color="#c9d1d9" active={sortBy === 'github'} />
+                    </td>
+                  </tr>
+                )}
+
                 {isLoading
                   ? [...Array(8)].map((_, i) => <SkeletonRow key={i} />)
                   : tableStudents.map((student: any, index: number) => {
@@ -302,19 +369,19 @@ const Leaderboard = () => {
 /* ── Helper Components ─────────────────────────────────────────────────────── */
 
 const DropdownSelect = ({ label, value, onChange, options, accent = false }: any) => (
-  <div className="flex flex-col gap-1.5 items-start">
+  <div className="flex flex-col gap-1.5 items-start ">
     <span className="text-[10px] uppercase font-black text-text-dim/60 ml-1 tracking-[0.1em]">{label}</span>
     <div className="relative group/sel">
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`appearance-none pr-10 pl-5 py-3 rounded-2xl outline-none cursor-pointer text-[13px] font-bold transition-all border shadow-lg ${accent
+        className={`appearance-none pr-10 pl-5 py-3 outline-none cursor-pointer text-[13px] font-bold transition-all border shadow-lg ${accent
             ? 'bg-primary/10 border-primary/30 text-primary hover:border-primary hover:bg-primary/20'
             : 'bg-white/[0.03] border-white/5 text-slate-300 hover:border-white/20 hover:bg-white/[0.05]'
           }`}
       >
         {options.map((opt: any) => (
-          <option key={opt.value} value={opt.value} className="bg-[#0f1425] text-white py-2">
+          <option key={opt.value} value={opt.value} className="bg-black text-white py-2">
             {opt.label}
           </option>
         ))}
@@ -365,40 +432,52 @@ const PlatformCell = ({ value, href, color, active, suffix = '' }: any) => {
 
 const HighlightCard = ({ student, rank, color }: any) => {
   const navigate = useNavigate();
+  const section = (student.branch || '').match(/([A-Za-z])$/)?.[1]?.toUpperCase() || '—';
+  const yearSection = student.year ? `${student.year}-${section}` : '—';
+
   return (
     <div
       onClick={() => navigate(`/profile/${student.id}`)}
-      className="relative glass-card p-10 flex flex-col gap-6 cursor-pointer group hover:border-white/20 transition-all overflow-hidden"
+      className="relative bg-black border rounded-[32px] p-8 flex flex-col gap-8 cursor-pointer group hover:border-white/20 transition-all overflow-hidden shadow-2xl"
+      style={{ borderColor: `${color}30` }}
     >
-      <div className="absolute right-0 top-0 p-8 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
-        <Trophy size={120} style={{ color }} />
+      {/* Dynamic Background Glow */}
+      <div 
+        className="absolute -right-10 -top-10 w-40 h-40 blur-[80px] opacity-0 group-hover:opacity-10 transition-opacity duration-500 rounded-full"
+        style={{ background: color }}
+      />
+
+      {/* Header Row: Name & Badge */}
+      <div className="flex items-center justify-between relative z-10 mb-2">
+        <h3 className="text-xl font-black font-outfit text-white tracking-tight group-hover:text-primary transition-colors duration-300">
+          {student.name}
+        </h3>
+        <div 
+          className="w-14 h-14 rounded-full flex items-center justify-center bg-white/[0.05] border border-white/10 shadow-xl relative group-hover:scale-110 transition-transform duration-500"
+          style={{ boxShadow: `0 0 25px ${color}20` }}
+        >
+          <Trophy size={28} style={{ color }} className="relative z-10 drop-shadow-[0_0_8px_rgba(0,0,0,0.5)]" />
+          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 opacity-50" />
+        </div>
       </div>
 
-      <div className="flex items-center justify-between relative z-10">
-        <div className="flex items-center gap-6">
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center bg-white/[0.03] border border-white/5 font-black text-2xl" style={{ color }}>
-            #{rank}
-          </div>
-          <div className="flex flex-col">
-            <h3 className="text-2xl font-bold font-outfit text-white tracking-tight">{student.name}</h3>
-            <span className="text-xs text-slate-500 font-mono tracking-widest uppercase">{student.rollNo}</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-8 relative z-10">
-        <div className="flex flex-col">
-          <span className="text-[11px] text-slate-500 uppercase tracking-[0.2em] font-black mb-1">Solved</span>
-          <span className="text-5xl font-black font-outfit text-white group-hover:text-primary transition-colors">{student.totalSolved}</span>
-        </div>
-        <div className="flex flex-col">
-          <span className="text-[11px] text-slate-500 uppercase tracking-[0.2em] font-black mb-1">Rating</span>
-          <span className="text-5xl font-black font-outfit text-slate-200" style={{ color: `${color}cc` }}>{student.score.toFixed(0)}</span>
-        </div>
+      {/* Data Row: 4 Boxes */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 relative z-10">
+        <DataBox label="Rank" value={rank} />
+        <DataBox label="Total" value={student.totalSolved} />
+        <DataBox label="Rating" value={student.score?.toFixed(0) || 0} />
+        <DataBox label="Year-Section" value={yearSection} />
       </div>
     </div>
   );
 };
+
+const DataBox = ({ label, value }: { label: string, value: any }) => (
+  <div className="bg-[#0f0f12] border border-white/[0.04] rounded-[20px] py-6 px-2 flex flex-col items-center justify-center gap-1 group-hover:border-white/10 transition-colors">
+    <span className="text-[10px] text-text-dim/50 uppercase tracking-[0.15em] font-black">{label}</span>
+    <span className="text-2xl font-black font-outfit text-white tracking-tight">{value}</span>
+  </div>
+);
 
 const Pagination = ({ page, total, limit, setPage }: any) => (
   <footer className="flex justify-center items-center gap-6 py-8">

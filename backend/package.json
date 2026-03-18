@@ -10,7 +10,9 @@
     "worker:prod": "node dist/workers/index.js",
     "build": "tsc",
     "prisma:generate": "prisma generate",
-    "prisma:push": "prisma db push"
+    "prisma:push": "prisma db push",
+    "seed": "ts-node src/scripts/seed.ts",
+    "parse:students": "ts-node src/scripts/parse-students.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",

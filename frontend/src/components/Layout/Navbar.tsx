@@ -1,11 +1,37 @@
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { User, LogOut } from 'lucide-react';
 import logoImg from '../../assets/image.png';
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const [show, setShow] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  
   const token = localStorage.getItem('token');
   const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+  const controlNavbar = () => {
+    if (typeof window !== 'undefined') {
+      if (window.scrollY > lastScrollY && window.scrollY > 80) {
+        // Scrolling down
+        setShow(false);
+      } else {
+        // Scrolling up
+        setShow(true);
+      }
+      setLastScrollY(window.scrollY);
+    }
+  };
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.addEventListener('scroll', controlNavbar);
+      return () => {
+        window.removeEventListener('scroll', controlNavbar);
+      };
+    }
+  }, [lastScrollY]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -15,7 +41,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-[1000] h-[80px] flex items-center justify-between px-10 bg-[#050810]/80 backdrop-blur-xl border-b border-white/5">
+    <nav className={`fixed top-0 left-0 right-0 z-[1000] h-[80px] flex items-center justify-between px-10 bg-[#050810]/20 backdrop-blur-sm border-b border-white/5 transition-transform duration-300 ${show ? 'translate-y-0' : '-translate-y-full'}`}>
       <div className="flex items-center gap-4">
         <Link to="/dashboard" className="flex items-center gap-3 text-white no-underline group">
           <div className="h-12 w-auto bg-transparent rounded-lg flex items-center justify-center transition-all overflow-hidden py-0.5">
@@ -23,7 +49,7 @@ const Navbar = () => {
           </div>
           <div className="flex flex-col">
             <span className="font-outfit font-black text-lg tracking-tight leading-none">KIET Deemed to be University</span>
-            <span className="text-[10px] text-text-dim uppercase tracking-widest font-bold">DSA Performance Tracker</span>
+            <span className="text-[10px] text-white uppercase tracking-widest font-bold">DSA Performance Tracker</span>
           </div>
         </Link>
       </div>
@@ -53,7 +79,7 @@ const Navbar = () => {
 };
 
 const NavLink = ({ to, icon, label }: any) => (
-  <Link to={to} className="flex items-center gap-2 no-underline text-text-dim hover:text-white hover:bg-white/5 px-4 py-2.5 rounded-full transition-all text-xs font-bold uppercase tracking-wider">
+  <Link to={to} className="flex items-center gap-2 no-underline text-white hover:text-white hover:bg-white/5 px-4 py-2.5 rounded-full transition-all text-xs font-bold uppercase tracking-wider">
     {icon}
     <span className="hidden md:inline">{label}</span>
   </Link>

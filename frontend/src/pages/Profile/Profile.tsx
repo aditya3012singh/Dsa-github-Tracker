@@ -90,7 +90,7 @@ const Profile = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <PlatformCard 
               name="LeetCode" 
-              icon={<Code size={24} />} 
+              icon={<img src="https://img.icons8.com/?size=100&id=9L16NypUzu38&format=png&color=FFFFFF" alt="LeetCode" className="w-8 h-8 object-contain" />} 
               color="#FFA116"
               handle={student.leetcode.handle}
               stats={[
@@ -102,7 +102,7 @@ const Profile = () => {
             />
             <PlatformCard 
               name="GitHub" 
-              icon={<Github size={24} />} 
+              icon={<img src="https://img.icons8.com/?size=100&id=efFfwotdkiU5&format=png&color=FFFFFF" alt="GitHub" className="w-8 h-8 object-contain" />} 
               color="#eaebed"
               handle={student.github.handle}
               stats={[
@@ -114,7 +114,7 @@ const Profile = () => {
             />
             <PlatformCard 
               name="Codeforces" 
-              icon={<LayoutGrid size={24} />} 
+              icon={<img src="https://img.icons8.com/?size=100&id=jldAN67IAsrW&format=png&color=FFFFFF" alt="Codeforces" className="w-8 h-8 object-contain" />} 
               color="#1890ff"
               handle={student.codeforces.handle}
               stats={[
@@ -124,7 +124,7 @@ const Profile = () => {
             />
             <PlatformCard 
               name="CodeChef" 
-              icon={<Trophy size={24} />} 
+              icon={<img src="https://img.icons8.com/?size=100&id=4z2zrIWYmGqx&format=png&color=FFFFFF" alt="CodeChef" className="w-8 h-8 object-contain" />} 
               color="#CD7F32"
               handle={student.codechef.handle}
               stats={[
@@ -134,7 +134,7 @@ const Profile = () => {
             />
             <PlatformCard 
               name="GfG" 
-              icon={<Trophy size={24} />} 
+              icon={<img src="https://img.icons8.com/?size=100&id=AbQBhN9v62Ob&format=png&color=FFFFFF" alt="GfG" className="w-8 h-8 object-contain" />} 
               color="#00ff00"
               handle={student.gfg.handle}
               stats={[

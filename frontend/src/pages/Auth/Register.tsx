@@ -94,12 +94,48 @@ const Register = () => {
           <div className="flex flex-col gap-6">
             <h3 className="text-lg font-semibold text-primary border-b border-border pb-2">Coding Handles</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <InputGroup label="LeetCode" name="leetcodeHandle" icon={<Code size={18}/>} placeholder="leetcode_user" value={formData.leetcodeHandle} onChange={handleChange} />
-              <InputGroup label="GitHub" name="githubHandle" icon={<Github size={18}/>} placeholder="github_user" value={formData.githubHandle} onChange={handleChange} />
+              <InputGroup 
+                label="LeetCode" 
+                name="leetcodeHandle" 
+                icon={<img src="https://img.icons8.com/?size=100&id=9L16NypUzu38&format=png&color=FFFFFF" alt="LeetCode" className="w-5 h-5 object-contain opacity-70" />} 
+                placeholder="leetcode_user" 
+                value={formData.leetcodeHandle} 
+                onChange={handleChange} 
+              />
+              <InputGroup 
+                label="GitHub" 
+                name="githubHandle" 
+                icon={<img src="https://img.icons8.com/?size=100&id=efFfwotdkiU5&format=png&color=FFFFFF" alt="GitHub" className="w-5 h-5 object-contain opacity-70" />} 
+                placeholder="github_user" 
+                value={formData.githubHandle} 
+                onChange={handleChange} 
+              />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <InputGroup label="Codeforces" name="codeforcesHandle" icon={<LayoutGrid size={18}/>} placeholder="cf_handle" value={formData.codeforcesHandle} onChange={handleChange} />
-              <InputGroup label="CodeChef" name="codechefHandle" icon={<Trophy size={18}/>} placeholder="cc_handle" value={formData.codechefHandle} onChange={handleChange} />
+              <InputGroup 
+                label="Codeforces" 
+                name="codeforcesHandle" 
+                icon={<img src="https://img.icons8.com/?size=100&id=jldAN67IAsrW&format=png&color=FFFFFF" alt="Codeforces" className="w-5 h-5 object-contain opacity-70" />} 
+                placeholder="cf_handle" 
+                value={formData.codeforcesHandle} 
+                onChange={handleChange} 
+              />
+              <InputGroup 
+                label="CodeChef" 
+                name="codechefHandle" 
+                icon={<img src="https://img.icons8.com/?size=100&id=4z2zrIWYmGqx&format=png&color=FFFFFF" alt="CodeChef" className="w-5 h-5 object-contain opacity-70" />} 
+                placeholder="cc_handle" 
+                value={formData.codechefHandle} 
+                onChange={handleChange} 
+              />
+              <InputGroup 
+                label="GeeksforGeeks" 
+                name="gfgHandle" 
+                icon={<img src="https://img.icons8.com/?size=100&id=AbQBhN9v62Ob&format=png&color=FFFFFF" alt="GfG" className="w-5 h-5 object-contain opacity-70" />} 
+                placeholder="gfg_user" 
+                value={formData.gfgHandle} 
+                onChange={handleChange} 
+              />
             </div>
           </div>
 

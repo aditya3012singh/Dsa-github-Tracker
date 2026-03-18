@@ -15,7 +15,7 @@ function App() {
   const token = localStorage.getItem('token');
   
   return (
-    <div className="min-h-screen flex flex-col bg-bg-dark text-text-main font-sans selection:bg-primary/30">
+    <div className="min-h-screen flex flex-col bg-black text-text-main font-sans selection:bg-primary/30">
       <Navbar />
       {/* No top padding here – each page handles its own spacing to account for the fixed navbar */}
       <main className="flex-1 w-full">
