@@ -25,11 +25,15 @@ model Student {
   resetToken       String?   @unique
   resetTokenExpiry DateTime?
   createdAt        DateTime  @default(now())
+
+  // Relations
+  codingStats      CodingStats?
 }
 
 model CodingStats {
   id                  String   @id @default(uuid())
   studentId           String   @unique
+  student             Student  @relation(fields: [studentId], references: [id])
   leetcodeSolved      Int      @default(0)
   leetcodeEasy        Int      @default(0)
   leetcodeMedium      Int      @default(0)
