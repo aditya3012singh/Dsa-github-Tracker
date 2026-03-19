@@ -20,7 +20,9 @@ export const getStudents = async (req: Request, res: Response, next: NextFunctio
       return {
         id: student.id,
         name: student.name,
+        libraryId: student.libraryId,
         rollNo: student.rollNo,
+        email: student.email,
         branch: student.branch,
         year: student.year,
         section: student.section,
@@ -142,7 +144,7 @@ export const updateProfile = async (req: AuthRequest, res: Response, next: NextF
     const id = req.user?.id;
     if (!id) return res.status(401).json({ status: 'error', message: 'Unauthorized' });
 
-    const { password, rollNo, ...updateData } = req.body; // Protect rollNo from updates here
+    const { password, libraryId: _libId, ...updateData } = req.body; // Protect libraryId from being overwritten
 
     // Sanitize handles
     const sanitizedData = { ...updateData };
@@ -225,7 +227,9 @@ export const getStudentById = async (req: Request, res: Response, next: NextFunc
     const data = {
       id: student.id,
       name: student.name,
+      libraryId: student.libraryId,
       rollNo: student.rollNo,
+      email: student.email,
       branch: student.branch,
       year: student.year,
       section: student.section,
