@@ -5,7 +5,7 @@ import { Lock, User, LogIn, AlertCircle } from 'lucide-react';
 import loginLogo from '../../assets/image.png';
 
 const DEMO_CREDENTIALS = {
-  libraryId: 'LIB-2226IT1100',
+  libraryId: '2226IT1100',
   password: 'password123',
 };
 
@@ -35,7 +35,7 @@ const Login = () => {
 
   return (
     <div className="flex justify-center items-center py-16 px-4 animate-fade-in pt-40 pb-40">
-      <div className="glass-card w-full bg-black/30 border-blue-800 max-w-[440px] p-12 flex flex-col gap-8">
+      <div className="glass-card w-full bg-black/30 backdrop-blur-2xl border-blue-800 max-w-[440px] p-12 flex flex-col gap-8">
         <header className="text-center">
           
           <div className='p-8'>
