@@ -94,7 +94,7 @@ const Leaderboard = () => {
 
 
         {/* Year filter */}
-        <DropdownSelect 
+        <DropdownSelect
           label="Year"
           value={yearFilter}
           onChange={(val: string) => { setYearFilter(val); setPage(1); }}
@@ -206,25 +206,25 @@ const Leaderboard = () => {
                   <th className="px-6 py-5 text-white">Branch</th>
                   <th className="px-6 py-5 text-white">Sec</th>
                   <th className="px-6 py-5 text-white whitespace-nowrap">Roll No</th>
-                  <SortTh 
-                    label={<div className="flex items-center gap-2"><img src={leetcodeIcon} className="w-4 h-4 object-contain opacity-80" alt="LeetCode" /><span>LeetCode</span></div>} 
-                    sortKey="leetcode" sortBy={sortBy} order={order} onSort={(k: any) => { setSortBy(k); setOrder('desc'); }} 
+                  <SortTh
+                    label={<div className="flex items-center gap-2"><img src={leetcodeIcon} className="w-4 h-4 object-contain" alt="LeetCode" /><span className='text-white'>LeetCode</span></div>}
+                    sortKey="leetcode" sortBy={sortBy} order={order} onSort={(k: any) => { setSortBy(k); setOrder('desc'); }}
                   />
-                  <SortTh 
-                    label={<div className="flex items-center gap-2"><img src={codeforcesIcon} className="w-4 h-4 object-contain opacity-80" alt="Codeforces" /><span>Codeforces</span></div>} 
-                    sortKey="codeforces" sortBy={sortBy} order={order} onSort={(k: any) => { setSortBy(k); setOrder('desc'); }} 
+                  <SortTh
+                    label={<div className="flex items-center gap-2"><img src={codeforcesIcon} className="w-4 h-4 object-contain" alt="Codeforces" /><span className='text-white'>Codeforces</span></div>}
+                    sortKey="codeforces" sortBy={sortBy} order={order} onSort={(k: any) => { setSortBy(k); setOrder('desc'); }}
                   />
-                  <SortTh 
-                    label={<div className="flex items-center gap-2"><img src={codechefIcon} className="w-4 h-4 object-contain opacity-80" alt="CodeChef" /><span>CodeChef</span></div>} 
-                    sortKey="codechef" sortBy={sortBy} order={order} onSort={(k: any) => { setSortBy(k); setOrder('desc'); }} 
+                  <SortTh
+                    label={<div className="flex items-center gap-2"><img src={codechefIcon} className="w-4 h-4 object-contain opacity-80" alt="CodeChef" /><span className='text-white'>CodeChef</span></div>}
+                    sortKey="codechef" sortBy={sortBy} order={order} onSort={(k: any) => { setSortBy(k); setOrder('desc'); }}
                   />
-                  <SortTh 
-                    label={<div className="flex items-center gap-2"><img src={gfgIcon} className="w-4 h-4 object-contain opacity-80" alt="GfG" /><span>GfG</span></div>} 
-                    sortKey="gfg" sortBy={sortBy} order={order} onSort={(k: any) => { setSortBy(k); setOrder('desc'); }} 
+                  <SortTh
+                    label={<div className="flex items-center gap-2"><img src={gfgIcon} className="w-4 h-4 object-contain opacity-80" alt="GfG" /><span className='text-white'>GfG</span></div>}
+                    sortKey="gfg" sortBy={sortBy} order={order} onSort={(k: any) => { setSortBy(k); setOrder('desc'); }}
                   />
-                  <SortTh 
-                    label={<div className="flex items-center gap-2"><img src={githubIcon} className="w-4 h-4 object-contain opacity-80" alt="GitHub" /><span>GitHub</span></div>} 
-                    sortKey="github" sortBy={sortBy} order={order} onSort={(k: any) => { setSortBy(k); setOrder('desc'); }} 
+                  <SortTh
+                    label={<div className="flex items-center gap-2"><img src={githubIcon} className="w-5 h-5 object-contain opacity-80" alt="GitHub" /><span className='text-white' >GitHub</span></div>}
+                    sortKey="github" sortBy={sortBy} order={order} onSort={(k: any) => { setSortBy(k); setOrder('desc'); }}
                   />
                 </tr>
               </thead>
@@ -248,7 +248,7 @@ const Leaderboard = () => {
                       </span>
                     </td>
                     <td className="px-8 py-6">
-                      <span className="text-[15px] font-semibold text-slate-100">Year {data.userRank.student.year}</span>
+                      <span className="text-[15px] font-semibold text-slate-100">{data.userRank.student.year}</span>
                     </td>
                     <td className="px-8 py-6">
                       <span className="text-[15px] font-medium text-slate-100">
@@ -264,19 +264,19 @@ const Leaderboard = () => {
                       <span className="font-mono text-[15px] text-slate-100 whitespace-nowrap tracking-tight">{data.userRank.student.rollNo || '—'}</span>
                     </td>
                     <td className="px-8 py-6">
-                      <PlatformCell value={data.userRank.student.leetcode.total} href={`https://leetcode.com/${data.userRank.student.leetcode.handle}`} color="#FFA116" active={sortBy === 'leetcode'} />
+                      <PlatformCell value={data.userRank.student.leetcode.total} href={`https://leetcode.com/${data.userRank.student.leetcode.handle}`} color="#FFD700" active={sortBy === 'leetcode'} />
                     </td>
                     <td className="px-8 py-6">
-                      <PlatformCell value={data.userRank.student.codeforces.rating} href={`https://codeforces.com/profile/${data.userRank.student.codeforces.handle}`} color="#4dabf7" active={sortBy === 'codeforces'} suffix="pts" />
+                      <PlatformCell value={data.userRank.student.codeforces.rating} href={`https://codeforces.com/profile/${data.userRank.student.codeforces.handle}`} color="#339AF0" active={sortBy === 'codeforces'} suffix="pts" />
                     </td>
                     <td className="px-8 py-6">
-                      <PlatformCell value={data.userRank.student.codechef.rating} href={`https://www.codechef.com/users/${data.userRank.student.codechef.handle}`} color="#e8a87c" active={sortBy === 'codechef'} />
+                      <PlatformCell value={data.userRank.student.codechef.rating} href={`https://www.codechef.com/users/${data.userRank.student.codechef.handle}`} color="#FF922B" active={sortBy === 'codechef'} />
                     </td>
                     <td className="px-8 py-6">
-                      <PlatformCell value={data.userRank.student.gfg.total} href={`https://www.geeksforgeeks.org/user/${data.userRank.student.gfg.handle}/`} color="#69db7c" active={sortBy === 'gfg'} />
+                      <PlatformCell value={data.userRank.student.gfg.total} href={`https://www.geeksforgeeks.org/user/${data.userRank.student.gfg.handle}/`} color="#51CF66" active={sortBy === 'gfg'} />
                     </td>
                     <td className="px-8 py-6">
-                      <PlatformCell value={data.userRank.student.github.contributions} href={`https://github.com/${data.userRank.student.github.handle}`} color="#c9d1d9" active={sortBy === 'github'} />
+                      <PlatformCell value={data.userRank.student.github.contributions} href={`https://github.com/${data.userRank.student.github.handle}`} color="#F8FAFC" active={sortBy === 'github'} />
                     </td>
                   </tr>
                 )}
@@ -310,7 +310,7 @@ const Leaderboard = () => {
 
                         {/* Year */}
                         <td className="px-8 py-6">
-                          <span className="text-[15px] font-semibold text-slate-100">Year {student.year}</span>
+                          <span className="text-[15px] font-semibold text-slate-100">{student.year}</span>
                         </td>
 
                         {/* Branch */}
@@ -321,38 +321,38 @@ const Leaderboard = () => {
                         </td>
 
                         {/* Section */}
-                         <td className="px-8 py-6">
+                        <td className="px-8 py-6">
                           <span className="text-[15px] font-bold text-slate-400">
                             {student.section || '—'}
                           </span>
                         </td>
-                         <td className="px-8 py-6">
+                        <td className="px-8 py-6">
                           <span className="font-mono text-[15px] text-slate-100 whitespace-nowrap tracking-tight">{student.rollNo || '—'}</span>
                         </td>
 
                         {/* LeetCode */}
                         <td className="px-8 py-6">
-                          <PlatformCell value={student.leetcode.total} href={`https://leetcode.com/${student.leetcode.handle}`} color="#FFA116" active={sortBy === 'leetcode'} />
+                          <PlatformCell value={student.leetcode.total} href={`https://leetcode.com/${student.leetcode.handle}`} color="#FFD700" active={sortBy === 'leetcode'} />
                         </td>
 
                         {/* Codeforces */}
                         <td className="px-8 py-6">
-                          <PlatformCell value={student.codeforces.rating} href={`https://codeforces.com/profile/${student.codeforces.handle}`} color="#4dabf7" active={sortBy === 'codeforces'} suffix="pts" />
+                          <PlatformCell value={student.codeforces.rating} href={`https://codeforces.com/profile/${student.codeforces.handle}`} color="#339AF0" active={sortBy === 'codeforces'} suffix="pts" />
                         </td>
 
                         {/* CodeChef */}
                         <td className="px-8 py-6">
-                          <PlatformCell value={student.codechef.rating} href={`https://www.codechef.com/users/${student.codechef.handle}`} color="#e8a87c" active={sortBy === 'codechef'} />
+                          <PlatformCell value={student.codechef.rating} href={`https://www.codechef.com/users/${student.codechef.handle}`} color="#FF922B" active={sortBy === 'codechef'} />
                         </td>
 
                         {/* GfG */}
                         <td className="px-8 py-6">
-                          <PlatformCell value={student.gfg.total} href={`https://www.geeksforgeeks.org/user/${student.gfg.handle}/`} color="#69db7c" active={sortBy === 'gfg'} />
+                          <PlatformCell value={student.gfg.total} href={`https://www.geeksforgeeks.org/user/${student.gfg.handle}/`} color="#51CF66" active={sortBy === 'gfg'} />
                         </td>
 
                         {/* GitHub */}
                         <td className="px-8 py-6">
-                          <PlatformCell value={student.github.contributions} href={`https://github.com/${student.github.handle}`} color="#c9d1d9" active={sortBy === 'github'} />
+                          <PlatformCell value={student.github.contributions} href={`https://github.com/${student.github.handle}`} color="#F8FAFC" active={sortBy === 'github'} />
                         </td>
                       </tr>
                     );

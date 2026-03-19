@@ -3,7 +3,19 @@ import * as cheerio from 'cheerio';
 import { logger } from './logger';
 
 export const fetchHtml = async (url: string) => {
-  const apiKey = process.env.PROXY_API_KEY;
+  const singleKey = process.env.PROXY_API_KEY;
+  const multiKeys = process.env.PROXY_API_KEYS;
+  
+  let apiKey = singleKey;
+
+  // Support for multiple comma-separated keys (random rotation)
+  if (multiKeys) {
+    const keys = multiKeys.split(',').map(k => k.trim()).filter(Boolean);
+    if (keys.length > 0) {
+      apiKey = keys[Math.floor(Math.random() * keys.length)];
+    }
+  }
+
   let targetUrl = url;
   
   // If API key is provided, route through ScraperAPI

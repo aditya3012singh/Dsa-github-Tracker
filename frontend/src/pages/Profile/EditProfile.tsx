@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGetStudentQuery, useUpdateProfileMutation } from '../../store/apiSlice';
 import { User, BookOpen, GraduationCap, Grid, Code, Github, Globe, Hash, Save, X, Trophy } from 'lucide-react';
+import { DropdownSelect } from '../Dashboard/components/LeaderboardComponents';
+import leetcodeIcon from '../../assets/icons/leetcode.png';
+import codeforcesIcon from '../../assets/icons/codeforces.png';
+import gfgIcon from '../../assets/icons/gfg.png';
+import codechefIcon from '../../assets/icons/codechef.png';
 
 const EditProfile = () => {
   const navigate = useNavigate();
@@ -96,23 +101,18 @@ const EditProfile = () => {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-2">
-                <label className="text-xs uppercase font-black text-text-dim/60 ml-2 tracking-widest">Year</label>
-                <div className="relative">
-                  <GraduationCap className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-                  <select
-                    name="year"
-                    value={formData.year}
-                    onChange={handleChange}
-                    className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-4 pl-12 pr-4 text-white font-bold outline-none focus:border-primary/50 focus:bg-white/[0.05] transition-all appearance-none"
-                  >
-                    <option value="1" className="bg-bg-dark">1st Year</option>
-                    <option value="2" className="bg-bg-dark">2nd Year</option>
-                    <option value="3" className="bg-bg-dark">3rd Year</option>
-                    <option value="4" className="bg-bg-dark">4th Year</option>
-                  </select>
-                </div>
-              </div>
+              <DropdownSelect
+                label="Year"
+                icon={GraduationCap}
+                value={formData.year}
+                onChange={(val: string) => setFormData({ ...formData, year: val })}
+                options={[
+                  { value: '1', label: '1st Year' },
+                  { value: '2', label: '2nd Year' },
+                  { value: '3', label: '3rd Year' },
+                  { value: '4', label: '4th Year' },
+                ]}
+              />
               <InputGroup label="Section" icon={<Grid size={18} />} name="section" value={formData.section} onChange={handleChange} placeholder="e.g. A" />
             </div>
 
@@ -128,7 +128,7 @@ const EditProfile = () => {
 
             <InputGroup 
               label="LeetCode Username" 
-              icon={<img src="https://img.icons8.com/?size=100&id=9L16NypUzu38&format=png&color=FFFFFF" className="w-[18px] h-[18px]" alt="LC" />} 
+              icon={<img src={leetcodeIcon} className="w-[18px] h-[18px]" alt="LC" />} 
               name="leetcodeHandle" 
               value={formData.leetcodeHandle} 
               onChange={handleChange} 
@@ -146,7 +146,7 @@ const EditProfile = () => {
 
             <InputGroup 
               label="Codeforces Handle" 
-              icon={<img src="https://img.icons8.com/?size=100&id=jldAN67IAsrW&format=png&color=FFFFFF" className="w-[18px] h-[18px]" alt="CF" />} 
+              icon={<img src={codeforcesIcon} className="w-[18px] h-[18px]" alt="CF" />} 
               name="codeforcesHandle" 
               value={formData.codeforcesHandle} 
               onChange={handleChange} 
@@ -156,7 +156,7 @@ const EditProfile = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InputGroup 
                 label="CodeChef" 
-                icon={<img src="https://img.icons8.com/?size=100&id=4z2zrIWYmGqx&format=png&color=FFFFFF" className="w-[18px] h-[18px]" alt="CC" />} 
+                icon={<img src={codechefIcon} className="w-[18px] h-[18px]" alt="CC" />} 
                 name="codechefHandle" 
                 value={formData.codechefHandle} 
                 onChange={handleChange} 
@@ -164,7 +164,7 @@ const EditProfile = () => {
               />
               <InputGroup 
                 label="GfG" 
-                icon={<img src="https://img.icons8.com/?size=100&id=AbQBhN9v62Ob&format=png&color=FFFFFF" className="w-[18px] h-[18px]" alt="GFG" />} 
+                icon={<img src={gfgIcon} className="w-[18px] h-[18px]" alt="GFG" />} 
                 name="gfgHandle" 
                 value={formData.gfgHandle} 
                 onChange={handleChange} 

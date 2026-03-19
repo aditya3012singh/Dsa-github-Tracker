@@ -97,20 +97,22 @@ export const PlatformCell = ({ value, href, color, active, suffix = '' }: any) =
       target="_blank"
       rel="noreferrer"
       onClick={(e) => e.stopPropagation()}
-      className={`inline-flex items-center gap-1 no-underline transition-all rounded-md px-3 py-1.5 -ml-3 ${
+      className={`inline-flex items-center justify-center gap-1 no-underline transition-all rounded-full px-4 py-1.5 min-w-[3.5rem] mt-1 ${
         active && !isZero
-          ? 'font-black text-[16px]'
-          : 'font-bold text-[16px] opacity-70 hover:opacity-100 hover:bg-white/5'
+          ? 'font-black text-[15px] shadow-lg scale-110 z-10 relative'
+          : 'font-bold text-[14px] hover:scale-110 hover:shadow-xl hover:z-10'
       }`}
       style={{
-        color: isZero ? '#475569' : color,
-        background: active && !isZero ? `${color}15` : '',
-        boxShadow: active && !isZero ? `0 0 10px ${color}10` : 'none',
-        textShadow: active && !isZero ? `0 0 8px ${color}40` : 'none',
+        color: isZero ? '#8b949e' : color,
+        backgroundColor: isZero ? 'rgba(255,255,255,0.03)' : `${color}20`,
+        boxShadow: active && !isZero ? `0 4px 15px ${color}25` : 'none',
+        border: `1px solid ${isZero ? 'transparent' : `${color}30`}`
       }}
     >
-      {value ?? 0}
-      {suffix && <span className="text-[10px] opacity-60 uppercase ml-0.5 tracking-wider">{suffix}</span>}
+      <span>
+        {value ?? 0}
+      </span>
+      {suffix && <span className="text-[9px] font-black opacity-80 uppercase ml-0.5 tracking-wider">{suffix}</span>}
     </a>
   );
 };
@@ -118,7 +120,7 @@ export const PlatformCell = ({ value, href, color, active, suffix = '' }: any) =
 export const HighlightCard = ({ student, rank, color }: any) => {
   const navigate = useNavigate();
   const section = student.section || '—';
-  const yearSection = student.year ? `Year ${student.year} - ${section}` : '—';
+  const yearSection = student.year ? `${student.year} - ${section}` : '—';
 
   return (
     <div
@@ -141,7 +143,7 @@ export const HighlightCard = ({ student, rank, color }: any) => {
           className="w-14 h-14 rounded-full flex items-center justify-center bg-white/[0.05] border border-white/10 shadow-xl relative group-hover:scale-110 transition-transform duration-500"
           style={{ boxShadow: `0 0 25px ${color}20` }}
         >
-          <Trophy size={28} style={{ color }} className="relative z-10 drop-shadow-[0_0_8px_rgba(0,0,0,0.5)]" />
+          <Trophy size={28} style={{ color }} className='relative z-10 drop-shadow-[0_0_8px_rgba(0,0,0,0.5)]'/>
           <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 opacity-50" />
         </div>
       </div>
@@ -151,7 +153,7 @@ export const HighlightCard = ({ student, rank, color }: any) => {
         <DataBox label="Rank" value={rank} />
         <DataBox label="Total" value={student.totalSolved} />
         <DataBox label="Rating" value={student.score?.toFixed(0) || 0} />
-        <DataBox label="Year-Section" value={yearSection} />
+        <DataBox label="Yr-Sec" value={yearSection} />
       </div>
     </div>
   );

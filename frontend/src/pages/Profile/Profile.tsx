@@ -4,6 +4,11 @@ import {
   Github, Code, LayoutGrid, Trophy, RefreshCw, 
   User as UserIcon, BookOpen, Star, Zap, ExternalLink 
 } from 'lucide-react';
+import leetcodeIcon from '../../assets/icons/leetcode.png';
+import codeforcesIcon from '../../assets/icons/codeforces.png';
+import gfgIcon from '../../assets/icons/gfg.png';
+import codechefIcon from '../../assets/icons/codechef.png';
+import githubIcon from '../../assets/icons/github.png';
 
 const Profile = () => {
   const { id } = useParams();
@@ -107,7 +112,7 @@ const Profile = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <PlatformCard 
               name="LeetCode" 
-              icon={<img src="https://img.icons8.com/?size=100&id=9L16NypUzu38&format=png&color=FFFFFF" alt="LeetCode" className="w-8 h-8 object-contain" />} 
+              icon={<img src={leetcodeIcon} alt="LeetCode" className="w-8 h-8 object-contain" />} 
               color="#FFA116"
               handle={student.leetcode.handle}
               stats={[
@@ -119,7 +124,7 @@ const Profile = () => {
             />
             <PlatformCard 
               name="GitHub" 
-              icon={<img src="https://img.icons8.com/?size=100&id=efFfwotdkiU5&format=png&color=FFFFFF" alt="GitHub" className="w-8 h-8 object-contain" />} 
+              icon={<img src={githubIcon} alt="GitHub" className="w-8 h-8 object-contain" />} 
               color="#eaebed"
               handle={student.github.handle}
               stats={[
@@ -131,7 +136,7 @@ const Profile = () => {
             />
             <PlatformCard 
               name="Codeforces" 
-              icon={<img src="https://img.icons8.com/?size=100&id=jldAN67IAsrW&format=png&color=FFFFFF" alt="Codeforces" className="w-8 h-8 object-contain" />} 
+              icon={<img src={codeforcesIcon} alt="Codeforces" className="w-8 h-8 object-contain" />} 
               color="#1890ff"
               handle={student.codeforces.handle}
               stats={[
@@ -141,7 +146,7 @@ const Profile = () => {
             />
             <PlatformCard 
               name="CodeChef" 
-              icon={<img src="https://img.icons8.com/?size=100&id=4z2zrIWYmGqx&format=png&color=FFFFFF" alt="CodeChef" className="w-8 h-8 object-contain" />} 
+              icon={<img src={codechefIcon} alt="CodeChef" className="w-8 h-8 object-contain" />} 
               color="#CD7F32"
               handle={student.codechef.handle}
               stats={[
@@ -151,7 +156,7 @@ const Profile = () => {
             />
             <PlatformCard 
               name="GfG" 
-              icon={<img src="https://img.icons8.com/?size=100&id=AbQBhN9v62Ob&format=png&color=FFFFFF" alt="GfG" className="w-8 h-8 object-contain" />} 
+              icon={<img src={gfgIcon} alt="GfG" className="w-8 h-8 object-contain" />} 
               color="#00ff00"
               handle={student.gfg.handle}
               stats={[
@@ -169,7 +174,7 @@ const DetailItem = ({ icon, label, value }: any) => (
   <div className="flex items-center gap-4">
     <span className="text-primary">{icon}</span>
     <div className="flex flex-col">
-      <span className="text-[10px] text-text-dim uppercase tracking-wider font-semibold">{label}</span>
+      <span className="text-[10px] text-text-dim/60 uppercase tracking-[0.1em] font-black">{label}</span>
       <span className="font-bold text-sm text-white">{value}</span>
     </div>
   </div>
@@ -222,7 +227,7 @@ const PlatformCard = ({ name, icon, color, stats, handle }: any) => {
       <div className="grid grid-cols-2 gap-y-6 gap-x-8 relative z-10">
         {stats.map((s: any, i: number) => (
           <div key={i} className="flex flex-col">
-            <span className="text-[10px] text-text-dim/60 uppercase tracking-[0.2em] font-bold mb-1">{s.label}</span>
+            <span className="text-[10px] text-text-dim/60 uppercase tracking-[0.2em] font-black mb-1">{s.label}</span>
             <span className="text-2xl font-black font-outfit text-slate-100 group-hover:text-white transition-colors">
               {s.value}
             </span>

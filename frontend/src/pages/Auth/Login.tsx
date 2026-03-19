@@ -42,13 +42,13 @@ const Login = () => {
           )}
 
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-semibold text-text-dim uppercase tracking-wider">Library ID</label>
+            <label className="text-[10px] uppercase font-black text-text-dim/60 ml-2 tracking-widest transition-colors">LIBRARY ID</label>
             <div className="relative flex items-center">
               <User className="absolute left-4 text-text-dim" size={20} />
               <input 
                 type="text" 
                 placeholder="Ex: 2226CSE1084" 
-                className="w-full bg-bg-glass border border-border pl-12 pr-4 py-3 rounded-xl text-white outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm"
+                className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-4 pl-12 pr-4 text-white font-bold outline-none focus:border-primary/50 focus:bg-white/[0.05] transition-all placeholder:text-slate-700"
                 value={libraryId}
                 onChange={(e) => setLibraryId(e.target.value)}
                 required
@@ -57,13 +57,13 @@ const Login = () => {
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-semibold text-text-dim uppercase tracking-wider">Password</label>
+            <label className="text-[10px] uppercase font-black text-text-dim/60 ml-2 tracking-widest transition-colors">PASSWORD</label>
             <div className="relative flex items-center">
               <Lock className="absolute left-4 text-text-dim" size={20} />
               <input 
                 type="password" 
                 placeholder="••••••••" 
-                className="w-full bg-bg-glass border border-border pl-12 pr-4 py-3 rounded-xl text-white outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm"
+                className="w-full bg-white/[0.03] border border-white/5 rounded-2xl py-4 pl-12 pr-4 text-white font-bold outline-none focus:border-primary/50 focus:bg-white/[0.05] transition-all placeholder:text-slate-700"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -74,7 +74,7 @@ const Login = () => {
           <button 
             type="submit" 
             disabled={isLoading} 
-            className="bg-primary text-white border-none py-3.5 rounded-xl font-bold flex items-center justify-center gap-3 cursor-pointer hover:bg-primary/90 hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed mt-4 shadow-lg shadow-primary/20"
+            className="w-full bg-primary hover:bg-[hsl(var(--primary-glow))] text-white font-black font-outfit py-5 rounded-[24px] shadow-[0_0_30px_rgba(var(--primary-rgb),0.3)] hover:shadow-[0_0_50px_rgba(var(--primary-rgb),0.5)] transition-all flex items-center justify-center gap-3 text-lg disabled:opacity-50 mt-4 cursor-pointer disabled:cursor-not-allowed"
           >
             {isLoading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : (
               <>
