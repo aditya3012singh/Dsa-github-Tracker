@@ -17,7 +17,9 @@ export const getLeaderboard = async (req: AuthRequest, res: Response, next: Next
     const cacheKey = 'leaderboard_data';
     
     // Try to get from cache first
-    const cachedLeaderboard = await redisConnection.get(cacheKey);
+    // Temporarily disabling cache for testing
+    // const cachedLeaderboard = await redisConnection.get(cacheKey);
+    const cachedLeaderboard = null;
     if (cachedLeaderboard) {
       leaderboard = JSON.parse(cachedLeaderboard);
     } else {
