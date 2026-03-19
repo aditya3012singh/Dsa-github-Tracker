@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getStudents, createStudent, triggerFetch, updateStudent, getStudentById, syncAll } from '../controllers/students.controller';
+import { getStudents, createStudent, triggerFetch, updateStudent, getStudentById, syncAll, updateProfile } from '../controllers/students.controller';
 import { apiRateLimiter } from '../middleware/rateLimiter';
 import { authenticate } from '../middleware/auth';
 
@@ -9,6 +9,7 @@ router.use(apiRateLimiter);
 
 router.get('/', getStudents);
 router.post('/sync-all', syncAll);       // ← Must be before /:id routes
+router.put('/profile', authenticate, updateProfile); // Pinned current user edit
 router.get('/:id', getStudentById);
 router.post('/', createStudent);
 router.patch('/:id', authenticate, updateStudent);

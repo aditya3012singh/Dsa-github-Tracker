@@ -10,10 +10,12 @@ datasource db {
 model Student {
   id               String       @id @default(uuid())
   name             String
-  rollNo           String       @unique
+  libraryId        String       @unique
+  rollNo           String?
   email            String?      @unique
   branch           String
   year             Int
+  section          String?
   leetcodeHandle   String?
   codeforcesHandle String?
   gfgHandle        String?

@@ -23,6 +23,7 @@ export const getStudents = async (req: Request, res: Response, next: NextFunctio
         rollNo: student.rollNo,
         branch: student.branch,
         year: student.year,
+        section: student.section,
         leetcode: {
           handle: student.leetcodeHandle,
           total: stats?.leetcodeSolved || 0,
@@ -67,7 +68,8 @@ export const createStudent = async (req: Request, res: Response, next: NextFunct
   try {
     const {
       name,
-      rollNo,
+      rollNo, // Keep rollNo for creation if it's still a field in the DB
+      libraryId, // Add libraryId for creation
       branch,
       year,
       leetcodeHandle,
@@ -81,6 +83,7 @@ export const createStudent = async (req: Request, res: Response, next: NextFunct
       data: {
         name,
         rollNo,
+        libraryId, // Assign libraryId
         branch,
         year,
         leetcodeHandle: sanitizeHandle(leetcodeHandle, 'leetcode'),
@@ -101,6 +104,7 @@ export const updateStudent = async (req: AuthRequest, res: Response, next: NextF
   try {
     const { id } = req.params;
     
+    // Safety: only allow updating own profile via this specific ID route
     if (req.user?.id !== id) {
       return res.status(403).json({ status: 'error', message: 'You can only update your own profile' });
     }
@@ -117,13 +121,46 @@ export const updateStudent = async (req: AuthRequest, res: Response, next: NextF
 
     const student = await prisma.student.update({
       where: { id },
-      data: sanitizedData as any
+      data: sanitizedData
     });
 
     // Invalidate cache
     await redisConnection.del('leaderboard_data');
 
-    res.json({ status: 'success', data: { id: student.id, name: student.name } });
+    res.json({ status: 'success', data: { id: student.id, name: student.name, section: student.section } });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * PUT /api/students/profile
+ * Update CURRENT authenticated student's profile
+ */
+export const updateProfile = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const id = req.user?.id;
+    if (!id) return res.status(401).json({ status: 'error', message: 'Unauthorized' });
+
+    const { password, rollNo, ...updateData } = req.body; // Protect rollNo from updates here
+
+    // Sanitize handles
+    const sanitizedData = { ...updateData };
+    if (sanitizedData.leetcodeHandle) sanitizedData.leetcodeHandle = sanitizeHandle(sanitizedData.leetcodeHandle, 'leetcode');
+    if (sanitizedData.codeforcesHandle) sanitizedData.codeforcesHandle = sanitizeHandle(sanitizedData.codeforcesHandle, 'codeforces');
+    if (sanitizedData.gfgHandle) sanitizedData.gfgHandle = sanitizeHandle(sanitizedData.gfgHandle, 'gfg');
+    if (sanitizedData.codechefHandle) sanitizedData.codechefHandle = sanitizeHandle(sanitizedData.codechefHandle, 'codechef');
+    if (sanitizedData.githubHandle) sanitizedData.githubHandle = sanitizeHandle(sanitizedData.githubHandle, 'github');
+
+    const student = await prisma.student.update({
+      where: { id },
+      data: sanitizedData
+    });
+
+    // Invalidate leaderboard cache
+    await redisConnection.del('leaderboard_data');
+
+    res.json({ status: 'success', data: student });
   } catch (error) {
     next(error);
   }
@@ -191,6 +228,7 @@ export const getStudentById = async (req: Request, res: Response, next: NextFunc
       rollNo: student.rollNo,
       branch: student.branch,
       year: student.year,
+      section: student.section,
       leetcode: {
         handle: student.leetcodeHandle,
         total: stats?.leetcodeSolved || 0,

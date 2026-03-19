@@ -10,14 +10,14 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-key';
 
 export const register = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { name, rollNo, email, password, branch, year, leetcodeHandle, githubHandle, gfgHandle, codeforcesHandle, codechefHandle } = req.body;
+    const { name, libraryId, email, password, branch, year, leetcodeHandle, githubHandle, gfgHandle, codeforcesHandle, codechefHandle } = req.body;
 
     const existingStudent = await prisma.student.findUnique({
-      where: { rollNo },
+      where: { libraryId },
     });
 
     if (existingStudent) {
-      return res.status(400).json({ status: 'error', message: 'Student with this Roll Number already exists' });
+      return res.status(400).json({ status: 'error', message: 'Student with this Library ID already exists' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -25,7 +25,8 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
     const student = await prisma.student.create({
       data: {
         name,
-        rollNo,
+        libraryId,
+        rollNo: null,
         email,
         password: hashedPassword,
         branch,
@@ -38,7 +39,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
       },
     });
 
-    res.status(201).json({ status: 'success', message: 'Student registered successfully', data: { id: student.id, name: student.name, rollNo: student.rollNo } });
+    res.status(201).json({ status: 'success', message: 'Student registered successfully', data: { id: student.id, name: student.name, libraryId: student.libraryId } });
   } catch (error) {
     next(error);
   }
@@ -46,19 +47,19 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
 
 export const login = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { rollNo, password } = req.body;
+    const { libraryId, password } = req.body;
 
     const student = await prisma.student.findUnique({
-      where: { rollNo },
+      where: { libraryId },
     });
 
     if (!student || !(await bcrypt.compare(password, student.password))) {
-      return res.status(401).json({ status: 'error', message: 'Invalid Roll Number or password' });
+      return res.status(401).json({ status: 'error', message: 'Invalid Library ID or password' });
     }
 
-    const token = jwt.sign({ id: student.id, rollNo: student.rollNo }, JWT_SECRET, { expiresIn: '24h' });
+    const token = jwt.sign({ id: student.id, libraryId: student.libraryId }, JWT_SECRET, { expiresIn: '24h' });
 
-    res.json({ status: 'success', token, data: { id: student.id, name: student.name, rollNo: student.rollNo } });
+    res.json({ status: 'success', token, data: { id: student.id, name: student.name, libraryId: student.libraryId } });
   } catch (error) {
     next(error);
   }
@@ -66,10 +67,10 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
 
 export const forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { rollNo } = req.body;
+    const { libraryId } = req.body;
 
     const student = await prisma.student.findUnique({
-      where: { rollNo },
+      where: { libraryId },
     });
 
     if (!student) {
@@ -85,7 +86,7 @@ export const forgotPassword = async (req: Request, res: Response, next: NextFunc
     });
 
     // In a real app, you'd send an email here. For now, we'll just return the token.
-    logger.info(`Password reset requested for ${rollNo}. Token: ${resetToken}`);
+    logger.info(`Password reset requested for ${libraryId}. Token: ${resetToken}`);
     
     res.json({ 
       status: 'success', 
