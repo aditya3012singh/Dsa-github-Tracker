@@ -84,6 +84,25 @@ export const getLeaderboard = async (req: AuthRequest, res: Response, next: Next
       await redisConnection.setex(cacheKey, 3600, JSON.stringify(leaderboard));
     }
 
+    const yearFilter = req.query.year as string;
+    const branchFilter = req.query.branch as string;
+    const sectionFilter = req.query.section as string;
+
+    // Apply Year Filter
+    if (yearFilter && yearFilter !== 'All') {
+      leaderboard = leaderboard.filter(item => item.year?.toString() === yearFilter);
+    }
+
+    // Apply Branch Filter
+    if (branchFilter && branchFilter !== 'All') {
+      leaderboard = leaderboard.filter(item => (item.branch || '').toLowerCase().includes(branchFilter.toLowerCase()));
+    }
+
+    // Apply Section Filter
+    if (sectionFilter && sectionFilter !== 'All') {
+      leaderboard = leaderboard.filter(item => (item.section || '').toUpperCase() === sectionFilter.toUpperCase());
+    }
+
     // Apply Search Filter
     if (search) {
       const searchLower = search.toLowerCase();

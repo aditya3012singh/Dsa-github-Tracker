@@ -2,6 +2,13 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGetLeaderboardQuery, useSyncAllMutation } from '../../store/apiSlice';
 import { Search, ChevronLeft, ChevronRight, RefreshCw, Trophy, Medal, Github, Code, LayoutGrid, ChevronDown, Zap, CheckCircle } from 'lucide-react';
+import { useDebounce } from '../../hooks/useDebounce';
+import { DropdownSelect, SortTh, PlatformCell, HighlightCard, Pagination, SkeletonRow } from './components/LeaderboardComponents';
+import leetcodeIcon from '../../assets/icons/leetcode.png';
+import codeforcesIcon from '../../assets/icons/codeforces.png';
+import codechefIcon from '../../assets/icons/codechef.png';
+import gfgIcon from '../../assets/icons/gfg.png';
+import githubIcon from '../../assets/icons/github.png';
 
 const SORT_OPTIONS = [
   { key: 'totalSolved', label: 'Total Solved' },
@@ -16,6 +23,7 @@ const Leaderboard = () => {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 300);
   const [sortBy, setSortBy] = useState('totalSolved');
   const [order, setOrder] = useState('desc');
   const [yearFilter, setYearFilter] = useState('All');
@@ -38,18 +46,14 @@ const Leaderboard = () => {
   };
 
   const { data, isLoading, isFetching, error, refetch } = useGetLeaderboardQuery({
-    page, limit, search, sortBy, order,
+    page, limit, search: debouncedSearch, sortBy, order,
+    year: yearFilter, section: sectionFilter, branch: branchFilter
   });
 
   const students = useMemo(() => {
     if (!data?.data) return [];
-    return data.data.filter((s: any) => {
-      const yearMatch = yearFilter === 'All' || s.year?.toString() === yearFilter;
-      const branchMatch = branchFilter === 'All' || (s.branch || '').toLowerCase().includes(branchFilter.toLowerCase());
-      const sectionMatch = sectionFilter === 'All' || (s.section || '').toUpperCase() === sectionFilter.toUpperCase();
-      return yearMatch && branchMatch && sectionMatch;
-    });
-  }, [data, yearFilter, sectionFilter, branchFilter]);
+    return data.data; // Filtering is now handled server-side
+  }, [data]);
 
   const topThree = students.slice(0, 3);
   const tableStudents = students.slice(0);
@@ -63,7 +67,7 @@ const Leaderboard = () => {
   );
 
   return (
-    <div className="flex flex-col gap-10 pb-20 animate-fade-in pt-[100px]">
+    <div className="flex flex-col gap-10 pb-2 animate-fade-in pt-[100px]">
 
       {/* ── Page Header ── */}
       <header className="flex flex-col items-center gap-3 text-center px-4">
@@ -203,23 +207,23 @@ const Leaderboard = () => {
                   <th className="px-6 py-5 text-white">Sec</th>
                   <th className="px-6 py-5 text-white whitespace-nowrap">Roll No</th>
                   <SortTh 
-                    label={<div className="flex items-center gap-2"><img src="https://img.icons8.com/?size=100&id=9L16NypUzu38&format=png&color=FFFFFF" className="w-4 h-4 object-contain opacity-80" alt="" /><span>LeetCode</span></div>} 
+                    label={<div className="flex items-center gap-2"><img src={leetcodeIcon} className="w-4 h-4 object-contain opacity-80" alt="LeetCode" /><span>LeetCode</span></div>} 
                     sortKey="leetcode" sortBy={sortBy} order={order} onSort={(k: any) => { setSortBy(k); setOrder('desc'); }} 
                   />
                   <SortTh 
-                    label={<div className="flex items-center gap-2"><img src="https://img.icons8.com/?size=100&id=jldAN67IAsrW&format=png&color=FFFFFF" className="w-4 h-4 object-contain opacity-80" alt="" /><span>Codeforces</span></div>} 
+                    label={<div className="flex items-center gap-2"><img src={codeforcesIcon} className="w-4 h-4 object-contain opacity-80" alt="Codeforces" /><span>Codeforces</span></div>} 
                     sortKey="codeforces" sortBy={sortBy} order={order} onSort={(k: any) => { setSortBy(k); setOrder('desc'); }} 
                   />
                   <SortTh 
-                    label={<div className="flex items-center gap-2"><img src="https://img.icons8.com/?size=100&id=4z2zrIWYmGqx&format=png&color=FFFFFF" className="w-4 h-4 object-contain opacity-80" alt="" /><span>CodeChef</span></div>} 
+                    label={<div className="flex items-center gap-2"><img src={codechefIcon} className="w-4 h-4 object-contain opacity-80" alt="CodeChef" /><span>CodeChef</span></div>} 
                     sortKey="codechef" sortBy={sortBy} order={order} onSort={(k: any) => { setSortBy(k); setOrder('desc'); }} 
                   />
                   <SortTh 
-                    label={<div className="flex items-center gap-2"><img src="https://img.icons8.com/?size=100&id=AbQBhN9v62Ob&format=png&color=FFFFFF" className="w-4 h-4 object-contain opacity-80" alt="" /><span>GfG</span></div>} 
+                    label={<div className="flex items-center gap-2"><img src={gfgIcon} className="w-4 h-4 object-contain opacity-80" alt="GfG" /><span>GfG</span></div>} 
                     sortKey="gfg" sortBy={sortBy} order={order} onSort={(k: any) => { setSortBy(k); setOrder('desc'); }} 
                   />
                   <SortTh 
-                    label={<div className="flex items-center gap-2"><img src="https://img.icons8.com/?size=100&id=efFfwotdkiU5&format=png&color=FFFFFF" className="w-4 h-4 object-contain opacity-80" alt="" /><span>GitHub</span></div>} 
+                    label={<div className="flex items-center gap-2"><img src={githubIcon} className="w-4 h-4 object-contain opacity-80" alt="GitHub" /><span>GitHub</span></div>} 
                     sortKey="github" sortBy={sortBy} order={order} onSort={(k: any) => { setSortBy(k); setOrder('desc'); }} 
                   />
                 </tr>
@@ -365,149 +369,5 @@ const Leaderboard = () => {
   );
 };
 
-/* ── Helper Components ─────────────────────────────────────────────────────── */
-
-const DropdownSelect = ({ label, value, onChange, options, accent = false }: any) => (
-  <div className="flex flex-col gap-1.5 items-start ">
-    <span className="text-[10px] uppercase font-black text-text-dim/60 ml-1 tracking-[0.1em]">{label}</span>
-    <div className="relative group/sel">
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`appearance-none pr-10 pl-5 py-3 outline-none cursor-pointer text-[13px] font-bold transition-all border shadow-lg ${accent
-            ? 'bg-primary/10 border-primary/30 text-primary hover:border-primary hover:bg-primary/20'
-            : 'bg-white/[0.03] border-white/5 text-slate-300 hover:border-white/20 hover:bg-white/[0.05]'
-          }`}
-      >
-        {options.map((opt: any) => (
-          <option key={opt.value} value={opt.value} className="bg-black text-white py-2">
-            {opt.label}
-          </option>
-        ))}
-      </select>
-      <ChevronDown size={14} className={`absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none transition-transform group-hover/sel:translate-y-[-40%] ${accent ? 'text-primary' : 'text-text-dim'}`} />
-    </div>
-  </div>
-);
-const SortTh = ({ label, sortKey, sortBy, order, onSort }: any) => {
-  const active = sortBy === sortKey;
-  return (
-    <th
-      onClick={() => onSort(sortKey)}
-      className={`px-6 py-5 whitespace-nowrap cursor-pointer select-none transition-all text-[11px] uppercase tracking-[0.2em] font-black ${active
-          ? 'text-primary'
-          : 'text-slate-500 hover:text-slate-300'
-        }`}
-    >
-      {label}{active && <span className="ml-1 text-[10px] opacity-80">{order === 'desc' ? '↓' : '↑'}</span>}
-    </th>
-  );
-};
-
-const PlatformCell = ({ value, href, color, active, suffix = '' }: any) => {
-  const isZero = !value || value === 0;
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noreferrer"
-      onClick={(e) => e.stopPropagation()}
-      className={`inline-flex items-center gap-1 no-underline transition-all rounded-md px-3 py-1.5 -ml-3 ${active && !isZero
-          ? 'font-black text-[16px]'
-          : 'font-bold text-[16px] opacity-70 hover:opacity-100 hover:bg-white/5'
-        }`}
-      style={{
-        color: isZero ? '#475569' : color,
-        background: active && !isZero ? `${color}15` : '',
-        boxShadow: active && !isZero ? `0 0 10px ${color}10` : 'none',
-        textShadow: active && !isZero ? `0 0 8px ${color}40` : 'none',
-      }}
-    >
-      {value ?? 0}
-      {suffix && <span className="text-[10px] opacity-60 uppercase ml-0.5 tracking-wider">{suffix}</span>}
-    </a>
-  );
-};
-
-const HighlightCard = ({ student, rank, color }: any) => {
-  const navigate = useNavigate();
-  const section = student.section || '—';
-  const yearSection = student.year ? `Year ${student.year} - ${section}` : '—';
-
-  return (
-    <div
-      onClick={() => navigate(`/profile/${student.id}`)}
-      className="relative bg-black border rounded-[32px] p-8 flex flex-col gap-8 cursor-pointer group hover:border-white/20 transition-all overflow-hidden shadow-2xl"
-      style={{ borderColor: `${color}30` }}
-    >
-      {/* Dynamic Background Glow */}
-      <div 
-        className="absolute -right-10 -top-10 w-40 h-40 blur-[80px] opacity-0 group-hover:opacity-10 transition-opacity duration-500 rounded-full"
-        style={{ background: color }}
-      />
-
-      {/* Header Row: Name & Badge */}
-      <div className="flex items-center justify-between relative z-10 mb-2">
-        <h3 className="text-xl font-black font-outfit text-white tracking-tight group-hover:text-primary transition-colors duration-300">
-          {student.name}
-        </h3>
-        <div 
-          className="w-14 h-14 rounded-full flex items-center justify-center bg-white/[0.05] border border-white/10 shadow-xl relative group-hover:scale-110 transition-transform duration-500"
-          style={{ boxShadow: `0 0 25px ${color}20` }}
-        >
-          <Trophy size={28} style={{ color }} className="relative z-10 drop-shadow-[0_0_8px_rgba(0,0,0,0.5)]" />
-          <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 opacity-50" />
-        </div>
-      </div>
-
-      {/* Data Row: 4 Boxes */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 relative z-10">
-        <DataBox label="Rank" value={rank} />
-        <DataBox label="Total" value={student.totalSolved} />
-        <DataBox label="Rating" value={student.score?.toFixed(0) || 0} />
-        <DataBox label="Year-Section" value={yearSection} />
-      </div>
-    </div>
-  );
-};
-
-const DataBox = ({ label, value }: { label: string, value: any }) => (
-  <div className="bg-[#0f0f12] border border-white/[0.04] rounded-[20px] py-6 px-2 flex flex-col items-center justify-center gap-1 group-hover:border-white/10 transition-colors">
-    <span className="text-[10px] text-text-dim/50 uppercase tracking-[0.15em] font-black">{label}</span>
-    <span className="text-2xl font-black font-outfit text-white tracking-tight">{value}</span>
-  </div>
-);
-
-const Pagination = ({ page, total, limit, setPage }: any) => (
-  <footer className="flex justify-center items-center gap-6 py-8">
-    <button
-      disabled={page === 1}
-      onClick={() => setPage((p: number) => p - 1)}
-      className="w-11 h-11 rounded-full border border-border flex items-center justify-center text-white hover:border-primary hover:bg-primary/10 disabled:opacity-20 transition-all"
-    >
-      <ChevronLeft size={20} />
-    </button>
-    <span className="text-text-dim text-sm font-bold uppercase tracking-widest">
-      Page {page} <span className="mx-2 opacity-30">/</span> {Math.max(1, Math.ceil(total / limit))}
-    </span>
-    <button
-      disabled={page * limit >= total}
-      onClick={() => setPage((p: number) => p + 1)}
-      className="w-11 h-11 rounded-full border border-border flex items-center justify-center text-white hover:border-primary hover:bg-primary/10 disabled:opacity-20 transition-all"
-    >
-      <ChevronRight size={20} />
-    </button>
-  </footer>
-);
-
-const SkeletonRow = () => (
-  <tr className="animate-pulse">
-    {[...Array(11)].map((_, i) => (
-      <td key={i} className="px-5 py-4">
-        <div className="h-4 bg-white/5 rounded w-full max-w-[80px]" />
-      </td>
-    ))}
-  </tr>
-);
-
 export default Leaderboard;
+
