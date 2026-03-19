@@ -9,6 +9,7 @@
     "worker": "ts-node src/workers/index.ts",
     "worker:prod": "node dist/workers/index.js",
     "build": "tsc",
+    "postinstall": "prisma generate",
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
     "seed": "ts-node src/scripts/seed.ts",

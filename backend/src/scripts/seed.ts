@@ -37,12 +37,13 @@ async function main() {
 
   for (const student of students) {
     try {
-      // Upsert: Create if doesn't exist, skip if it does (or update)
+      const libraryId = student.libraryId || `LIB-${student.rollNo}`; // Fallback if missing
       await prisma.student.upsert({
-        where: { rollNo: student.rollNo },
-        update: {}, // Don't overwrite existing data
+        where: { libraryId },
+        update: {},
         create: {
           name: student.name,
+          libraryId,
           rollNo: student.rollNo,
           branch: student.branch,
           year: student.year,
@@ -57,7 +58,7 @@ async function main() {
       successCount++;
       if (successCount % 50 === 0) console.log(`Processed ${successCount} students...`);
     } catch (error) {
-      console.error(`Failed to seed student ${student.rollNo}:`, error);
+      console.error(`Failed to seed student:`, error);
       skipCount++;
     }
   }
