@@ -4,11 +4,21 @@ import { useLoginMutation } from '../../store/apiSlice';
 import { Lock, User, LogIn, AlertCircle } from 'lucide-react';
 import loginLogo from '../../assets/image.png';
 
+const DEMO_CREDENTIALS = {
+  libraryId: 'LIB-2226IT1100',
+  password: 'password123',
+};
+
 const Login = () => {
   const [libraryId, setLibraryId] = useState('');
   const [password, setPassword] = useState('');
   const [login, { isLoading, error }] = useLoginMutation();
   const navigate = useNavigate();
+
+  const fillDemoCredentials = () => {
+    setLibraryId(DEMO_CREDENTIALS.libraryId);
+    setPassword(DEMO_CREDENTIALS.password);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,6 +46,23 @@ const Login = () => {
         </header>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+          <div className="bg-primary/10 border border-primary/30 text-primary p-4 rounded-xl text-sm">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="font-bold tracking-wide uppercase text-[11px] mb-2">Demo Credentials</p>
+                <p className="text-text-main text-xs sm:text-sm">Library ID: {DEMO_CREDENTIALS.libraryId}</p>
+                <p className="text-text-main text-xs sm:text-sm">Password: {DEMO_CREDENTIALS.password}</p>
+              </div>
+              <button
+                type="button"
+                onClick={fillDemoCredentials}
+                className="shrink-0 bg-primary text-white px-3 py-2 rounded-lg text-[11px] sm:text-xs font-bold uppercase tracking-wider hover:bg-primary/80 transition-all cursor-pointer"
+              >
+                Use Demo
+              </button>
+            </div>
+          </div>
+
           {error && (
             <div className="bg-error/10 border border-error/20 text-error p-4 rounded-xl flex items-center gap-3 text-sm">
               <AlertCircle size={20} />
