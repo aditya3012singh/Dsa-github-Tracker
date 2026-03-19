@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Layout/Navbar';
 import Footer from './components/Layout/Footer';
 import Leaderboard from './pages/Dashboard/Leaderboard';
@@ -15,6 +15,8 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 function App() {
   const token = localStorage.getItem('token');
+  const location = useLocation();
+  const hideNavbar = location.pathname === '/login';
   
   return (
     <div className="min-h-screen flex flex-col bg- text-text-main font-sans selection:bg-primary/30 relative">
@@ -33,7 +35,7 @@ function App() {
           pixelRatio={2}
         />
       </div>
-      <Navbar />
+      {!hideNavbar && <Navbar />}
       {/* No top padding here – each page handles its own spacing to account for the fixed navbar */}
       <main className="flex-1 w-full">
         <Routes>
