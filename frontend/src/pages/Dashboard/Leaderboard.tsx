@@ -260,22 +260,22 @@ const Leaderboard = () => {
                         {data.userRank.student.section || '—'}
                       </span>
                     </td>
-                    <td className="px-8 py-6">
+                    <td className="px-8 py-8">
                       <span className="font-mono text-[15px] text-slate-100 whitespace-nowrap tracking-tight">{data.userRank.student.rollNo || '—'}</span>
                     </td>
                     <td className="px-8 py-6">
                       <PlatformCell value={data.userRank.student.leetcode.total} href={`https://leetcode.com/${data.userRank.student.leetcode.handle}`} color="#FFD700" active={sortBy === 'leetcode'} />
                     </td>
-                    <td className="px-8 py-6">
+                    <td className="px-8 py-8  ">
                       <PlatformCell value={data.userRank.student.codeforces.rating} href={`https://codeforces.com/profile/${data.userRank.student.codeforces.handle}`} color="#339AF0" active={sortBy === 'codeforces'} suffix="pts" />
                     </td>
-                    <td className="px-8 py-6">
+                    <td className="px-8 py-8">
                       <PlatformCell value={data.userRank.student.codechef.rating} href={`https://www.codechef.com/users/${data.userRank.student.codechef.handle}`} color="#FF922B" active={sortBy === 'codechef'} />
                     </td>
                     <td className="px-8 py-6">
                       <PlatformCell value={data.userRank.student.gfg.total} href={`https://www.geeksforgeeks.org/user/${data.userRank.student.gfg.handle}/`} color="#51CF66" active={sortBy === 'gfg'} />
                     </td>
-                    <td className="px-8 py-6">
+                    <td className="px-8 py-8">
                       <PlatformCell value={data.userRank.student.github.contributions} href={`https://github.com/${data.userRank.student.github.handle}`} color="#F8FAFC" active={sortBy === 'github'} />
                     </td>
                   </tr>

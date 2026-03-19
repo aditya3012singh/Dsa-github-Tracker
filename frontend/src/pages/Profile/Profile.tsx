@@ -68,7 +68,7 @@ const Profile = () => {
                 onClick={async () => {
                   try {
                     await triggerFetch(student.id).unwrap();
-                    alert('Sync started! Data will update in a few minutes.');
+                    // Sync queued — spinner feedback is sufficient
                   } catch (err) {
                     console.error('Sync failed:', err);
                   }
