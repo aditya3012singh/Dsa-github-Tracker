@@ -7,7 +7,7 @@
   --primary-glow: 210 100% 60% / 0.4;
   --secondary: 260 100% 70%;  /* Purple */
   --accent: 190 100% 50%;     /* Cyan */
-  --bg-dark: 220 40% 4%;      /* Very Deep Navy */
+  --bg-dark: 225 40% 5%;      /* Deep Navy */
   --bg-card: 220 40% 8% / 0.7;
   --bg-glass: 220 40% 12% / 0.4;
   --border: 220 30% 15%;
@@ -20,40 +20,19 @@
 
 @layer base {
   body {
-    @apply bg-bg-dark text-text-main font-sans selection:bg-primary/30;
+    @apply text-text-main font-sans selection:bg-primary/30;
+    background: linear-gradient(160deg, #060b14 0%, #0b0c2a 50%, #0f0720 100%);
+    min-height: 100vh;
     margin: 0;
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
     position: relative;
   }
+  
 
-  body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: 
-      radial-gradient(1px 1px at 20px 30px, #fff, rgba(0,0,0,0)),
-      radial-gradient(1px 1px at 40px 70px, #fff, rgba(0,0,0,0)),
-      radial-gradient(1px 1px at 50px 160px, #fff, rgba(0,0,0,0)),
-      radial-gradient(1px 1px at 90px 40px, #fff, rgba(0,0,0,0)),
-      radial-gradient(1px 1px at 130px 80px, #fff, rgba(0,0,0,0)),
-      radial-gradient(1px 1px at 160px 120px, #fff, rgba(0,0,0,0));
-    background-repeat: repeat;
-    background-size: 200px 200px;
-    opacity: 0.15;
-    animation: stars 100s linear infinite;
-    pointer-events: none;
-    z-index: -1;
-  }
+
 }
 
-@keyframes stars {
-  from { transform: translateY(0); }
-  to { transform: translateY(-1000px); }
-}
 
 @layer components {
   .glass-card {

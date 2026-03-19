@@ -125,7 +125,7 @@ export const HighlightCard = ({ student, rank, color }: any) => {
   return (
     <div
       onClick={() => navigate(`/profile/${student.id}`)}
-      className="relative bg-black border rounded-[32px] p-8 flex flex-col gap-8 cursor-pointer group hover:border-white/20 transition-all overflow-hidden shadow-2xl"
+      className="relative bg-black/30 border rounded-[32px] p-8 flex flex-col gap-8 cursor-pointer group hover:border-white/20 transition-all overflow-hidden shadow-2xl"
       style={{ borderColor: `${color}30` }}
     >
       {/* Dynamic Background Glow */}
@@ -149,7 +149,7 @@ export const HighlightCard = ({ student, rank, color }: any) => {
       </div>
 
       {/* Data Row: 4 Boxes */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 relative z-10">
+      <div className="grid bg grid-cols-2 lg:grid-cols-4 gap-2.5 relative z-10">
         <DataBox label="Rank" value={rank} />
         <DataBox label="Total" value={student.totalSolved} />
         <DataBox label="Rating" value={student.score?.toFixed(0) || 0} />
@@ -159,8 +159,26 @@ export const HighlightCard = ({ student, rank, color }: any) => {
   );
 };
 
+export const HighlightCardSkeleton = () => (
+  <div className="relative bg-black/30 border border-white/10 rounded-[32px] p-8 flex flex-col gap-8 overflow-hidden animate-pulse">
+    <div className="flex items-center justify-between relative z-10 mb-2">
+      <div className="h-7 w-40 rounded-lg bg-white/10" />
+      <div className="w-14 h-14 rounded-full bg-white/10 border border-white/10" />
+    </div>
+
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 relative z-10">
+      {[...Array(4)].map((_, idx) => (
+        <div key={idx} className="bg-black/20 border border-white/[0.04] rounded-[20px] py-6 px-2 flex flex-col items-center justify-center gap-2">
+          <div className="h-3 w-14 rounded bg-white/10" />
+          <div className="h-7 w-16 rounded bg-white/10" />
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
 export const DataBox = ({ label, value }: { label: string; value: any }) => (
-  <div className="bg-[#0f0f12] border border-white/[0.04] rounded-[20px] py-6 px-2 flex flex-col items-center justify-center gap-1.5 group-hover:border-white/10 transition-colors">
+  <div className="bg-black/20 border border-white/[0.04] rounded-[20px] py-6 px-2 flex flex-col items-center justify-center gap-1.5 group-hover:border-white/10 transition-colors">
     <span className="text-[12px] text-text-dim/70 uppercase tracking-[0.15em] font-black">{label}</span>
     <span className="text-2xl font-black font-outfit text-white tracking-tight">{value}</span>
   </div>

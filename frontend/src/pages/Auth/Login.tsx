@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLoginMutation } from '../../store/apiSlice';
 import { Lock, User, LogIn, AlertCircle } from 'lucide-react';
+import loginLogo from '../../assets/image.png';
 
 const Login = () => {
   const [libraryId, setLibraryId] = useState('');
@@ -24,12 +25,13 @@ const Login = () => {
 
   return (
     <div className="flex justify-center items-center py-16 px-4 animate-fade-in pt-40 pb-40">
-      <div className="glass-card w-full max-w-[440px] p-12 flex flex-col gap-8">
+      <div className="glass-card w-full bg-black/30 border-blue-800 max-w-[440px] p-12 flex flex-col gap-8">
         <header className="text-center">
-          <div className="w-16 h-16 bg-primary/10 text-primary border border-primary/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <Lock size={32} />
+          
+          <div className='p-8'>
+            <img src={loginLogo} alt="Logo" className="h-24 w-auto object-contain mx-auto" />
           </div>
-          <h1 className="text-3xl font-outfit font-bold mb-2">Welcome Back</h1>
+          <h1 className="text-4xl font-outfit font-bold mb-2">KIET DSA Training</h1>
           <p className="text-text-dim text-sm">Login with your college library credentials</p>
         </header>
 

@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGetStudentQuery, useUpdateProfileMutation } from '../../store/apiSlice';
-import { User, BookOpen, GraduationCap, Grid, Code, Github, Globe, Hash, Save, X, Trophy } from 'lucide-react';
-import { DropdownSelect } from '../Dashboard/components/LeaderboardComponents';
+import { User, BookOpen, GraduationCap, Grid, Code, Github, Hash, Save, X, Trophy, RefreshCw } from 'lucide-react';
 import leetcodeIcon from '../../assets/icons/leetcode.png';
 import codeforcesIcon from '../../assets/icons/codeforces.png';
 import gfgIcon from '../../assets/icons/gfg.png';
@@ -65,32 +64,49 @@ const EditProfile = () => {
     }
   };
 
-  if (isLoading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  if (isLoading) {
+    return (
+      <div className="p-20 text-center text-text-dim text-lg flex items-center justify-center gap-3">
+        <RefreshCw className="animate-spin text-primary" size={24} />
+        Loading profile data...
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen pt-32 pb-20 px-4 flex flex-col items-center">
-      <div className="max-w-4xl w-full">
+    <div className="flex flex-col gap-8 pb-16 animate-fade-in pt-[100px] px-6 max-w-[1200px] mx-auto w-full">
+      <div className="w-full">
         {/* Header */}
-        <div className="flex items-center justify-between mb-12">
+        <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-4xl font-black font-outfit text-white mb-2">Edit Profile</h1>
-            <p className="text-text-dim uppercase tracking-widest text-sm font-bold">Refine your identity on the platform</p>
+            <h1 className="text-[2.2rem] font-black font-outfit text-white leading-none drop-shadow-[0_0_30px_rgba(255,255,255,0.15)]">
+              Edit Profile<span className="text-primary">.</span>
+            </h1>
+            <p className="text-sm text-text-dim uppercase tracking-[0.2em] font-semibold mt-1">
+              Update your information and platform handles
+            </p>
           </div>
           <button 
             onClick={() => navigate(-1)}
-            className="p-3 bg-white/5 border border-white/10 rounded-2xl text-slate-400 hover:text-white hover:bg-white/10 transition-all"
+            className="p-3 bg-white/5 border border-white/10 rounded-2xl text-slate-400 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
+            title="Close"
           >
             <X size={24} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Basic Info Section */}
-          <div className="space-y-6">
-            <h2 className="text-xl font-bold text-primary flex items-center gap-3 mb-6">
-              <User size={20} />
-              Basic Information
-            </h2>
+          <section className="glass-card p-10 bg-black/30 border-white/10 flex flex-col gap-6">
+            <div className="flex items-center gap-4 mb-2">
+              <div className="w-11 h-11 rounded-2xl bg-black/20 border border-white/10 flex items-center justify-center text-primary">
+                <User size={20} />
+              </div>
+              <div>
+                <h2 className="text-2xl font-outfit font-bold text-white tracking-tight">Basic Information</h2>
+                <p className="text-[11px] text-text-dim uppercase tracking-[0.18em] font-black">Identity and academic details</p>
+              </div>
+            </div>
 
             <InputGroup label="Full Name" icon={<User size={18} />} name="name" value={formData.name} onChange={handleChange} placeholder="John Doe" />
             
@@ -100,11 +116,12 @@ const EditProfile = () => {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <DropdownSelect
+              <SelectGroup
                 label="Year"
-                icon={GraduationCap}
+                icon={<GraduationCap size={18} />}
+                name="year"
                 value={formData.year}
-                onChange={(val: string) => setFormData({ ...formData, year: val })}
+                onChange={handleChange}
                 options={[
                   { value: '1', label: '1st Year' },
                   { value: '2', label: '2nd Year' },
@@ -116,14 +133,19 @@ const EditProfile = () => {
             </div>
 
             <InputGroup label="Branch" icon={<BookOpen size={18} />} name="branch" value={formData.branch} onChange={handleChange} placeholder="e.g. CS" />
-          </div>
+          </section>
 
           {/* Coding Handles Section */}
-          <div className="space-y-6">
-            <h2 className="text-xl font-bold text-primary flex items-center gap-3 mb-6">
-              <Code size={20} />
-              Coding Platforms
-            </h2>
+          <section className="glass-card p-10 bg-black/30 border-white/10 flex flex-col gap-6">
+            <div className="flex items-center gap-4 mb-2">
+              <div className="w-11 h-11 rounded-2xl bg-black/20 border border-white/10 flex items-center justify-center text-primary">
+                <Code size={20} />
+              </div>
+              <div>
+                <h2 className="text-2xl font-outfit font-bold text-white tracking-tight">Coding Platforms</h2>
+                <p className="text-[11px] text-text-dim uppercase tracking-[0.18em] font-black">Connect your competitive profiles</p>
+              </div>
+            </div>
 
             <InputGroup 
               label="LeetCode Username" 
@@ -170,24 +192,33 @@ const EditProfile = () => {
                 placeholder="gfg_id" 
               />
             </div>
-          </div>
+          </section>
 
           {/* Submit */}
-          <div className="md:col-span-2 pt-8">
-            <button
-              type="submit"
-              disabled={isUpdating}
-              className="w-full bg-primary hover:bg-primary-hover text-white font-black font-outfit py-5 rounded-[24px] shadow-[0_0_30px_rgba(var(--primary-rgb),0.3)] hover:shadow-[0_0_50px_rgba(var(--primary-rgb),0.5)] transition-all flex items-center justify-center gap-3 text-lg disabled:opacity-50"
-            >
-              {isUpdating ? (
-                <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin" />
-              ) : (
-                <>
-                  <Save size={24} />
-                  SAVE CHANGES
-                </>
-              )}
-            </button>
+          <div className="lg:col-span-2">
+            <div className="glass-card p-5 bg-black/30 border-white/10 flex flex-col sm:flex-row gap-3 sm:justify-end">
+              <button
+                type="button"
+                onClick={() => navigate(-1)}
+                className="px-6 py-3 rounded-xl border border-white/10 bg-white/5 text-white font-bold hover:bg-white/10 transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isUpdating}
+                className="px-7 py-3 rounded-xl bg-primary text-white font-black font-outfit shadow-[0_0_30px_rgba(var(--primary-rgb),0.3)] hover:shadow-[0_0_50px_rgba(var(--primary-rgb),0.45)] hover:bg-[hsl(var(--primary-glow))] transition-all flex items-center justify-center gap-3 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+              >
+                {isUpdating ? (
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <Save size={20} />
+                    Save Changes
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </form>
       </div>
@@ -213,10 +244,37 @@ const InputGroup = ({ label, icon, name, value, onChange, placeholder, readOnly 
         readOnly={readOnly}
         className={`w-full border rounded-2xl py-4 pl-14 pr-6 text-white font-bold outline-none transition-all placeholder:text-slate-700 ${
           readOnly
-            ? 'bg-white/[0.01] border-white/[0.03] text-slate-500 cursor-not-allowed select-none'
-            : 'bg-white/[0.03] border-white/5 focus:border-primary/50 focus:bg-white/[0.05]'
+            ? 'bg-black/10 border-white/[0.06] text-slate-500 cursor-not-allowed select-none'
+            : 'bg-black/20 border-white/10 focus:border-primary/50 focus:bg-black/30'
         }`}
       />
+    </div>
+  </div>
+);
+
+const SelectGroup = ({ label, icon, name, value, onChange, options }: any) => (
+  <div className="flex flex-col gap-2 group/select">
+    <label className="text-[10px] uppercase font-black text-text-dim/60 ml-2 tracking-widest transition-colors group-focus-within/select:text-primary">
+      {label}
+    </label>
+    <div className="relative">
+      <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within/select:text-primary transition-colors pointer-events-none">
+        {icon}
+      </div>
+      <select
+        name={name}
+        value={value}
+        onChange={onChange}
+        className="w-full border rounded-2xl py-4 pl-14 pr-10 text-white font-bold outline-none transition-all bg-black/20 border-white/10 focus:border-primary/50 focus:bg-black/30 appearance-none"
+      >
+        <option value="" className="bg-[#0a0a0c] text-slate-400">Select Year</option>
+        {options.map((opt: any) => (
+          <option key={opt.value} value={opt.value} className="bg-[#0a0a0c] text-white">
+            {opt.label}
+          </option>
+        ))}
+      </select>
+      <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-500">▾</span>
     </div>
   </div>
 );

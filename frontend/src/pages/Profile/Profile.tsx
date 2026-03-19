@@ -35,9 +35,9 @@ const Profile = () => {
       <div className="grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-8">
         {/* Profile Card */}
         <section className="flex flex-col gap-6">
-          <div className="glass-card p-12 text-center sticky top-[90px]">
+          <div className="glass-card p-12 text-center bg-black/30 top-[90px]">
             <div className="mb-6 relative">
-              <div className="w-24 h-24 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center mx-auto shadow-[0_0_30px_hsl(var(--primary-glow))]">
+              <div className="w-24 h-24 bg-black/40 from-primary to-secondary rounded-full flex items-center justify-center mx-auto shadow-[0_0_30px_hsl(var(--primary-glow))]">
                 <UserIcon size={48} className="text-white" />
               </div>
             </div>
@@ -96,7 +96,7 @@ const Profile = () => {
         {/* Stats Content */}
         <section className="flex flex-col gap-8">
           {/* Top Score Card */}
-          <div className="glass-card p-10 bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
+          <div className="glass-card p-10 bg-black/30 from-primary/10 to-secondary/10 border-primary/20">
             <div className="flex justify-between items-center">
               <div className="flex flex-col gap-2">
                 <span className="text-[10px] text-text-dim uppercase tracking-widest font-bold">Total Questions Solved</span>
@@ -198,7 +198,7 @@ const PlatformCard = ({ name, icon, color, stats, handle }: any) => {
       href={getUrl()} 
       target="_blank" 
       rel="noreferrer"
-      className="relative glass-card p-10 flex flex-col gap-8 hover:border-white/20 transition-all group no-underline overflow-hidden"
+      className="relative glass-card bg-black/30 p-10 flex flex-col gap-8 hover:border-white/20 transition-all group no-underline overflow-hidden"
     >
       {/* Background Glow */}
       <div 
@@ -209,7 +209,7 @@ const PlatformCard = ({ name, icon, color, stats, handle }: any) => {
       <div className="flex items-center justify-between relative z-10">
         <div className="flex items-center gap-4">
           <div 
-            className="w-12 h-12 rounded-2xl flex items-center justify-center bg-white/[0.03] border border-white/5 group-hover:border-white/10 transition-colors"
+            className="w-12 h-12 rounded-2xl flex items-center justify-center bg-black/20 border border-white/5 group-hover:border-white/10 transition-colors"
             style={{ color }}
           >
             {icon}
