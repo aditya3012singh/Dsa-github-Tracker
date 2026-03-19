@@ -1,4 +1,4 @@
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useGetStudentQuery, useTriggerFetchMutation } from '../../store/apiSlice';
 import { 
   Github, Code, LayoutGrid, Trophy, RefreshCw, 
@@ -9,6 +9,7 @@ const Profile = () => {
   const { id } = useParams();
   const loggedInUser = JSON.parse(localStorage.getItem('user') || '{}');
   const token = localStorage.getItem('token');
+  const navigate = useNavigate();
   
   const studentId = id || loggedInUser.id;
   const { data: studentData, isLoading } = useGetStudentQuery(studentId, { skip: !studentId });
@@ -36,11 +37,14 @@ const Profile = () => {
               </div>
             </div>
             <h2 className="text-2xl font-outfit font-bold mb-1 text-white">{student.name}</h2>
-            <p className="text-text-dim font-medium mb-8 text-sm uppercase tracking-wider">{student.rollNo}</p>
+            <p className="text-text-dim font-medium mb-8 text-sm uppercase tracking-wider">{student.libraryId}</p>
             
             <div className="flex flex-col gap-4 text-left mb-8">
               <DetailItem icon={<BookOpen size={18}/>} label="Branch" value={student.branch} />
-              <DetailItem icon={<Star size={18}/>} label="Year" value={`${student.year}${getOrdinal(student.year)} Year`} />
+              <div className="grid grid-cols-2 gap-4">
+                <DetailItem icon={<Star size={18}/>} label="Year" value={`${student.year}${getOrdinal(student.year)} Year`} />
+                <DetailItem icon={<LayoutGrid size={18}/>} label="Section" value={student.section || '—'} />
+              </div>
             </div>
 
             {student.updatedAt && (
@@ -50,24 +54,37 @@ const Profile = () => {
               </div>
             )}
 
-            <button 
-              className={`w-full flex items-center justify-center gap-3 p-4 rounded-xl font-bold border transition-all ${
-                isFetching ? 'bg-primary/20 border-primary/40 text-primary cursor-not-allowed' : 
-                'bg-transparent border-primary text-primary hover:bg-primary hover:text-white cursor-pointer'
-              }`}
-              onClick={async () => {
-                try {
-                  await triggerFetch(student.id).unwrap();
-                  alert('Sync started! Data will update in a few minutes.');
-                } catch (err) {
-                  console.error('Sync failed:', err);
-                }
-              }}
-              disabled={isFetching}
-            >
-              <RefreshCw className={`${isFetching ? 'animate-spin' : ''}`} size={18} />
-              <span>{isFetching ? 'Syncing...' : 'Sync All Stats'}</span>
-            </button>
+            <div className="flex flex-col gap-3">
+              <button 
+                className={`w-full flex items-center justify-center gap-3 p-4 rounded-xl font-bold border transition-all ${
+                  isFetching ? 'bg-primary/20 border-primary/40 text-primary cursor-not-allowed' : 
+                  'bg-transparent border-primary text-primary hover:bg-primary hover:text-white cursor-pointer'
+                }`}
+                onClick={async () => {
+                  try {
+                    await triggerFetch(student.id).unwrap();
+                    alert('Sync started! Data will update in a few minutes.');
+                  } catch (err) {
+                    console.error('Sync failed:', err);
+                  }
+                }}
+                disabled={isFetching}
+              >
+                <RefreshCw className={`${isFetching ? 'animate-spin' : ''}`} size={18} />
+                <span>{isFetching ? 'Syncing...' : 'Sync All Stats'}</span>
+              </button>
+
+              {/* Edit Profile Button (Only for owner) */}
+              {(id === loggedInUser.id || !id) && (
+                <button 
+                  onClick={() => navigate('/edit-profile')}
+                  className="w-full flex items-center justify-center gap-3 p-4 rounded-xl font-bold bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all cursor-pointer"
+                >
+                  <UserIcon size={18} />
+                  <span>Edit Profile</span>
+                </button>
+              )}
+            </div>
           </div>
         </section>
 

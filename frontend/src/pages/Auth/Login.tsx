@@ -4,7 +4,7 @@ import { useLoginMutation } from '../../store/apiSlice';
 import { Lock, User, LogIn, AlertCircle } from 'lucide-react';
 
 const Login = () => {
-  const [rollNo, setRollNo] = useState('');
+  const [libraryId, setLibraryId] = useState('');
   const [password, setPassword] = useState('');
   const [login, { isLoading, error }] = useLoginMutation();
   const navigate = useNavigate();
@@ -12,7 +12,7 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const result = await login({ rollNo, password }).unwrap();
+      const result = await login({ libraryId, password }).unwrap();
       localStorage.setItem('token', result.token);
       localStorage.setItem('user', JSON.stringify(result.data));
       navigate('/dashboard');
@@ -37,20 +37,20 @@ const Login = () => {
           {error && (
             <div className="bg-error/10 border border-error/20 text-error p-4 rounded-xl flex items-center gap-3 text-sm">
               <AlertCircle size={20} />
-              <span>Invalid Roll Number or Password</span>
+              <span>Invalid Library ID or Password</span>
             </div>
           )}
 
           <div className="flex flex-col gap-2">
-            <label className="text-xs font-semibold text-text-dim uppercase tracking-wider">Roll Number</label>
+            <label className="text-xs font-semibold text-text-dim uppercase tracking-wider">Library ID</label>
             <div className="relative flex items-center">
               <User className="absolute left-4 text-text-dim" size={20} />
               <input 
                 type="text" 
-                placeholder="Ex: 21BCS123" 
+                placeholder="Ex: 2226CSE1084" 
                 className="w-full bg-bg-glass border border-border pl-12 pr-4 py-3 rounded-xl text-white outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all text-sm"
-                value={rollNo}
-                onChange={(e) => setRollNo(e.target.value)}
+                value={libraryId}
+                onChange={(e) => setLibraryId(e.target.value)}
                 required
               />
             </div>

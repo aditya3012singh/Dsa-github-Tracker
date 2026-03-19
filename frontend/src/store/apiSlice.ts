@@ -39,6 +39,14 @@ export const apiSlice = createApi({
         body: userData,
       }),
     }),
+    updateProfile: builder.mutation({
+      query: (userData) => ({
+        url: '/students/profile',
+        method: 'PUT',
+        body: userData,
+      }),
+      invalidatesTags: ['Student', 'Leaderboard'],
+    }),
     triggerFetch: builder.mutation({
       query: (id) => ({
         url: `/students/${id}/fetch`,
@@ -61,6 +69,7 @@ export const {
   useGetStudentQuery,
   useLoginMutation,
   useRegisterMutation,
+  useUpdateProfileMutation,
   useTriggerFetchMutation,
   useSyncAllMutation,
 } = apiSlice;

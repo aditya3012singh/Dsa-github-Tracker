@@ -22,7 +22,7 @@ const Leaderboard = () => {
   const [sectionFilter, setSectionFilter] = useState('All');
   const [branchFilter, setBranchFilter] = useState('All');
   const [syncDone, setSyncDone] = useState(false);
-  const limit = 50;
+  const limit = 30;
 
   const [syncAll, { isLoading: isSyncing }] = useSyncAllMutation();
 
@@ -46,7 +46,8 @@ const Leaderboard = () => {
     return data.data.filter((s: any) => {
       const yearMatch = yearFilter === 'All' || s.year?.toString() === yearFilter;
       const branchMatch = branchFilter === 'All' || (s.branch || '').toLowerCase().includes(branchFilter.toLowerCase());
-      return yearMatch && branchMatch;
+      const sectionMatch = sectionFilter === 'All' || (s.section || '').toUpperCase() === sectionFilter.toUpperCase();
+      return yearMatch && branchMatch && sectionMatch;
     });
   }, [data, yearFilter, sectionFilter, branchFilter]);
 
@@ -80,7 +81,7 @@ const Leaderboard = () => {
         <DropdownSelect
           label="Sort By"
           value={sortBy}
-          onChange={(val) => { setSortBy(val); setOrder('desc'); setPage(1); }}
+          onChange={(val: string) => { setSortBy(val); setOrder('desc'); setPage(1); }}
           options={SORT_OPTIONS.map(o => ({ value: o.key, label: o.label }))}
           accent
         />
@@ -92,7 +93,7 @@ const Leaderboard = () => {
         <DropdownSelect 
           label="Year"
           value={yearFilter}
-          onChange={(val) => { setYearFilter(val); setPage(1); }}
+          onChange={(val: string) => { setYearFilter(val); setPage(1); }}
           options={[
             { value: 'All', label: 'All Years' },
             { value: '1', label: '1st Year' },
@@ -150,7 +151,7 @@ const Leaderboard = () => {
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
             <input
               type="text"
-              placeholder="Search by name or roll number..."
+              placeholder="Search by name or roll no..."
               className="w-full bg-white/[0.03] border border-white/5 rounded-xl py-3 pl-12 pr-4 text-white text-[15px] focus:border-primary/40 outline-none transition-all placeholder:text-slate-600"
               value={search}
               onChange={(e) => { setSearch(e.target.value); setPage(1); }}
@@ -200,7 +201,7 @@ const Leaderboard = () => {
                   <th className="px-6 py-5 text-white whitespace-nowrap">Year</th>
                   <th className="px-6 py-5 text-white">Branch</th>
                   <th className="px-6 py-5 text-white">Sec</th>
-                  <th className="px-6 py-5 text-white whitespace-nowrap">Roll No.</th>
+                  <th className="px-6 py-5 text-white whitespace-nowrap">Roll No</th>
                   <SortTh 
                     label={<div className="flex items-center gap-2"><img src="https://img.icons8.com/?size=100&id=9L16NypUzu38&format=png&color=FFFFFF" className="w-4 h-4 object-contain opacity-80" alt="" /><span>LeetCode</span></div>} 
                     sortKey="leetcode" sortBy={sortBy} order={order} onSort={(k: any) => { setSortBy(k); setOrder('desc'); }} 
@@ -252,11 +253,11 @@ const Leaderboard = () => {
                     </td>
                     <td className="px-8 py-6">
                       <span className="text-[15px] font-bold text-slate-400">
-                        {(data.userRank.student.branch || '').match(/([A-Za-z])$/)?.[1]?.toUpperCase() || '—'}
+                        {data.userRank.student.section || '—'}
                       </span>
                     </td>
                     <td className="px-8 py-6">
-                      <span className="font-mono text-[15px] text-slate-100 whitespace-nowrap tracking-tight">{data.userRank.student.rollNo}</span>
+                      <span className="font-mono text-[15px] text-slate-100 whitespace-nowrap tracking-tight">{data.userRank.student.rollNo || '—'}</span>
                     </td>
                     <td className="px-8 py-6">
                       <PlatformCell value={data.userRank.student.leetcode.total} href={`https://leetcode.com/${data.userRank.student.leetcode.handle}`} color="#FFA116" active={sortBy === 'leetcode'} />
@@ -316,15 +317,13 @@ const Leaderboard = () => {
                         </td>
 
                         {/* Section */}
-                        <td className="px-8 py-6">
+                         <td className="px-8 py-6">
                           <span className="text-[15px] font-bold text-slate-400">
-                            {(student.branch || '').match(/([A-Za-z])$/)?.[1]?.toUpperCase() || '—'}
+                            {student.section || '—'}
                           </span>
                         </td>
-
-                        {/* Roll No */}
-                        <td className="px-8 py-6">
-                          <span className="font-mono text-[15px] text-slate-100 whitespace-nowrap tracking-tight">{student.rollNo}</span>
+                         <td className="px-8 py-6">
+                          <span className="font-mono text-[15px] text-slate-100 whitespace-nowrap tracking-tight">{student.rollNo || '—'}</span>
                         </td>
 
                         {/* LeetCode */}
@@ -432,8 +431,8 @@ const PlatformCell = ({ value, href, color, active, suffix = '' }: any) => {
 
 const HighlightCard = ({ student, rank, color }: any) => {
   const navigate = useNavigate();
-  const section = (student.branch || '').match(/([A-Za-z])$/)?.[1]?.toUpperCase() || '—';
-  const yearSection = student.year ? `${student.year}-${section}` : '—';
+  const section = student.section || '—';
+  const yearSection = student.year ? `Year ${student.year} - ${section}` : '—';
 
   return (
     <div

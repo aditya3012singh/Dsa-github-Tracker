@@ -6,11 +6,11 @@ import { User, Mail, Lock, Github, Code, LayoutGrid, Trophy, ArrowRight, CheckCi
 const Register = () => {
   const [formData, setFormData] = useState({
     name: '',
-    rollNo: '',
+    libraryId: '',
     email: '',
     password: '',
     branch: '',
-    year: '1',
+    year: '2',
     leetcodeHandle: '',
     githubHandle: '',
     codeforcesHandle: '',
@@ -63,7 +63,7 @@ const Register = () => {
             <h3 className="text-lg font-semibold text-primary border-b border-border pb-2">Personal Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <InputGroup label="Full Name" name="name" icon={<User size={18}/>} placeholder="John Doe" value={formData.name} onChange={handleChange} required />
-              <InputGroup label="Roll Number" name="rollNo" icon={<Trophy size={18}/>} placeholder="21BCS001" value={formData.rollNo} onChange={handleChange} required />
+              <InputGroup label="Library ID" name="libraryId" icon={<Trophy size={18}/>} placeholder="2226CSE1084" value={formData.libraryId} onChange={handleChange} required />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <InputGroup label="Email Address" name="email" type="email" icon={<Mail size={18}/>} placeholder="john@college.edu" value={formData.email} onChange={handleChange} required />

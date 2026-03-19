@@ -4,6 +4,7 @@ import Footer from './components/Layout/Footer';
 import Leaderboard from './pages/Dashboard/Leaderboard';
 import Login from './pages/Auth/Login';
 import Profile from './pages/Profile/Profile';
+import EditProfile from './pages/Profile/EditProfile';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const token = localStorage.getItem('token');
@@ -35,6 +36,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <Profile />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/edit-profile" 
+            element={
+              <ProtectedRoute>
+                <EditProfile />
               </ProtectedRoute>
             } 
           />
