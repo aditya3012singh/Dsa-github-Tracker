@@ -37,8 +37,10 @@ export const getLeaderboard = async (req: AuthRequest, res: Response, next: Next
           id: student.id,
           name: student.name,
           rollNo: student.rollNo,
+          libraryId: student.libraryId,
           branch: student.branch,
           year: student.year,
+          section: student.section,
           totalSolved,
           score,
           leetcode: {
