@@ -13,20 +13,20 @@ const jobNames = [
 ] as const;
 
 export const startCronJobs = () => {
-  // Run every 15 minutes to spread the load
-  cron.schedule('*/15 * * * *', async () => {
-    logger.info('Starting cron job to enqueue fetch jobs (Smooth Batching)');
+  // Run at 7:30 AM for testing
+  cron.schedule('30 7 * * *', async () => {
+    logger.info('Starting cron job to enqueue fetch jobs (Testing 7:30 AM)');
     
     try {
-      // Find students whose stats haven't been updated in the last 11 hours.
-      // This ensures we catch them for the twice-daily update cycle.
-      const elevenHoursAgo = new Date(Date.now() - 11 * 60 * 60 * 1000);
+      // Temporarily bypassing the 11-hour check to force testing over newly seeded data
+      // const elevenHoursAgo = new Date(Date.now() - 11 * 60 * 60 * 1000);
+      const oneMinuteAgo = new Date(Date.now() - 1 * 60 * 1000);
       
       const students = await prisma.student.findMany({
         where: {
           OR: [
             { codingStats: { is: null } },
-            { codingStats: { updatedAt: { lte: elevenHoursAgo } } }
+            { codingStats: { updatedAt: { lte: oneMinuteAgo } } }
           ]
         },
         take: 250, // Process 250 students every 15 minutes
