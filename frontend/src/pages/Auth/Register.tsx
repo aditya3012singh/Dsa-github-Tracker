@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useRegisterMutation } from '../../store/apiSlice';
 import { User, Mail, Lock, Github, Code, LayoutGrid, Trophy, ArrowRight, CheckCircle } from 'lucide-react';
+import { BRANCHES } from '../../constants/branches';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -74,9 +75,9 @@ const Register = () => {
                 <label className="text-xs font-semibold text-text-dim uppercase tracking-wider">Branch</label>
                 <select name="branch" value={formData.branch} onChange={handleChange} required className="w-full bg-bg-glass border border-border px-4 py-3 rounded-xl text-white outline-none focus:border-primary transition-all text-sm">
                   <option value="" className='bg-bg-dark'>Select Branch</option>
-                  <option value="CSE" className='bg-bg-dark'>Computer Science</option>
-                  <option value="IT" className='bg-bg-dark'>Information Technology</option>
-                  <option value="ECE" className='bg-bg-dark'>Electronics</option>
+                  {BRANCHES.map(b => (
+                    <option key={b} value={b} className='bg-bg-dark'>{b}</option>
+                  ))}
                 </select>
               </div>
               <div className="flex flex-col gap-2">

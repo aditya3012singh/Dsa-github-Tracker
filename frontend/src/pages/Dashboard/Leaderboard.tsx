@@ -4,6 +4,7 @@ import { useGetLeaderboardQuery, useSyncAllMutation } from '../../store/apiSlice
 import { Search, RefreshCw, Zap, CheckCircle } from 'lucide-react';
 import { useDebounce } from '../../hooks/useDebounce';
 import { DropdownSelect, SortTh, PlatformCell, HighlightCard, HighlightCardSkeleton, Pagination, SkeletonRow } from './components/LeaderboardComponents';
+import { BRANCHES } from '../../constants/branches';
 import leetcodeIcon from '../../assets/icons/leetcode.png';
 import codeforcesIcon from '../../assets/icons/codeforces.png';
 import codechefIcon from '../../assets/icons/codechef.png';
@@ -117,6 +118,7 @@ const Leaderboard = () => {
               { value: 'B', label: 'B' },
               { value: 'C', label: 'C' },
               { value: 'D', label: 'D' },
+              {value:'E', label:'E'}
             ]}
           />
           <DropdownSelect
@@ -125,12 +127,7 @@ const Leaderboard = () => {
             onChange={(val: any) => { setBranchFilter(val); setPage(1); }}
             options={[
               { value: 'All', label: 'All' },
-              { value: 'CS', label: 'CS' },
-              { value: 'CSE', label: 'CSE' },
-              { value: 'IT', label: 'IT' },
-              { value: 'ECE', label: 'ECE' },
-              { value: 'ME', label: 'ME' },
-              { value: 'CE', label: 'CE' },
+              ...BRANCHES.map(b => ({ value: b, label: b }))
             ]}
           />
           <DropdownSelect

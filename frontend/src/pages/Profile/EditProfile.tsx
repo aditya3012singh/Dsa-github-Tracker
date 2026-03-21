@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGetStudentQuery, useUpdateProfileMutation } from '../../store/apiSlice';
 import { User, BookOpen, GraduationCap, Grid, Code, Github, Hash, Save, X, Trophy, RefreshCw } from 'lucide-react';
+import { BRANCHES } from '../../constants/branches';
 import leetcodeIcon from '../../assets/icons/leetcode.png';
 import codeforcesIcon from '../../assets/icons/codeforces.png';
 import gfgIcon from '../../assets/icons/gfg.png';
@@ -132,7 +133,14 @@ const EditProfile = () => {
               <InputGroup label="Section" icon={<Grid size={18} />} name="section" value={formData.section} onChange={handleChange} placeholder="e.g. A" />
             </div>
 
-            <InputGroup label="Branch" icon={<BookOpen size={18} />} name="branch" value={formData.branch} onChange={handleChange} placeholder="e.g. CS" />
+            <SelectGroup
+              label="Branch"
+              icon={<BookOpen size={18} />}
+              name="branch"
+              value={formData.branch}
+              onChange={handleChange}
+              options={BRANCHES.map(b => ({ value: b, label: b }))}
+            />
           </section>
 
           {/* Coding Handles Section */}
