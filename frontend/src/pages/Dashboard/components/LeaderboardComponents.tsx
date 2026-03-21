@@ -125,7 +125,7 @@ export const HighlightCard = ({ student, rank, color }: any) => {
   return (
     <div
       onClick={() => navigate(`/profile/${student.id}`)}
-      className="relative bg-black/30 border rounded-[32px] p-8 flex flex-col gap-8 cursor-pointer group hover:border-white/20 transition-all overflow-hidden shadow-2xl"
+      className="relative bg-black/30  border rounded-[32px] p-8 flex flex-col gap-8 cursor-pointer group hover:border-white/20 transition-all overflow-hidden shadow-2xl"
       style={{ borderColor: `${color}30` }}
     >
       {/* Dynamic Background Glow */}

@@ -187,7 +187,7 @@ const Leaderboard = () => {
         </div>
 
         {/* Table */}
-        <div className="glass-card overflow-hidden rounded-2xl border border-white/[0.06] bg-black/40">
+        <div className="glass-card overflow-hidden rounded-2xl border border-white/[0.06] bg-black/40 ">
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-left">
               <thead>
