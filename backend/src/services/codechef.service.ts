@@ -1,24 +1,29 @@
-import { fetchHtml } from '../utils/scraper';
+import axios from 'axios';
 
 export const codechefService = async (handle: string) => {
-  const url = `https://www.codechef.com/users/${handle}`;
-  console.log(`[CodeChef] Scraping URL: ${url}`);
-  const $ = await fetchHtml(url);
+  const url = `https://codechef-api.vercel.app/${handle}`;
   
-  // Rating extraction
-  const ratingText = $('.rating-number').text();
-  console.log(`[CodeChef] Rating text found: "${ratingText}"`);
-  const rating = parseInt(ratingText, 10) || 0;
+  try {
+    const response = await axios.get(url);
+    const data = response.data;
 
-  // Total Problems Solved extraction
-  const solvedHeaderText = $('section.rating-data-section.problems-solved h3').text();
-  console.log(`[CodeChef] Solved header text found: "${solvedHeaderText}"`);
-  const solvedMatch = solvedHeaderText.match(/Total Problems Solved:\s*(\d+)/i);
-  const solvedCount = solvedMatch ? parseInt(solvedMatch[1], 10) : 0;
+    // The API might return status: 'Failed' or 404
+    if (data.status === 'Failed' || !data.currentRating) {
+      return {
+        codechefRating: 0,
+        codechefSolved: 0
+      };
+    }
 
-  console.log(`[CodeChef] Final stats for ${handle}: Rating=${rating}, Solved=${solvedCount}`);
-  return {
-    codechefRating: rating,
-    codechefSolved: solvedCount
-  };
+    return {
+      codechefRating: data.currentRating || 0,
+      codechefSolved: data.problemsSolved || 0
+    };
+  } catch (error: any) {
+    console.error(`[CodeChef] API error for ${handle}:`, error.message);
+    return {
+      codechefRating: 0,
+      codechefSolved: 0
+    };
+  }
 };

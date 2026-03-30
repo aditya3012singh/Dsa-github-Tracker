@@ -1,28 +1,30 @@
-import { fetchHtml } from '../utils/scraper';
+import axios from 'axios';
 
 export const githubService = async (handle: string) => {
-  // Main profile for repos/followers
-  const $profile = await fetchHtml(`https://github.com/${handle}`);
+  const token = process.env.GITHUB_TOKEN;
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers['Authorization'] = `token ${token}`;
+  }
+
+  // 1. Get basic stats from GitHub REST API
+  const restUrl = `https://api.github.com/users/${handle}`;
+  const restResponse = await axios.get(restUrl, { headers });
   
-  // Separate contributions page for accuracy
-  const $contribs = await fetchHtml(`https://github.com/users/${handle}/contributions`);
-  
-  // Contributions count
-  const contributionText = $contribs('h2').first().text().trim();
-  const rawContribs = contributionText.match(/(\d+)/);
-  const contributions = rawContribs ? parseInt(rawContribs[1], 10) : 0;
+  const githubRepos = restResponse.data.public_repos || 0;
+  const githubFollowers = restResponse.data.followers || 0;
+  const githubFollowing = restResponse.data.following || 0;
 
-  // Repository count
-  const reposText = $profile('a[href*="tab=repositories"] span.Counter').first().text().trim();
-  const githubRepos = parseInt(reposText, 10) || 0;
-
-  // Followers count
-  const followersText = $profile('a[href*="tab=followers"] span.text-bold').first().text().trim();
-  const githubFollowers = parseInt(followersText, 10) || 0;
-
-  // Following count
-  const followingText = $profile('a[href*="tab=following"] span.text-bold').first().text().trim();
-  const githubFollowing = parseInt(followingText, 10) || 0;
+  // 2. Get contributions from community API (or GraphQL if token exists)
+  // For now, using community API to avoid complex GraphQL setup without verified token
+  let contributions = 0;
+  try {
+    const contribsUrl = `https://github-contributions-api.jogruber.de/v4/${handle}`;
+    const contribsResponse = await axios.get(contribsUrl);
+    contributions = contribsResponse.data.total?.lastYear || contribsResponse.data.total?.thisYear || 0;
+  } catch (err) {
+    console.error(`[GitHub] Failed to fetch contributions for ${handle}:`, err);
+  }
 
   return { 
     githubContributions: contributions,

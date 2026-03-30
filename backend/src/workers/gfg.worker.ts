@@ -20,14 +20,15 @@ export const processGfg = async (job: Job) => {
       gfgSolved: stats.gfgSolved,
     };
  
-    const mergedStats = { ...(existingStats || {}), ...newData };
+    const totalSolved = (stats.gfgSolved || 0) + (existingStats?.leetcodeSolved || 0) + (existingStats?.codechefSolved || 0);
+    const mergedStats = { ...(existingStats || {}), ...newData, totalSolved };
     const overallScore = calculateOverallScore(mergedStats);
  
     await prisma.$transaction([
       prisma.codingStats.upsert({
         where: { studentId },
-        update: { ...newData, overallScore } as any,
-        create: { studentId, ...newData, overallScore } as any,
+        update: { ...newData, totalSolved, overallScore } as any,
+        create: { studentId, ...newData, totalSolved, overallScore } as any,
       }),
       prisma.fetchJob.upsert({
         where: { studentId_platform: { studentId, platform: 'gfg' } },

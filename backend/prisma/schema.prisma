@@ -28,6 +28,10 @@ model Student {
 
   // Relations
   codingStats      CodingStats?
+
+  @@index([year])
+  @@index([branch])
+  @@index([section])
 }
 
 model CodingStats {
@@ -43,12 +47,19 @@ model CodingStats {
   codechefRating      Int      @default(0)
   gfgSolved           Int      @default(0)
   overallScore        Float    @default(0)
+  totalSolved         Int      @default(0)
   updatedAt           DateTime @updatedAt
   codechefSolved      Int      @default(0)
   githubContributions Int      @default(0)
   githubFollowers     Int      @default(0)
   githubFollowing     Int      @default(0)
   githubRepos         Int      @default(0)
+  
+  @@index([overallScore(sort: Desc)])
+  @@index([totalSolved(sort: Desc)])
+  @@index([leetcodeSolved(sort: Desc)])
+  @@index([codeforcesRating(sort: Desc)])
+  @@index([gfgSolved(sort: Desc)])
 }
 
 model FetchJob {

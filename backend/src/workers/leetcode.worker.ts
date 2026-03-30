@@ -23,14 +23,15 @@ export const processLeetcode = async (job: Job) => {
       leetcodeHard: stats.leetcodeHard,
     };
 
-    const mergedStats = { ...existingStats, ...newData };
+    const totalSolved = (stats.leetcodeSolved || 0) + (existingStats?.gfgSolved || 0) + (existingStats?.codechefSolved || 0);
+    const mergedStats = { ...existingStats, ...newData, totalSolved };
     const overallScore = calculateOverallScore(mergedStats);
 
     await prisma.$transaction([
       prisma.codingStats.upsert({
         where: { studentId },
-        update: { ...newData, overallScore } as any,
-        create: { studentId, ...newData, overallScore } as any,
+        update: { ...newData, totalSolved, overallScore } as any,
+        create: { studentId, ...newData, totalSolved, overallScore } as any,
       }),
       prisma.fetchJob.upsert({
         where: {
