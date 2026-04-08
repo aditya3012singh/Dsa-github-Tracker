@@ -36,7 +36,8 @@ export const redisConnection = redisURL
   });
 
 redisConnection.once('connect', () => {
-  logger.info('Connected to Redis server.');
+  logger.info(`Connected to Redis server: ${redisURL ? 'Cloud' : 'Local'}`);
+  if (redisURL) logger.info(`Redis URL: ${redisURL.substring(0, 20)}...`);
 });
 
 redisConnection.on('reconnecting', (delay: number) => {

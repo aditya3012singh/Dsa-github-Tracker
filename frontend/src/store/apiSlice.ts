@@ -61,6 +61,10 @@ export const apiSlice = createApi({
       }),
       invalidatesTags: ['Leaderboard', 'Stats'],
     }),
+    getRankHistory: builder.query({
+      query: (studentId) => `/leaderboard/rank-history/${studentId}`,
+      providesTags: (result, error, id) => [{ type: 'Student', id: `${id}-history` }],
+    }),
   }),
 });
 
@@ -72,4 +76,5 @@ export const {
   useUpdateProfileMutation,
   useTriggerFetchMutation,
   useSyncAllMutation,
+  useGetRankHistoryQuery,
 } = apiSlice;

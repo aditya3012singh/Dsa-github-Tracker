@@ -3,11 +3,15 @@
 @tailwind utilities;
 
 :root {
-  --primary: 210 100% 60%;    /* Bright Blue */
+  --primary: 210 100% 60%;
+  /* Bright Blue */
   --primary-glow: 210 100% 60% / 0.4;
-  --secondary: 260 100% 70%;  /* Purple */
-  --accent: 190 100% 50%;     /* Cyan */
-  --bg-dark: 225 40% 5%;      /* Deep Navy */
+  --secondary: 260 100% 70%;
+  /* Purple */
+  --accent: 190 100% 50%;
+  /* Cyan */
+  --bg-dark: 225 40% 5%;
+  /* Deep Navy */
   --bg-card: 220 40% 8% / 0.7;
   --bg-glass: 220 40% 12% / 0.4;
   --border: 220 30% 15%;
@@ -28,7 +32,7 @@
     overflow-x: hidden;
     position: relative;
   }
-  
+
 
 
 }
@@ -39,14 +43,33 @@
     @apply bg-bg-glass backdrop-blur-xl border border-border rounded-2xl transition-all duration-500;
     box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
   }
-  
+
   .glass-card:hover {
-    @apply border-primary/40 shadow-2xl shadow-primary/10 -translate-y-1;
+    @apply border-primary/40 shadow-2xl shadow-primary/20 -translate-y-1;
+  }
+
+  .shimmer {
+    background: linear-gradient(90deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.05) 50%,
+        rgba(255, 255, 255, 0) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite linear;
+  }
+
+  @keyframes shimmer {
+    from {
+      background-position: 200% 0;
+    }
+
+    to {
+      background-position: -200% 0;
+    }
   }
 
   .podium-card {
     @apply glass-card p-8 flex flex-col items-center gap-4 relative overflow-hidden;
-    background: linear-gradient(180deg, hsl(var(--bg-glass)) 0%, rgba(0,0,0,0.8) 100%);
+    background: linear-gradient(180deg, hsl(var(--bg-glass)) 0%, rgba(0, 0, 0, 0.8) 100%);
   }
 
   .rank-bubble {
@@ -59,13 +82,17 @@
 ::-webkit-scrollbar {
   width: 8px;
 }
+
 ::-webkit-scrollbar-track {
   @apply bg-bg-dark;
 }
+
 ::-webkit-scrollbar-thumb {
   @apply bg-border rounded-full hover:bg-text-dim/30 transition-colors;
 }
 
-input, select, button {
+input,
+select,
+button {
   @apply font-sans;
 }

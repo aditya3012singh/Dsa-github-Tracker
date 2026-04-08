@@ -38,6 +38,9 @@ export const processGfg = async (job: Job) => {
     ]);
 
     logger.info(`Successfully processed GfG for student ${studentId}`);
+    const { updateRedisStats } = await import('../utils/redis-helper');
+    await updateRedisStats(studentId, overallScore);
+
   } catch (error: any) {
     logger.error(`Failed to process GfG for student ${studentId}: ${error.message}`);
     await prisma.fetchJob.upsert({

@@ -18,6 +18,9 @@ export const statsQueue = new Queue<StatsJobData>('statsFetchQueue', {
       delay: 5000,
     },
     removeOnComplete: true,
-    removeOnFail: false,
+    removeOnFail: {
+      count: 100, // Keep last 100 failures for debugging
+      age: 24 * 3600 // or keep for 24 hours
+    },
   },
 });

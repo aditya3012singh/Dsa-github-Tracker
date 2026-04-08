@@ -71,3 +71,14 @@ model FetchJob {
 
   @@unique([studentId, platform])
 }
+
+model RankHistory {
+  id        String   @id @default(uuid())
+  studentId String
+  rank      Int
+  score     Float
+  createdAt DateTime @default(now())
+
+  @@index([studentId])
+  @@index([createdAt])
+}

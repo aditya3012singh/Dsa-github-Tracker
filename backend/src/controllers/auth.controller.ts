@@ -36,6 +36,12 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
         gfgHandle: sanitizeHandle(gfgHandle, 'gfg'),
         codeforcesHandle: sanitizeHandle(codeforcesHandle, 'codeforces'),
         codechefHandle: sanitizeHandle(codechefHandle, 'codechef'),
+        codingStats: {
+          create: {
+            overallScore: 0,
+            totalSolved: 0
+          }
+        }
       },
     });
 

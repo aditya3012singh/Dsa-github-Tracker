@@ -50,6 +50,9 @@ export const processGithub = async (job: Job) => {
     ]);
 
     logger.info(`Successfully processed GitHub for student ${studentId}`);
+    const { updateRedisStats } = await import('../utils/redis-helper');
+    await updateRedisStats(studentId, overallScore);
+
   } catch (error: any) {
     logger.error(`Failed to process GitHub for student ${studentId}: ${error.message}`);
     

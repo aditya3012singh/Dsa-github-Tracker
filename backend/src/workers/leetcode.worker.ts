@@ -42,6 +42,10 @@ export const processLeetcode = async (job: Job) => {
       })
     ]);
 
+    // Sync with Redis for fast rank retrieval and cache invalidation
+    const { updateRedisStats } = await import('../utils/redis-helper');
+    await updateRedisStats(studentId, overallScore);
+
     logger.info(`Successfully processed LeetCode for student ${studentId}`);
   } catch (error: any) {
     logger.error(`Failed to process LeetCode for student ${studentId}: ${error.message}`);
@@ -54,6 +58,20 @@ export const processLeetcode = async (job: Job) => {
       create: { studentId, platform: 'leetcode', status: 'FAILED' }
     });
     
+    await backoffOnRateLimit(error);
     throw error;
+  }
+};
+
+const backoffOnRateLimit = async (error: any) => {
+  const isRateLimit = error.message.includes('429') || 
+                      error.message.toLowerCase().includes('rate limit') || 
+                      error.message.toLowerCase().includes('throttled');
+                      
+  if (isRateLimit) {
+    // Randomized backoff 5-15 seconds
+    const delay = Math.floor(Math.random() * 10000) + 5000;
+    logger.warn(`Rate limit hit. Backing off for ${delay}ms...`);
+    await new Promise(resolve => setTimeout(resolve, delay));
   }
 };

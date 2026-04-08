@@ -57,11 +57,6 @@ const worker = new Worker('statsFetchQueue', async (job: Job) => {
 
 worker.on('completed', async (job: Job) => {
   logger.info(`Job ${job.id} completed successfully`);
-  try {
-    await redisConnection.del('leaderboard_data');
-  } catch (err: any) {
-    logger.error(`Failed to invalidate cache after job ${job.id}: ${err.message}`);
-  }
 });
 
 worker.on('failed', (job: Job | undefined, err: Error) => {

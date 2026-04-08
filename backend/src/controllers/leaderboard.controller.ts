@@ -3,6 +3,42 @@ import { prisma } from '../config/db';
 import { redisConnection } from '../config/redis';
 import { calculateOverallScore } from '../utils/scoring';
 import { AuthRequest } from '../middleware/auth';
+import { logger } from '../utils/logger';
+
+const LEADERBOARD_SELECT = {
+  id: true,
+  name: true,
+  rollNo: true,
+  libraryId: true,
+  branch: true,
+  year: true,
+  section: true,
+  leetcodeHandle: true,
+  codeforcesHandle: true,
+  gfgHandle: true,
+  codechefHandle: true,
+  githubHandle: true,
+  codingStats: {
+    select: {
+      totalSolved: true,
+      overallScore: true,
+      leetcodeSolved: true,
+      leetcodeEasy: true,
+      leetcodeMedium: true,
+      leetcodeHard: true,
+      codeforcesRating: true,
+      codeforcesMaxRating: true,
+      codechefRating: true,
+      codechefSolved: true,
+      gfgSolved: true,
+      githubContributions: true,
+      githubRepos: true,
+      githubFollowers: true,
+      githubFollowing: true,
+      updatedAt: true
+    }
+  }
+};
 
 /**
  * Map Prisma student object to Leaderboard format
@@ -47,7 +83,8 @@ const mapStudentToLeaderboard = (student: any) => {
       followers: stats?.githubFollowers || 0,
       following: stats?.githubFollowing || 0
     },
-    updatedAt: stats?.updatedAt
+    updatedAt: stats?.updatedAt,
+    rankChange: student.rankChange || 0
   };
 };
 
@@ -65,7 +102,9 @@ export const getLeaderboard = async (req: AuthRequest, res: Response, next: Next
     const sectionFilter = req.query.section as string;
 
     // 1. Build the Prisma Where Clause for filtering
-    const where: any = {};
+    const where: any = {
+      codingStats: { isNot: null }
+    };
 
     if (yearFilter && yearFilter !== 'All') {
       where.year = parseInt(yearFilter);
@@ -120,53 +159,135 @@ export const getLeaderboard = async (req: AuthRequest, res: Response, next: Next
         orderBy = { codingStats: { overallScore: sortOrder } };
     }
 
-    // 3. Execute Paginated Query + Count Total
-    const [students, totalCount] = await Promise.all([
-      prisma.student.findMany({
-        where,
-        include: { codingStats: true },
-        orderBy,
-        skip,
-        take: limit,
-      }),
-      prisma.student.count({ where })
-    ]);
+    // 3. Execute Paginated Query + Count Total (with versioned caching)
+    let leaderboardData: any[] = [];
+    let totalCount = 0;
+    let source = 'db';
 
-    const leaderboardData = students.map(mapStudentToLeaderboard);
+    try {
+      // Fetch current cache version
+      const version = await redisConnection.get('leaderboard:version') || '0';
+      const cacheKey = `leaderboard:v3:v${version}:${JSON.stringify({ page, limit, sortBy, order, search, yearFilter, branchFilter, sectionFilter })}`;
 
-    // 4. Handle Authenticated User Rank (Efficient calculation)
-    let userRankInfo = null;
-    if (req.user) {
-      const userStats = await prisma.codingStats.findUnique({
-        where: { studentId: req.user.id }
-      });
+      const cached = await redisConnection.get(cacheKey);
+      if (cached) {
+        ({ data: leaderboardData, total: totalCount } = JSON.parse(cached));
+        source = 'redis';
+      }
 
-      if (userStats) {
-        // Correct rank calculation based on overallScore
-        const rank = await prisma.codingStats.count({
+      if (leaderboardData.length === 0) {
+        console.log('[DEBUG] Querying DB for leaderboard...');
+        const [students, count] = await Promise.all([
+          prisma.student.findMany({
+            where,
+            select: LEADERBOARD_SELECT,
+            orderBy,
+            skip,
+            take: limit,
+          }),
+          prisma.student.count({ where })
+        ]);
+        leaderboardData = students.map(mapStudentToLeaderboard);
+        totalCount = count;
+
+        // Calculate rankChange (Compare current rank with latest RankHistory record)
+        const studentIds = students.map(s => s.id);
+        const lastSnapshots = await prisma.rankHistory.findMany({
           where: {
-            overallScore: { gt: userStats.overallScore }
-          }
+            studentId: { in: studentIds },
+            createdAt: { lt: new Date(new Date().setHours(0,0,0,0)) }
+          },
+          orderBy: { createdAt: 'desc' },
+          distinct: ['studentId']
         });
 
-        // Try to find user in the current page results first
-        let userInPage = leaderboardData.find(s => s.id === req.user?.id);
-        
-        // If not in page, fetch the student object for the userRank response
-        if (!userInPage) {
-          const studentObj = await prisma.student.findUnique({
-            where: { id: req.user.id },
-            include: { codingStats: true }
+        const rankMap = new Map<string, number>(lastSnapshots.map((s: any) => [s.studentId, s.rank]));
+        leaderboardData = leaderboardData.map((s: any, i: number) => ({
+          ...s,
+          rankChange: rankMap.has(s.id) ? (rankMap.get(s.id) as number - ((page - 1) * limit + i + 1)) : 0
+        }));
+
+        // Cache for 1 hour (3600s) to reduce Redis load
+        await redisConnection.setex(cacheKey, 3600, JSON.stringify({ data: leaderboardData, total: totalCount }));
+      }
+    } catch (err) {
+      logger.error('Redis/Leaderboard Cache Error, falling back to DB:', err);
+      // Fallback: If Redis fails, query DB directly
+      if (leaderboardData.length === 0) {
+        const [students, count] = await Promise.all([
+          prisma.student.findMany({
+            where,
+            select: LEADERBOARD_SELECT,
+            orderBy,
+            skip,
+            take: limit,
+          }),
+          prisma.student.count({ where })
+        ]);
+        leaderboardData = students.map(mapStudentToLeaderboard);
+        totalCount = count;
+      }
+    }
+
+    // 4. Handle Authenticated User Rank (Dynamic based on current filters & sort)
+    let userRankInfo = null;
+    if (req.user) {
+      try {
+        const currentUserStats = await prisma.codingStats.findUnique({
+          where: { studentId: req.user.id }
+        });
+
+        if (currentUserStats) {
+          // Identify the metric field to compare
+          let metricField = '';
+          let metricValue: any = 0;
+
+          switch (sortBy) {
+            case 'leetcode': metricField = 'leetcodeSolved'; break;
+            case 'codeforces': metricField = 'codeforcesRating'; break;
+            case 'codechef': metricField = 'codechefRating'; break;
+            case 'gfg': metricField = 'gfgSolved'; break;
+            case 'github': metricField = 'githubContributions'; break;
+            case 'totalSolved': metricField = 'totalSolved'; break;
+            case 'score':
+            default: metricField = 'overallScore';
+          }
+          
+          metricValue = (currentUserStats as any)[metricField] || 0;
+
+          // Count students ahead of current user using the SAME filters
+          const countAhead = await prisma.student.count({
+            where: {
+              ...where,
+              codingStats: {
+                [metricField]: { gt: metricValue }
+              }
+            }
           });
-          if (studentObj) {
-            userInPage = mapStudentToLeaderboard(studentObj);
+
+          const currentRank = countAhead + 1;
+
+          // Find or fetch user detail
+          let userInPage = leaderboardData.find(s => s.id === req.user?.id);
+          if (!userInPage) {
+            const studentObj = await prisma.student.findUnique({
+              where: { id: req.user.id },
+              select: LEADERBOARD_SELECT
+            });
+            if (studentObj) {
+              userInPage = mapStudentToLeaderboard(studentObj);
+            }
+          }
+
+          if (userInPage) {
+            userRankInfo = {
+              rank: currentRank,
+              student: userInPage
+            };
           }
         }
-
-        userRankInfo = {
-          rank: rank + 1,
-          student: userInPage
-        };
+      } catch (uErr) {
+        logger.error('Error calculating personal rank:', uErr);
       }
     }
 
@@ -181,7 +302,28 @@ export const getLeaderboard = async (req: AuthRequest, res: Response, next: Next
       total: totalCount,
       userRank: userRankInfo,
       data: leaderboardData, 
-      source: 'db' 
+      source: source 
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Get rank history for a specific student
+ */
+export const getRankHistory = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { studentId } = req.params;
+    const history = await prisma.rankHistory.findMany({
+      where: { studentId },
+      orderBy: { createdAt: 'desc' },
+      take: 30, // Last 30 snapshots
+    });
+
+    res.json({
+      status: 'success',
+      data: history.reverse() // Chronological order for charts
     });
   } catch (error) {
     next(error);

@@ -38,6 +38,9 @@ export const processCodeforces = async (job: Job) => {
     ]);
 
     logger.info(`Successfully processed Codeforces for student ${studentId}`);
+    const { updateRedisStats } = await import('../utils/redis-helper');
+    await updateRedisStats(studentId, overallScore);
+
   } catch (error: any) {
     logger.error(`Failed to process Codeforces for student ${studentId}: ${error.message}`);
     await prisma.fetchJob.upsert({

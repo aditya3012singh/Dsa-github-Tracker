@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { logger } from '../utils/logger';
 
 export const gfgService = async (handle: string) => {
   const apiUrl = `https://practiceapi.geeksforgeeks.org/api/v1/user/problems/submissions/`;
@@ -22,8 +23,10 @@ export const gfgService = async (handle: string) => {
       const solved = parseInt(response.data.count, 10) || 0;
       return { gfgSolved: solved };
     }
+    
+    logger.warn(`GFG API response for ${handle} missing count: ${JSON.stringify(response.data)}`);
   } catch (error: any) {
-    // Silently fail or log to a proper logger if needed, but return 0
+    logger.error(`GFG service error for ${handle}: ${error.message}`);
   }
 
   return { gfgSolved: 0 };

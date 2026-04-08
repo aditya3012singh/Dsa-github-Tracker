@@ -1,8 +1,9 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useGetStudentQuery, useTriggerFetchMutation } from '../../store/apiSlice';
-import { 
-  Github, Code, LayoutGrid, Trophy, RefreshCw, 
-  User as UserIcon, BookOpen, Star, Zap, ExternalLink 
+import { useGetStudentQuery, useTriggerFetchMutation, useGetRankHistoryQuery } from '../../store/apiSlice';
+import RankEvolutionChart from './components/RankEvolutionChart';
+import {
+  Github, Code, LayoutGrid, Trophy, RefreshCw,
+  User as UserIcon, BookOpen, Star, Zap, ExternalLink
 } from 'lucide-react';
 import leetcodeIcon from '../../assets/icons/leetcode.png';
 import codeforcesIcon from '../../assets/icons/codeforces.png';
@@ -15,9 +16,10 @@ const Profile = () => {
   const loggedInUser = JSON.parse(localStorage.getItem('user') || '{}');
   const token = localStorage.getItem('token');
   const navigate = useNavigate();
-  
+
   const studentId = id || loggedInUser.id;
   const { data: studentData, isLoading } = useGetStudentQuery(studentId, { skip: !studentId });
+  const { data: rankHistoryData } = useGetRankHistoryQuery(studentId, { skip: !studentId });
   const [triggerFetch, { isLoading: isFetching }] = useTriggerFetchMutation();
 
   if (!token && !id) return <div className="p-20 text-center text-text-dim text-lg">Please login to view your profile.</div>;
@@ -43,12 +45,12 @@ const Profile = () => {
             </div>
             <h2 className="text-2xl font-outfit font-bold mb-1 text-white">{student.name}</h2>
             <p className="text-text-dim font-medium mb-8 text-sm uppercase tracking-wider">{student.libraryId}</p>
-            
+
             <div className="flex flex-col gap-4 text-left mb-8">
-              <DetailItem icon={<BookOpen size={18}/>} label="Branch" value={student.branch} />
+              <DetailItem icon={<BookOpen size={18} />} label="Branch" value={student.branch} />
               <div className="grid grid-cols-2 gap-4">
-                <DetailItem icon={<Star size={18}/>} label="Year" value={`${student.year}${getOrdinal(student.year)} Year`} />
-                <DetailItem icon={<LayoutGrid size={18}/>} label="Section" value={student.section || '—'} />
+                <DetailItem icon={<Star size={18} />} label="Year" value={`${student.year}${getOrdinal(student.year)} Year`} />
+                <DetailItem icon={<LayoutGrid size={18} />} label="Section" value={student.section || '—'} />
               </div>
             </div>
 
@@ -60,11 +62,10 @@ const Profile = () => {
             )}
 
             <div className="flex flex-col gap-3">
-              <button 
-                className={`w-full flex items-center justify-center gap-3 p-4 rounded-xl font-bold border transition-all ${
-                  isFetching ? 'bg-primary/20 border-primary/40 text-primary cursor-not-allowed' : 
+              <button
+                className={`w-full flex items-center justify-center gap-3 p-4 rounded-xl font-bold border transition-all ${isFetching ? 'bg-primary/20 border-primary/40 text-primary cursor-not-allowed' :
                   'bg-transparent border-primary text-primary hover:bg-primary hover:text-white cursor-pointer'
-                }`}
+                  }`}
                 onClick={async () => {
                   try {
                     await triggerFetch(student.id).unwrap();
@@ -81,7 +82,7 @@ const Profile = () => {
 
               {/* Edit Profile Button (Only for owner) */}
               {(id === loggedInUser.id || !id) && (
-                <button 
+                <button
                   onClick={() => navigate('/edit-profile')}
                   className="w-full flex items-center justify-center gap-3 p-4 rounded-xl font-bold bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all cursor-pointer"
                 >
@@ -108,11 +109,13 @@ const Profile = () => {
             </div>
           </div>
 
+          <RankEvolutionChart data={rankHistoryData?.data || []} />
+
           {/* Detailed Platform Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <PlatformCard 
-              name="LeetCode" 
-              icon={<img src={leetcodeIcon} alt="LeetCode" className="w-8 h-8 object-contain" />} 
+            <PlatformCard
+              name="LeetCode"
+              icon={<img src={leetcodeIcon} alt="LeetCode" className="w-8 h-8 object-contain" />}
               color="#FFA116"
               handle={student.leetcode.handle}
               stats={[
@@ -122,9 +125,9 @@ const Profile = () => {
                 { label: 'Hard', value: student.leetcode.hard },
               ]}
             />
-            <PlatformCard 
-              name="GitHub" 
-              icon={<img src={githubIcon} alt="GitHub" className="w-8 h-8 object-contain" />} 
+            <PlatformCard
+              name="GitHub"
+              icon={<img src={githubIcon} alt="GitHub" className="w-8 h-8 object-contain" />}
               color="#eaebed"
               handle={student.github.handle}
               stats={[
@@ -134,9 +137,9 @@ const Profile = () => {
                 { label: 'Following', value: student.github.following || 0 },
               ]}
             />
-            <PlatformCard 
-              name="Codeforces" 
-              icon={<img src={codeforcesIcon} alt="Codeforces" className="w-8 h-8 object-contain" />} 
+            <PlatformCard
+              name="Codeforces"
+              icon={<img src={codeforcesIcon} alt="Codeforces" className="w-8 h-8 object-contain" />}
               color="#1890ff"
               handle={student.codeforces.handle}
               stats={[
@@ -144,9 +147,9 @@ const Profile = () => {
                 { label: 'Max Rating', value: student.codeforces.maxRating },
               ]}
             />
-            <PlatformCard 
-              name="CodeChef" 
-              icon={<img src={codechefIcon} alt="CodeChef" className="w-8 h-8 object-contain" />} 
+            <PlatformCard
+              name="CodeChef"
+              icon={<img src={codechefIcon} alt="CodeChef" className="w-8 h-8 object-contain" />}
               color="#CD7F32"
               handle={student.codechef.handle}
               stats={[
@@ -154,9 +157,9 @@ const Profile = () => {
                 { label: 'Solved', value: student.codechef.total },
               ]}
             />
-            <PlatformCard 
-              name="GfG" 
-              icon={<img src={gfgIcon} alt="GfG" className="w-8 h-8 object-contain" />} 
+            <PlatformCard
+              name="GfG"
+              icon={<img src={gfgIcon} alt="GfG" className="w-8 h-8 object-contain" />}
               color="#00ff00"
               handle={student.gfg.handle}
               stats={[
@@ -194,21 +197,21 @@ const PlatformCard = ({ name, icon, color, stats, handle }: any) => {
   };
 
   return (
-    <a 
-      href={getUrl()} 
-      target="_blank" 
+    <a
+      href={getUrl()}
+      target="_blank"
       rel="noreferrer"
       className="relative glass-card bg-black/30 p-10 flex flex-col gap-8 hover:border-white/20 transition-all group no-underline overflow-hidden"
     >
       {/* Background Glow */}
-      <div 
+      <div
         className="absolute -right-8 -top-8 w-32 h-32 blur-[60px] opacity-0 group-hover:opacity-20 transition-opacity duration-500 rounded-full"
         style={{ background: color }}
       />
 
       <div className="flex items-center justify-between relative z-10">
         <div className="flex items-center gap-4">
-          <div 
+          <div
             className="w-12 h-12 rounded-2xl flex items-center justify-center bg-black/20 border border-white/5 group-hover:border-white/10 transition-colors"
             style={{ color }}
           >

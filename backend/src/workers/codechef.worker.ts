@@ -39,6 +39,9 @@ export const processCodeChef = async (job: Job) => {
     ]);
 
     logger.info(`Successfully processed CodeChef for student ${studentId}`);
+    const { updateRedisStats } = await import('../utils/redis-helper');
+    await updateRedisStats(studentId, overallScore);
+
   } catch (error: any) {
     logger.error(`Failed process CodeChef for student ${studentId}: ${error.message}`);
     await prisma.fetchJob.upsert({

@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import compression from 'compression';
 import { errorHandler } from './middleware/errorHandler';
 import studentRoutes from './routes/student.routes';
 import leaderboardRoutes from './routes/leaderboard.routes';
@@ -9,6 +10,7 @@ import { logger } from './utils/logger';
 
 const app = express();
 
+app.use(compression());
 app.use(morgan('combined', { 
   stream: { write: (message) => logger.info(message.trim()) } 
 }));
