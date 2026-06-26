@@ -10,6 +10,8 @@ import { logger } from './utils/logger';
 
 const app = express();
 
+app.set('trust proxy', true);
+
 app.use(compression());
 app.use(morgan('combined', { 
   stream: { write: (message) => logger.info(message.trim()) } 
