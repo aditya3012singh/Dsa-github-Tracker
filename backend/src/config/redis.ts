@@ -27,27 +27,34 @@ const commonRedisOptions = {
   retryStrategy: (times: number) => Math.min(times * 250, 5000),
 };
 
-export const redisConnection = redisURL
-  ? new Redis(redisURL, commonRedisOptions)
-  : new Redis({
-    host: redisHost,
-    port: redisPort,
-    ...commonRedisOptions,
+export const createRedisClient = (name: string = 'Redis') => {
+  const client = redisURL
+    ? new Redis(redisURL, commonRedisOptions)
+    : new Redis({
+      host: redisHost,
+      port: redisPort,
+      ...commonRedisOptions,
+    });
+
+  client.once('connect', () => {
+    logger.info(`[${name}] Connected to Redis server: ${redisURL ? 'Cloud' : 'Local'}`);
+    if (redisURL) logger.info(`[${name}] Redis URL: ${redisURL.substring(0, 20)}...`);
   });
 
-redisConnection.once('connect', () => {
-  logger.info(`Connected to Redis server: ${redisURL ? 'Cloud' : 'Local'}`);
-  if (redisURL) logger.info(`Redis URL: ${redisURL.substring(0, 20)}...`);
-});
+  client.on('reconnecting', (delay: number) => {
+    logger.warn(`[${name}] Reconnecting in ${delay}ms`);
+  });
 
-redisConnection.on('reconnecting', (delay: number) => {
-  logger.warn(`Redis reconnecting in ${delay}ms`);
-});
+  client.on('end', () => {
+    logger.warn(`[${name}] Connection closed.`);
+  });
 
-redisConnection.on('end', () => {
-  logger.warn('Redis connection closed.');
-});
+  client.on('error', (err) => {
+    logger.error(`[${name}] Connection error:`, err);
+  });
 
-redisConnection.on('error', (err) => {
-  logger.error('Redis connection error:', err);
-});
+  return client;
+};
+
+export const redisConnection = createRedisClient('Main');
+export const redisSubscriber = createRedisClient('Subscriber');

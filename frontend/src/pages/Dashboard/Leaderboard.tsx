@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useGetLeaderboardQuery, useSyncAllMutation } from '../../store/apiSlice';
+import { useGetLeaderboardQuery, useSyncAllMutation, useGetOnlineStudentsQuery } from '../../store/apiSlice';
 import { Search, RefreshCw, Zap, CheckCircle } from 'lucide-react';
 import { useDebounce } from '../../hooks/useDebounce';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -39,6 +39,7 @@ const Leaderboard = () => {
   const [yearFilter, setYearFilter] = useState('All');
   const [sectionFilter, setSectionFilter] = useState('All');
   const [branchFilter, setBranchFilter] = useState('All');
+  const [showOnlineOnly, setShowOnlineOnly] = useState(false);
   const limit = 100; // Optimal for virtualization
 
   const parentRef = useRef<HTMLDivElement>(null);
@@ -46,6 +47,10 @@ const Leaderboard = () => {
   const { data, isLoading, isFetching, error, refetch } = useGetLeaderboardQuery({
     page, limit, search: debouncedSearch, sortBy, order,
     year: yearFilter, section: sectionFilter, branch: branchFilter
+  });
+
+  const { data: onlineData, isLoading: isOnlineLoading, isFetching: isOnlineFetching } = useGetOnlineStudentsQuery(undefined, {
+    skip: !showOnlineOnly
   });
 
   // Always fetch the absolute Top 3 for the current filters, regardless of the page the user is on
@@ -67,7 +72,70 @@ const Leaderboard = () => {
     }
   };
 
-  const students = useMemo(() => data?.data || [], [data]);
+  const rawStudents = useMemo(() => {
+    return showOnlineOnly ? (onlineData?.data || []) : (data?.data || []);
+  }, [showOnlineOnly, onlineData, data]);
+
+  const students = useMemo(() => {
+    if (!showOnlineOnly) return rawStudents;
+
+    let filtered = [...rawStudents];
+    if (debouncedSearch) {
+      filtered = filtered.filter((s: any) =>
+        s.name.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        s.rollNo?.toLowerCase().includes(debouncedSearch.toLowerCase())
+      );
+    }
+
+    if (yearFilter !== 'All') {
+      filtered = filtered.filter((s: any) => s.year === parseInt(yearFilter));
+    }
+
+    if (sectionFilter !== 'All') {
+      filtered = filtered.filter((s: any) => s.section?.toUpperCase() === sectionFilter.toUpperCase());
+    }
+
+    if (branchFilter !== 'All') {
+      filtered = filtered.filter((s: any) => s.branch?.toLowerCase().includes(branchFilter.toLowerCase()));
+    }
+
+    filtered.sort((a: any, b: any) => {
+      let valA = 0;
+      let valB = 0;
+
+      switch (sortBy) {
+        case 'leetcode':
+          valA = a.leetcode?.total || 0;
+          valB = b.leetcode?.total || 0;
+          break;
+        case 'codeforces':
+          valA = a.codeforces?.rating || 0;
+          valB = b.codeforces?.rating || 0;
+          break;
+        case 'codechef':
+          valA = a.codechef?.rating || 0;
+          valB = b.codechef?.rating || 0;
+          break;
+        case 'gfg':
+          valA = a.gfg?.total || 0;
+          valB = b.gfg?.total || 0;
+          break;
+        case 'github':
+          valA = a.github?.contributions || 0;
+          valB = b.github?.contributions || 0;
+          break;
+        case 'totalSolved':
+        default:
+          valA = a.totalSolved || 0;
+          valB = b.totalSolved || 0;
+      }
+
+      return order === 'desc' ? valB - valA : valA - valB;
+    });
+
+    return filtered;
+  }, [showOnlineOnly, rawStudents, debouncedSearch, yearFilter, sectionFilter, branchFilter, sortBy, order]);
+
   const topThree = useMemo(() => topThreeData?.data || [], [topThreeData]);
 
   const virtualizer = useVirtualizer({
@@ -141,10 +209,19 @@ const Leaderboard = () => {
           </div>
           <motion.button
             whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+            onClick={() => { setShowOnlineOnly(!showOnlineOnly); setPage(1); }}
+            className={`p-2 md:p-2.5 rounded-xl border transition-all flex items-center gap-2 text-[12px] font-semibold ${showOnlineOnly ? 'bg-primary/20 border-primary/50 text-primary' : 'bg-white/[0.03] border-white/5 text-slate-400 hover:border-primary/40 hover:text-primary'}`}
+            title="Toggle Online Users"
+          >
+            <span className={`w-2 h-2 rounded-full ${showOnlineOnly ? 'bg-primary animate-pulse' : 'bg-slate-600'}`} />
+            <span className="hidden sm:inline">Online Only</span>
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
             onClick={handleSyncAll} disabled={isSyncing}
             className={`p-2 md:p-2.5 rounded-xl border transition-all flex items-center gap-2 ${syncDone ? 'bg-green-500/20 border-green-500/50 text-green-400' : 'bg-white/[0.03] border-white/5 text-slate-400 hover:border-primary/40 hover:text-primary'}`}
           >
-            {syncDone ? <CheckCircle size={17} /> : isSyncing ? <Zap className="animate-pulse" size={17} /> : <RefreshCw className={isFetching ? 'animate-spin' : ''} size={17} />}
+            {syncDone ? <CheckCircle size={17} /> : isSyncing ? <Zap className="animate-pulse" size={17} /> : <RefreshCw className={(showOnlineOnly ? isOnlineFetching : isFetching) ? 'animate-spin' : ''} size={17} />}
           </motion.button>
         </div>
 
@@ -189,9 +266,8 @@ const Leaderboard = () => {
                 </table>
               </div>
 
-              {/* 2. Virtualized Body rows */}
               <div className="relative z-10 w-full">
-                {isLoading ? (
+                {(showOnlineOnly ? isOnlineLoading : isLoading) ? (
                   <div className="p-4 flex flex-col gap-2 w-full">{[...Array(8)].map((_, i) => <SkeletonRow key={i} />)}</div>
                 ) : (
                   <div style={{ height: `${totalHeight}px`, width: '100%', position: 'relative' }}>
@@ -230,7 +306,9 @@ const Leaderboard = () => {
           <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-[#0a0a0c] to-transparent pointer-events-none md:hidden z-50 rounded-r-2xl" />
         </div>
 
-        <Pagination page={page} total={data?.total || 0} limit={limit} setPage={setPage} />
+        {!showOnlineOnly && (
+          <Pagination page={page} total={data?.total || 0} limit={limit} setPage={setPage} />
+        )}
       </div>
     </div>
   );

@@ -5,6 +5,9 @@ import { calculateOverallScore } from '../utils/scoring';
 import { AuthRequest } from '../middleware/auth';
 import { logger } from '../utils/logger';
 
+// Global map to track active database queries for specific cache keys (Single Flight)
+const activeLeaderboardQueries = new Map<string, Promise<{ data: any[]; total: number }>>();
+
 const LEADERBOARD_SELECT = {
   id: true,
   name: true,
@@ -159,7 +162,7 @@ export const getLeaderboard = async (req: AuthRequest, res: Response, next: Next
         orderBy = { codingStats: { overallScore: sortOrder } };
     }
 
-    // 3. Execute Paginated Query + Count Total (with versioned caching)
+    // 3. Execute Paginated Query + Count Total (with versioned caching and Single-Flight)
     let leaderboardData: any[] = [];
     let totalCount = 0;
     let source = 'db';
@@ -173,42 +176,61 @@ export const getLeaderboard = async (req: AuthRequest, res: Response, next: Next
       if (cached) {
         ({ data: leaderboardData, total: totalCount } = JSON.parse(cached));
         source = 'redis';
-      }
+      } else {
+        // Cache Miss: Check if another request is already fetching this exact query
+        let queryPromise = activeLeaderboardQueries.get(cacheKey);
 
-      if (leaderboardData.length === 0) {
-        console.log('[DEBUG] Querying DB for leaderboard...');
-        const [students, count] = await Promise.all([
-          prisma.student.findMany({
-            where,
-            select: LEADERBOARD_SELECT,
-            orderBy,
-            skip,
-            take: limit,
-          }),
-          prisma.student.count({ where })
-        ]);
-        leaderboardData = students.map(mapStudentToLeaderboard);
-        totalCount = count;
+        if (!queryPromise) {
+          console.log(`[DEBUG] Cache miss. Fetching from DB for key: ${cacheKey}`);
+          queryPromise = (async () => {
+            const [students, count] = await Promise.all([
+              prisma.student.findMany({
+                where,
+                select: LEADERBOARD_SELECT,
+                orderBy,
+                skip,
+                take: limit,
+              }),
+              prisma.student.count({ where })
+            ]);
+            const mappedData = students.map(mapStudentToLeaderboard);
 
-        // Calculate rankChange (Compare current rank with latest RankHistory record)
-        const studentIds = students.map(s => s.id);
-        const lastSnapshots = await prisma.rankHistory.findMany({
-          where: {
-            studentId: { in: studentIds },
-            createdAt: { lt: new Date(new Date().setHours(0,0,0,0)) }
-          },
-          orderBy: { createdAt: 'desc' },
-          distinct: ['studentId']
-        });
+            // Calculate rankChange (Compare current rank with latest RankHistory record)
+            const studentIds = students.map(s => s.id);
+            const lastSnapshots = await prisma.rankHistory.findMany({
+              where: {
+                studentId: { in: studentIds },
+                createdAt: { lt: new Date(new Date().setHours(0,0,0,0)) }
+              },
+              orderBy: { createdAt: 'desc' },
+              distinct: ['studentId']
+            });
 
-        const rankMap = new Map<string, number>(lastSnapshots.map((s: any) => [s.studentId, s.rank]));
-        leaderboardData = leaderboardData.map((s: any, i: number) => ({
-          ...s,
-          rankChange: rankMap.has(s.id) ? (rankMap.get(s.id) as number - ((page - 1) * limit + i + 1)) : 0
-        }));
+            const rankMap = new Map<string, number>(lastSnapshots.map((s: any) => [s.studentId, s.rank]));
+            const enrichedData = mappedData.map((s: any, i: number) => ({
+              ...s,
+              rankChange: rankMap.has(s.id) ? (rankMap.get(s.id) as number - ((page - 1) * limit + i + 1)) : 0
+            }));
 
-        // Cache for 1 hour (3600s) to reduce Redis load
-        await redisConnection.setex(cacheKey, 3600, JSON.stringify({ data: leaderboardData, total: totalCount }));
+            // Cache for 5 minutes (300s) to keep it fresh and reduce DB load
+            await redisConnection.setex(cacheKey, 300, JSON.stringify({ data: enrichedData, total: count }));
+
+            return { data: enrichedData, total: count };
+          })();
+
+          activeLeaderboardQueries.set(cacheKey, queryPromise);
+        } else {
+          console.log(`[DEBUG] Cache stampede prevented! Coalescing request for key: ${cacheKey}`);
+          source = 'db_coalesced';
+        }
+
+        try {
+          const result = await queryPromise;
+          leaderboardData = result.data;
+          totalCount = result.total;
+        } finally {
+          activeLeaderboardQueries.delete(cacheKey);
+        }
       }
     } catch (err) {
       logger.error('Redis/Leaderboard Cache Error, falling back to DB:', err);

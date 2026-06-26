@@ -7,6 +7,8 @@ import { processCodeforces } from './codeforces.worker';
 import { processCodeChef } from './codechef.worker';
 import { processGfg } from './gfg.worker';
 import { processGithub } from './github.worker';
+import { startDbWriter } from './db-writer';
+import { startConsumers } from '../consumers';
 
 // Helper for sleep
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -65,15 +67,21 @@ worker.on('failed', (job: Job | undefined, err: Error) => {
 
 logger.info('Worker initialized and listening to statsFetchQueue.');
 
+// Start DB writer and event consumers
+const stopDbWriter = startDbWriter();
+startConsumers();
+
 // Handle graceful shutdown
 process.on('SIGTERM', async () => {
   logger.info('SIGTERM received. Shutting down worker gracefully.');
+  stopDbWriter();
   await worker.close();
   process.exit(0);
 });
 
 process.on('SIGINT', async () => {
   logger.info('SIGINT received. Shutting down worker gracefully.');
+  stopDbWriter();
   await worker.close();
   process.exit(0);
 });

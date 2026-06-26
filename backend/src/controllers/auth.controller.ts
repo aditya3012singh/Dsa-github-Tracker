@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { prisma } from '../config/db';
+import { redisConnection } from '../config/redis';
 import { logger } from '../utils/logger';
 import { sanitizeHandle } from '../utils/sanitizer';
 
@@ -44,6 +45,13 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
         }
       },
     });
+
+    // Add to Redis fetch schedule to trigger initial API fetch immediately on next cron run
+    try {
+      await redisConnection.zadd('fetch_schedule', Date.now(), student.id);
+    } catch (cacheErr) {
+      logger.error(`[Redis Schedule] Failed to schedule new student ${student.id}:`, cacheErr);
+    }
 
     res.status(201).json({ status: 'success', message: 'Student registered successfully', data: { id: student.id, name: student.name, libraryId: student.libraryId } });
   } catch (error) {

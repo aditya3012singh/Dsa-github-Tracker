@@ -127,7 +127,8 @@ export const updateStudent = async (req: AuthRequest, res: Response, next: NextF
     });
 
     // Invalidate cache
-    await redisConnection.del('leaderboard_data');
+    await redisConnection.incr('leaderboard:version');
+    await redisConnection.del(`student:profile:${student.id}`);
 
     res.json({ status: 'success', data: { id: student.id, name: student.name, section: student.section } });
   } catch (error) {
@@ -160,7 +161,8 @@ export const updateProfile = async (req: AuthRequest, res: Response, next: NextF
     });
 
     // Invalidate leaderboard cache
-    await redisConnection.del('leaderboard_data');
+    await redisConnection.incr('leaderboard:version');
+    await redisConnection.del(`student:profile:${student.id}`);
 
     res.json({ status: 'success', data: student });
   } catch (error) {
@@ -202,8 +204,15 @@ export const triggerFetch = async (req: AuthRequest, res: Response, next: NextFu
       }
     }
 
+    // Push the student's next schedule forward in Redis by 11 hours
+    try {
+      await redisConnection.zadd('fetch_schedule', Date.now() + 11 * 60 * 60 * 1000, student.id);
+    } catch (err) {
+      logger.error(`[Redis Schedule] Failed to push schedule for student ${student.id}:`, err);
+    }
+
     // Invalidate leaderboard cache
-    await redisConnection.del('leaderboard_data');
+    await redisConnection.incr('leaderboard:version');
 
     res.json({ status: 'success', message: `Enqueued ${enqueued} jobs for student ${student.name}` });
   } catch (error) {
@@ -214,6 +223,18 @@ export const triggerFetch = async (req: AuthRequest, res: Response, next: NextFu
 export const getStudentById = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { id } = req.params;
+    const cacheKey = `student:profile:${id}`;
+
+    // Try Redis cache first
+    try {
+      const cached = await redisConnection.get(cacheKey);
+      if (cached) {
+        return res.json({ status: 'success', data: JSON.parse(cached), source: 'redis' });
+      }
+    } catch (cacheErr) {
+      logger.error('Redis Profile Cache Read Error:', cacheErr);
+    }
+
     const student = await prisma.student.findUnique({
       where: { id },
       include: { codingStats: true }
@@ -266,7 +287,14 @@ export const getStudentById = async (req: Request, res: Response, next: NextFunc
       updatedAt: stats?.updatedAt
     };
 
-    res.json({ status: 'success', data });
+    // Cache in Redis for 5 minutes (300 seconds)
+    try {
+      await redisConnection.setex(cacheKey, 300, JSON.stringify(data));
+    } catch (cacheErr) {
+      logger.error('Redis Profile Cache Write Error:', cacheErr);
+    }
+
+    res.json({ status: 'success', data, source: 'db' });
   } catch (error) {
     next(error);
   }
@@ -300,7 +328,12 @@ export const syncAll = async (req: Request, res: Response, next: NextFunction) =
     });
 
     let enqueued = 0;
+    const nextSchedule = Date.now() + 11 * 60 * 60 * 1000;
+    const pipeline = redisConnection.pipeline();
+
     for (const student of students) {
+      pipeline.zadd('fetch_schedule', nextSchedule, student.id);
+
       for (const p of platforms) {
         const handle = (student as any)[p.field] as string | null;
         if (handle) {
@@ -316,8 +349,14 @@ export const syncAll = async (req: Request, res: Response, next: NextFunction) =
       }
     }
 
+    try {
+      await pipeline.exec();
+    } catch (err) {
+      logger.error('[Redis Schedule] Failed to update schedules during syncAll:', err);
+    }
+
     // Bust the leaderboard cache so fresh data shows next request
-    await redisConnection.del('leaderboard_data');
+    await redisConnection.incr('leaderboard:version');
 
     logger.info(`[sync-all] Enqueued ${enqueued} jobs for ${students.length} students`);
     res.json({
@@ -326,6 +365,84 @@ export const syncAll = async (req: Request, res: Response, next: NextFunction) =
       studentsQueued: students.length,
       jobsEnqueued: enqueued,
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getOnlineStudents = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const twoMinutesAgo = Date.now() - 2 * 60 * 1000;
+    // Prune stale online users
+    try {
+      await redisConnection.zremrangebyscore('online_users', '-inf', twoMinutesAgo);
+    } catch (cacheErr) {
+      logger.error('[Online Users] Failed to prune online users:', cacheErr);
+    }
+
+    // Get active user IDs
+    let onlineIds: string[] = [];
+    try {
+      onlineIds = await redisConnection.zrevrange('online_users', 0, -1);
+    } catch (cacheErr) {
+      logger.error('[Online Users] Failed to fetch active user IDs:', cacheErr);
+    }
+
+    if (onlineIds.length === 0) {
+      return res.json({ status: 'success', data: [] });
+    }
+
+    const students = await prisma.student.findMany({
+      where: { id: { in: onlineIds } },
+      include: { codingStats: true }
+    });
+
+    const data = students.map((student: any) => {
+      const stats = student.codingStats;
+      return {
+        id: student.id,
+        name: student.name,
+        libraryId: student.libraryId,
+        rollNo: student.rollNo,
+        email: student.email,
+        branch: student.branch,
+        year: student.year,
+        section: student.section,
+        leetcode: {
+          handle: student.leetcodeHandle,
+          total: stats?.leetcodeSolved || 0,
+          easy: stats?.leetcodeEasy || 0,
+          medium: stats?.leetcodeMedium || 0,
+          hard: stats?.leetcodeHard || 0
+        },
+        codeforces: {
+          handle: student.codeforcesHandle,
+          rating: stats?.codeforcesRating || 0,
+          maxRating: stats?.codeforcesMaxRating || 0
+        },
+        gfg: {
+          handle: student.gfgHandle,
+          total: stats?.gfgSolved || 0
+        },
+        codechef: {
+          handle: student.codechefHandle,
+          rating: stats?.codechefRating || 0,
+          total: stats?.codechefSolved || 0
+        },
+        github: {
+          handle: student.githubHandle,
+          contributions: stats?.githubContributions || 0,
+          repositories: stats?.githubRepos || 0,
+          followers: stats?.githubFollowers || 0,
+          following: stats?.githubFollowing || 0
+        },
+        totalSolved: (stats?.leetcodeSolved || 0) + (stats?.gfgSolved || 0) + (stats?.codechefSolved || 0),
+        score: calculateOverallScore(stats),
+        updatedAt: stats?.updatedAt
+      };
+    });
+
+    res.json({ status: 'success', data });
   } catch (error) {
     next(error);
   }

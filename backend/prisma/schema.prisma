@@ -82,3 +82,51 @@ model RankHistory {
   @@index([studentId])
   @@index([createdAt])
 }
+
+model StatsHistory {
+  id          String   @id @default(uuid())
+  studentId   String
+  platform    String
+  solvedDelta Int
+  createdAt   DateTime @default(now())
+
+  @@index([studentId])
+  @@index([createdAt])
+}
+
+model Badge {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String
+  iconUrl     String?
+  requirements Json
+  createdAt   DateTime @default(now())
+
+  // Relations
+  studentBadges StudentBadge[]
+}
+
+model StudentBadge {
+  id         String   @id @default(uuid())
+  studentId  String
+  badgeId    String
+  badge      Badge    @relation(fields: [badgeId], references: [id])
+  unlockedAt DateTime @default(now())
+
+  @@unique([studentId, badgeId])
+  @@index([studentId])
+}
+
+model Goal {
+  id           String   @id @default(uuid())
+  studentId    String
+  targetCount  Int
+  currentCount Int      @default(0)
+  startDate    DateTime
+  endDate      DateTime
+  completed    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  @@index([studentId])
+  @@index([endDate])
+}

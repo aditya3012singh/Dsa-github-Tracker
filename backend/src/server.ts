@@ -2,7 +2,6 @@ import 'dotenv/config';
 import { app } from './app';
 import { logger } from './utils/logger';
 import { startCronJobs } from './cron/stats.cron';
-import { startRankHistoryCron } from './cron/rank-history.cron';
 
 const PORT = process.env.PORT || 3000;
 
@@ -14,7 +13,6 @@ const startServer = () => {
       const { redisConnection } = await import('./config/redis');
       await redisConnection.del('leaderboard');
       startCronJobs();
-      startRankHistoryCron();
     });
   } catch (error) {
     logger.error('Failed to start server:', error);

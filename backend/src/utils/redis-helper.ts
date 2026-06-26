@@ -11,10 +11,6 @@ export const updateRedisStats = async (studentId: string, overallScore: number) 
     // Update rank in ZSET
     pipeline.zadd('leaderboard_ranks', overallScore, studentId);
     
-    // Increment version to effectively invalidate all versioned caches
-    // This is O(1) and safe for high-frequency updates on Upstash
-    pipeline.incr('leaderboard:version');
-
     await pipeline.exec();
   } catch (error) {
     logger.error(`Failed to update Redis stats for student ${studentId}:`, error);
