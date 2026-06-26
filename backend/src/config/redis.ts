@@ -22,7 +22,7 @@ const redisURL = normalizeRedisUrl(rawRedisURL);
 
 const commonRedisOptions = {
   maxRetriesPerRequest: null as null,
-  connectTimeout: 10000,
+  connectTimeout: 30000,
   keepAlive: 30000,
   retryStrategy: (times: number) => Math.min(times * 250, 5000),
 };
