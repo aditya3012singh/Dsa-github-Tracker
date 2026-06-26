@@ -169,7 +169,7 @@ export const LeaderboardRow = React.memo(({ student, rank, index, navigate, sort
   return (
     <tr
       onClick={() => navigate(`/profile/${student.id}`)}
-      onMouseEnter={() => prefetchProfile(student.id)}
+      // onMouseEnter={() => prefetchProfile(student.id)}
       className={`group cursor-pointer transition-all duration-150 border-b border-white/[0.035] ${isPinned ? 'border-b-2 border-primary/30 bg-primary/[0.1] backdrop-blur-md sticky top-0 z-30' : `hover:bg-primary/[0.06] ${isEven ? 'bg-white/[0.01]' : ''}`}`}
     >
       <td className={`px-4 py-3 md:px-5 md:py-4 whitespace-nowrap ${COL_WIDTHS.rank} relative`}>
