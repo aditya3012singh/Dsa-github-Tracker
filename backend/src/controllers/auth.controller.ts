@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { prisma } from '../config/db';
 import { redisConnection } from '../config/redis';
+import { statsQueue } from '../queues/stats.queue';
 import { logger } from '../utils/logger';
 import { sanitizeHandle } from '../utils/sanitizer';
 
@@ -46,11 +47,28 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
       },
     });
 
-    // Add to Redis fetch schedule to trigger initial API fetch immediately on next cron run
+    // Enqueue initial fetches immediately for the newly registered student
     try {
-      await redisConnection.zadd('fetch_schedule', Date.now(), student.id);
+      const platforms = [
+        { name: 'leetcode', handle: student.leetcodeHandle },
+        { name: 'codeforces', handle: student.codeforcesHandle },
+        { name: 'codechef', handle: student.codechefHandle },
+        { name: 'gfg', handle: student.gfgHandle },
+        { name: 'github', handle: student.githubHandle }
+      ] as const;
+
+      for (const p of platforms) {
+        if (p.handle) {
+          await statsQueue.add(p.name as any, {
+            studentId: student.id,
+            platform: p.name as any,
+            handle: p.handle,
+          });
+        }
+      }
+      logger.info(`Enqueued initial fetch jobs for newly registered student: ${student.name}`);
     } catch (cacheErr) {
-      logger.error(`[Redis Schedule] Failed to schedule new student ${student.id}:`, cacheErr);
+      logger.error(`[Stats Fetch] Failed to trigger initial sync for new student ${student.id}:`, cacheErr);
     }
 
     res.status(201).json({ status: 'success', message: 'Student registered successfully', data: { id: student.id, name: student.name, libraryId: student.libraryId } });
