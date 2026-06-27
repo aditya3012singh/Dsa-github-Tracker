@@ -12,7 +12,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-key';
 
 export const register = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { name, libraryId, email, password, branch, year, leetcodeHandle, githubHandle, gfgHandle, codeforcesHandle, codechefHandle } = req.body;
+    const { name, libraryId, email, password, branch, year, leetcodeHandle, githubHandle, gfgHandle, codeforcesHandle, codechefHandle, linkedIn } = req.body;
 
     const existingStudent = await prisma.student.findUnique({
       where: { libraryId },
@@ -38,6 +38,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
         gfgHandle: sanitizeHandle(gfgHandle, 'gfg'),
         codeforcesHandle: sanitizeHandle(codeforcesHandle, 'codeforces'),
         codechefHandle: sanitizeHandle(codechefHandle, 'codechef'),
+        linkedIn: linkedIn || null,
         codingStats: {
           create: {
             overallScore: 0,

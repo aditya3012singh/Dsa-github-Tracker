@@ -26,6 +26,7 @@ export const getStudents = async (req: Request, res: Response, next: NextFunctio
         branch: student.branch,
         year: student.year,
         section: student.section,
+        linkedIn: student.linkedIn,
         leetcode: {
           handle: student.leetcodeHandle,
           total: stats?.leetcodeSolved || 0,
@@ -78,7 +79,8 @@ export const createStudent = async (req: Request, res: Response, next: NextFunct
       codeforcesHandle,
       gfgHandle,
       codechefHandle,
-      githubHandle
+      githubHandle,
+      linkedIn
     } = req.body;
 
     const student = await prisma.student.create({
@@ -93,6 +95,7 @@ export const createStudent = async (req: Request, res: Response, next: NextFunct
         gfgHandle: sanitizeHandle(gfgHandle, 'gfg'),
         codechefHandle: sanitizeHandle(codechefHandle, 'codechef'),
         githubHandle: sanitizeHandle(githubHandle, 'github'),
+        linkedIn: linkedIn || null,
         password: 'temporary_password' // Should be handled by registration
       } as any
     });
@@ -254,6 +257,7 @@ export const getStudentById = async (req: Request, res: Response, next: NextFunc
       branch: student.branch,
       year: student.year,
       section: student.section,
+      linkedIn: student.linkedIn,
       leetcode: {
         handle: student.leetcodeHandle,
         total: stats?.leetcodeSolved || 0,
@@ -408,6 +412,7 @@ export const getOnlineStudents = async (req: Request, res: Response, next: NextF
         branch: student.branch,
         year: student.year,
         section: student.section,
+        linkedIn: student.linkedIn,
         leetcode: {
           handle: student.leetcodeHandle,
           total: stats?.leetcodeSolved || 0,

@@ -16,6 +16,7 @@ const LEADERBOARD_SELECT = {
   branch: true,
   year: true,
   section: true,
+  linkedIn: true,
   leetcodeHandle: true,
   codeforcesHandle: true,
   gfgHandle: true,
@@ -56,6 +57,7 @@ const mapStudentToLeaderboard = (student: any) => {
     branch: student.branch,
     year: student.year,
     section: student.section,
+    linkedIn: student.linkedIn,
     totalSolved: stats?.totalSolved || 0,
     score: stats?.overallScore || 0,
     leetcode: {

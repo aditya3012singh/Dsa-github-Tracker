@@ -5,7 +5,7 @@ import { Lock, User, LogIn, AlertCircle } from 'lucide-react';
 import loginLogo from '../../assets/image.png';
 
 const DEMO_CREDENTIALS = {
-  libraryId: '2226IT1100',
+  libraryId: '2428CSEAI1029',
   password: 'password123',
 };
 

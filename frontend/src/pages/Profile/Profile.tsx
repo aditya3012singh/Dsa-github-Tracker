@@ -3,7 +3,7 @@ import { useGetStudentQuery, useTriggerFetchMutation, useGetRankHistoryQuery } f
 import RankEvolutionChart from './components/RankEvolutionChart';
 import {
   Github, Code, LayoutGrid, Trophy, RefreshCw,
-  User as UserIcon, BookOpen, Star, Zap, ExternalLink
+  User as UserIcon, BookOpen, Star, Zap, ExternalLink, Linkedin
 } from 'lucide-react';
 import leetcodeIcon from '../../assets/icons/leetcode.png';
 import codeforcesIcon from '../../assets/icons/codeforces.png';
@@ -52,6 +52,18 @@ const Profile = () => {
                 <DetailItem icon={<Star size={18} />} label="Year" value={`${student.year}${getOrdinal(student.year)} Year`} />
                 <DetailItem icon={<LayoutGrid size={18} />} label="Section" value={student.section || '—'} />
               </div>
+              {student.linkedIn && (
+                <a
+                  href={student.linkedIn}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-3 p-3 rounded-xl bg-[#0A66C2]/10 border border-[#0A66C2]/30 text-[#0A66C2] hover:bg-[#0A66C2]/20 hover:border-[#0A66C2]/50 transition-all group no-underline"
+                >
+                  <Linkedin size={18} className="shrink-0" />
+                  <span className="text-sm font-bold truncate">LinkedIn Profile</span>
+                  <ExternalLink size={14} className="ml-auto shrink-0 opacity-60 group-hover:opacity-100" />
+                </a>
+              )}
             </div>
 
             {student.updatedAt && (

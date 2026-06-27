@@ -25,7 +25,7 @@ model Student {
   resetToken       String?   @unique
   resetTokenExpiry DateTime?
   createdAt        DateTime  @default(now())
-
+  linkedIn         String? @default("https://www.linkedin.com/")
   // Relations
   codingStats      CodingStats?
 

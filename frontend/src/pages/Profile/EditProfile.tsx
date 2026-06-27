@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGetStudentQuery, useUpdateProfileMutation } from '../../store/apiSlice';
-import { User, BookOpen, GraduationCap, Grid, Code, Github, Hash, Save, X, Trophy, RefreshCw } from 'lucide-react';
+import { User, BookOpen, GraduationCap, Grid, Code, Github, Hash, Save, X, Trophy, RefreshCw, Linkedin } from 'lucide-react';
 import { BRANCHES } from '../../constants/branches';
 import leetcodeIcon from '../../assets/icons/leetcode.png';
 import codeforcesIcon from '../../assets/icons/codeforces.png';
@@ -26,7 +26,8 @@ const EditProfile = () => {
     githubHandle: '',
     codeforcesHandle: '',
     codechefHandle: '',
-    gfgHandle: ''
+    gfgHandle: '',
+    linkedIn: ''
   });
 
   useEffect(() => {
@@ -43,7 +44,8 @@ const EditProfile = () => {
         githubHandle: s.github?.handle || '',
         codeforcesHandle: s.codeforces?.handle || '',
         codechefHandle: s.codechef?.handle || '',
-        gfgHandle: s.gfg?.handle || ''
+        gfgHandle: s.gfg?.handle || '',
+        linkedIn: s.linkedIn || ''
       });
     }
   }, [data]);
@@ -200,6 +202,15 @@ const EditProfile = () => {
                 placeholder="gfg_id" 
               />
             </div>
+
+            <InputGroup 
+              label="LinkedIn URL" 
+              icon={<Linkedin size={18} />} 
+              name="linkedIn" 
+              value={formData.linkedIn} 
+              onChange={handleChange} 
+              placeholder="https://www.linkedin.com/in/your-profile" 
+            />
           </section>
 
           {/* Submit */}

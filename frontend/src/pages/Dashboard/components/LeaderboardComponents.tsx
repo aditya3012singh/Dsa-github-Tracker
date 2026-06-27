@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, Trophy, ChevronDown, Check } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Trophy, ChevronDown, Check, Linkedin } from 'lucide-react';
 import { apiSlice } from '../../../store/apiSlice';
 
 /* ── Custom Dropdown Component ── */
@@ -196,6 +196,18 @@ export const LeaderboardRow = React.memo(({ student, rank, index, navigate, sort
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-primary"></span>
               </span>
+            )}
+            {student.linkedIn && (
+              <a
+                href={student.linkedIn}
+                target="_blank"
+                rel="noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                title="LinkedIn Profile"
+                className="opacity-0 group-hover:opacity-100 transition-opacity text-[#0A66C2] hover:text-[#0A66C2]/80 flex-shrink-0"
+              >
+                <Linkedin size={13} />
+              </a>
             )}
           </div>
           <span className="text-[9px] md:text-[10px] text-slate-500 font-medium tracking-wider">
