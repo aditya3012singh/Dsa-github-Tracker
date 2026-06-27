@@ -28,28 +28,31 @@ const Profile = () => {
     <div className="flex flex-col gap-10 pb-16 pt-[100px] px-6 max-w-[1400px] mx-auto w-full">
       <div className="grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-8">
         {/* Left: Profile Card Skeleton */}
-        <div className="glass-card p-12 bg-black/30 flex flex-col items-center gap-5 shimmer">
+        <div className="glass-card p-8 bg-black/30 flex flex-col items-center gap-3 shimmer">
           {/* Avatar */}
-          <div className="w-24 h-24 rounded-full bg-white/10 mb-2" />
+          <div className="w-20 h-20 rounded-full bg-white/10 mb-1" />
           {/* Name */}
-          <div className="h-6 w-40 rounded-lg bg-white/10" />
+          <div className="h-5 w-36 rounded-lg bg-white/10" />
           {/* Library ID */}
-          <div className="h-3 w-28 rounded bg-white/[0.06]" />
-          {/* Detail rows */}
-          <div className="w-full flex flex-col gap-3 mt-4">
-            <div className="h-10 w-full rounded-xl bg-white/[0.05]" />
-            <div className="grid grid-cols-2 gap-3">
-              <div className="h-10 rounded-xl bg-white/[0.05]" />
-              <div className="h-10 rounded-xl bg-white/[0.05]" />
+          <div className="h-2.5 w-24 rounded bg-white/[0.06] mb-2" />
+          {/* Detail rows — branch, year+section, linkedin */}
+          <div className="w-full flex flex-col gap-2">
+            <div className="h-7 w-full rounded-xl bg-white/[0.05]" />
+            <div className="grid grid-cols-2 gap-2">
+              <div className="h-7 rounded-xl bg-white/[0.05]" />
+              <div className="h-7 rounded-xl bg-white/[0.05]" />
             </div>
-            <div className="h-10 w-full rounded-xl bg-white/[0.05]" />
+            <div className="h-9 w-full rounded-xl bg-white/[0.05]" />
           </div>
+          {/* Last updated */}
+          <div className="h-2.5 w-40 rounded bg-white/[0.04]" />
           {/* Buttons */}
-          <div className="w-full flex flex-col gap-3 mt-4">
-            <div className="h-12 w-full rounded-xl bg-white/[0.06]" />
-            <div className="h-12 w-full rounded-xl bg-white/[0.04]" />
+          <div className="w-full flex flex-col gap-2 mt-1">
+            <div className="h-11 w-full rounded-xl bg-white/[0.06]" />
+            <div className="h-11 w-full rounded-xl bg-white/[0.04]" />
           </div>
         </div>
+
 
         {/* Right: Stats Skeleton */}
         <div className="flex flex-col gap-8">
