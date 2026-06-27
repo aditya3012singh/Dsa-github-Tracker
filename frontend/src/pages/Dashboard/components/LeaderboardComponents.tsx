@@ -155,7 +155,7 @@ export const COL_WIDTHS = {
   platform: 'w-[100px] md:w-[120px]'
 };
 export const LeaderboardRow = React.memo(({ student, rank, index, navigate, sortBy, isPinned }: any) => {
-  const prefetchProfile = apiSlice.usePrefetch('getStudent');
+  // const prefetchProfile = apiSlice.usePrefetch('getStudent');
   const isEven = index % 2 === 0;
 
 

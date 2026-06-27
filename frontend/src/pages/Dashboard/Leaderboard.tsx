@@ -44,20 +44,47 @@ const Leaderboard = () => {
 
   const parentRef = useRef<HTMLDivElement>(null);
 
-  const { data, isLoading, isFetching, error, refetch } = useGetLeaderboardQuery({
-    page, limit, search: debouncedSearch, sortBy, order,
-    year: yearFilter, section: sectionFilter, branch: branchFilter
+const { data, isLoading, isFetching, error, refetch } =
+  useGetLeaderboardQuery({
+    page,
+    limit,
+    search: debouncedSearch,
+    sortBy,
+    order,
+    year: yearFilter,
+    section: sectionFilter,
+    branch: branchFilter,
   });
 
-  const { data: onlineData, isLoading: isOnlineLoading, isFetching: isOnlineFetching } = useGetOnlineStudentsQuery(undefined, {
-    skip: !showOnlineOnly
-  });
+const {
+  data: onlineData,
+  isLoading: isOnlineLoading,
+  isFetching: isOnlineFetching,
+} = useGetOnlineStudentsQuery(undefined, {
+  skip: !showOnlineOnly,
+});
 
-  // Always fetch the absolute Top 3 for the current filters, regardless of the page the user is on
-  const { data: topThreeData, isLoading: isTopThreeLoading } = useGetLeaderboardQuery({
-    page: 1, limit: 3, search: debouncedSearch, sortBy, order,
-    year: yearFilter, section: sectionFilter, branch: branchFilter
-  });
+// Only fetch Top 3 separately when we're NOT already on page 1
+const isOnPageOne = page === 1 && !showOnlineOnly;
+
+const {
+  data: topThreeData,
+  isLoading: isTopThreeLoading,
+} = useGetLeaderboardQuery(
+  {
+    page: 1,
+    limit: 3,
+    search: debouncedSearch,
+    sortBy,
+    order,
+    year: yearFilter,
+    section: sectionFilter,
+    branch: branchFilter,
+  },
+  {
+    skip: isOnPageOne,
+  }
+);
 
   const [syncAll, { isLoading: isSyncing }] = useSyncAllMutation();
   const [syncDone, setSyncDone] = useState(false);
@@ -136,7 +163,14 @@ const Leaderboard = () => {
     return filtered;
   }, [showOnlineOnly, rawStudents, debouncedSearch, yearFilter, sectionFilter, branchFilter, sortBy, order]);
 
-  const topThree = useMemo(() => topThreeData?.data || [], [topThreeData]);
+  const topThree = useMemo(() => {
+    if (isOnPageOne) {
+      return data?.data?.slice(0, 3) || [];
+    }
+
+    return topThreeData?.data || [];
+  }, [isOnPageOne, data, topThreeData]);
+
 
   const virtualizer = useVirtualizer({
     count: students.length,
