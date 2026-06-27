@@ -250,13 +250,13 @@ const {
             <span className={`w-2 h-2 rounded-full ${showOnlineOnly ? 'bg-primary animate-pulse' : 'bg-slate-600'}`} />
             <span className="hidden sm:inline">Online Only</span>
           </motion.button>
-          <motion.button
+          {/* <motion.button
             whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
             onClick={handleSyncAll} disabled={isSyncing}
             className={`p-2 md:p-2.5 rounded-xl border transition-all flex items-center gap-2 ${syncDone ? 'bg-green-500/20 border-green-500/50 text-green-400' : 'bg-white/[0.03] border-white/5 text-slate-400 hover:border-primary/40 hover:text-primary'}`}
           >
             {syncDone ? <CheckCircle size={17} /> : isSyncing ? <Zap className="animate-pulse" size={17} /> : <RefreshCw className={(showOnlineOnly ? isOnlineFetching : isFetching) ? 'animate-spin' : ''} size={17} />}
-          </motion.button>
+          </motion.button> */}
         </div>
 
         <div className="glass-card rounded-2xl border border-white/[0.06] bg-black/40 overflow-hidden relative">
