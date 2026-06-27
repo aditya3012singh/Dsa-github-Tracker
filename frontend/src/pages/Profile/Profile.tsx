@@ -72,7 +72,7 @@ const Profile = () => {
 
           {/* Platform cards grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[...Array(5)].map((_, i) => (
+            {[...Array(4)].map((_, i) => (
               <div key={i} className="glass-card bg-black/30 p-10 shimmer flex flex-col gap-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
