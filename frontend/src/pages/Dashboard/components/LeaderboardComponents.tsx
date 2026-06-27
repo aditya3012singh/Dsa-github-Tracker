@@ -188,9 +188,21 @@ export const LeaderboardRow = React.memo(({ student, rank, index, navigate, sort
       <td className={`px-4 py-3 md:px-5 md:py-4 whitespace-nowrap ${COL_WIDTHS.student}`}>
         <div className="flex flex-col text-left">
           <div className="flex items-center gap-2">
-            <span className="text-[13px] md:text-[14px] font-bold text-white group-hover:text-primary transition-colors">
-              {student.name}
-            </span>
+            {student.linkedIn ? (
+              <a
+                href={student.linkedIn}
+                target="_blank"
+                rel="noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="text-[13px] md:text-[14px] font-bold text-white group-hover:text-primary transition-colors no-underline hover:text-[#0A66C2]"
+              >
+                {student.name}
+              </a>
+            ) : (
+              <span className="text-[13px] md:text-[14px] font-bold text-white group-hover:text-primary transition-colors">
+                {student.name}
+              </span>
+            )}
             {isRecentUpdate && (
               <span className="flex h-1.5 w-1.5 relative">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
@@ -215,6 +227,7 @@ export const LeaderboardRow = React.memo(({ student, rank, index, navigate, sort
           </span>
         </div>
       </td>
+
       <td className={`px-4 py-3 md:px-5 md:py-4 text-center ${COL_WIDTHS.total}`}>
         <span className={`text-[15px] md:text-[16px] font-black font-outfit ${sortBy === 'totalSolved' ? 'text-primary' : 'text-slate-100'}`}>
           {student.totalSolved}
