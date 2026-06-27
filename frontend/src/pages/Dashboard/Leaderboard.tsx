@@ -24,7 +24,7 @@ const SORT_OPTIONS = [
   { key: 'totalSolved', label: 'Total Solved' },
   { key: 'leetcode', label: 'LeetCode' },
   { key: 'codeforces', label: 'Codeforces' },
-  { key: 'codechef', label: 'CodeChef' },
+  // { key: 'codechef', label: 'CodeChef' },
   { key: 'gfg', label: 'GfG' },
   { key: 'github', label: 'GitHub' },
 ];
@@ -139,10 +139,10 @@ const {
           valA = a.codeforces?.rating || 0;
           valB = b.codeforces?.rating || 0;
           break;
-        case 'codechef':
-          valA = a.codechef?.rating || 0;
-          valB = b.codechef?.rating || 0;
-          break;
+        // case 'codechef':
+        //   valA = a.codechef?.rating || 0;
+        //   valB = b.codechef?.rating || 0;
+        //   break;
         case 'gfg':
           valA = a.gfg?.total || 0;
           valB = b.gfg?.total || 0;
@@ -281,7 +281,7 @@ const {
                       <th className={`px-4 py-3 md:px-5 md:py-4 ${COL_WIDTHS.id}`}>ID</th>
                       <SortTh label="LeetCode" sortKey="leetcode" sortBy={sortBy} order={order} onSort={(k: any) => { setSortBy(k); setOrder('desc'); }} className={COL_WIDTHS.platform} />
                       <SortTh label="Codeforces" sortKey="codeforces" sortBy={sortBy} order={order} onSort={(k: any) => { setSortBy(k); setOrder('desc'); }} className={COL_WIDTHS.platform} />
-                      <SortTh label="CodeChef" sortKey="codechef" sortBy={sortBy} order={order} onSort={(k: any) => { setSortBy(k); setOrder('desc'); }} className={COL_WIDTHS.platform} />
+                      {/* <SortTh label="CodeChef" sortKey="codechef" sortBy={sortBy} order={order} onSort={(k: any) => { setSortBy(k); setOrder('desc'); }} className={COL_WIDTHS.platform} /> */}
                       <SortTh label="GfG" sortKey="gfg" sortBy={sortBy} order={order} onSort={(k: any) => { setSortBy(k); setOrder('desc'); }} className={COL_WIDTHS.platform} />
                       <SortTh label="GitHub" sortKey="github" sortBy={sortBy} order={order} onSort={(k: any) => { setSortBy(k); setOrder('desc'); }} className={COL_WIDTHS.platform} />
                     </tr>

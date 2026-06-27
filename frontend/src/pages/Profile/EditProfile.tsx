@@ -25,7 +25,7 @@ const EditProfile = () => {
     leetcodeHandle: '',
     githubHandle: '',
     codeforcesHandle: '',
-    codechefHandle: '',
+    // codechefHandle: '',
     gfgHandle: '',
     linkedIn: ''
   });
@@ -43,7 +43,7 @@ const EditProfile = () => {
         leetcodeHandle: s.leetcode?.handle || '',
         githubHandle: s.github?.handle || '',
         codeforcesHandle: s.codeforces?.handle || '',
-        codechefHandle: s.codechef?.handle || '',
+        // codechefHandle: s.codechef?.handle || '',
         gfgHandle: s.gfg?.handle || '',
         linkedIn: s.linkedIn || ''
       });
@@ -185,14 +185,14 @@ const EditProfile = () => {
             />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <InputGroup 
+              {/* <InputGroup 
                 label="CodeChef" 
                 icon={<img src={codechefIcon} className="w-[18px] h-[18px]" alt="CC" />} 
                 name="codechefHandle" 
                 value={formData.codechefHandle} 
                 onChange={handleChange} 
                 placeholder="cc_id" 
-              />
+              /> */}
               <InputGroup 
                 label="GfG" 
                 icon={<img src={gfgIcon} className="w-[18px] h-[18px]" alt="GFG" />} 

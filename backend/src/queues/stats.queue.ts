@@ -4,7 +4,7 @@ import { redisConnection } from '../config/redis';
 // Define the shape of the job data
 export interface StatsJobData {
   studentId: string;
-  platform: 'leetcode' | 'codeforces' | 'codechef' | 'gfg' | 'hackerrank' | 'hackerearth' | 'atcoder';
+  platform: 'leetcode' | 'codeforces' | 'codechef' | 'gfg' ;
   handle: string;
 }
 

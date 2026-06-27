@@ -229,7 +229,7 @@ const Profile = () => {
                 { label: 'Max Rating', value: student.codeforces.maxRating },
               ]}
             />
-            <PlatformCard
+            {/* <PlatformCard
               name="CodeChef"
               icon={<img src={codechefIcon} alt="CodeChef" className="w-8 h-8 object-contain" />}
               color="#CD7F32"
@@ -238,7 +238,7 @@ const Profile = () => {
                 { label: 'Rating', value: student.codechef.rating },
                 { label: 'Solved', value: student.codechef.total },
               ]}
-            />
+            /> */}
             <PlatformCard
               name="GfG"
               icon={<img src={gfgIcon} alt="GfG" className="w-8 h-8 object-contain" />}
@@ -272,7 +272,7 @@ const PlatformCard = ({ name, icon, color, stats, handle }: any) => {
       case 'LeetCode': return `https://leetcode.com/${handle}`;
       case 'GitHub': return `https://github.com/${handle}`;
       case 'Codeforces': return `https://codeforces.com/profile/${handle}`;
-      case 'CodeChef': return `https://www.codechef.com/users/${handle}`;
+      // case 'CodeChef': return `https://www.codechef.com/users/${handle}`;
       case 'GfG': return `https://www.geeksforgeeks.org/user/${handle}/`;
       default: return '#';
     }

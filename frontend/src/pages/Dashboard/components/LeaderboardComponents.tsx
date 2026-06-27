@@ -245,7 +245,7 @@ export const LeaderboardRow = React.memo(({ student, rank, index, navigate, sort
       </td>
       <td className={`px-4 py-3 md:px-5 md:py-4 ${COL_WIDTHS.platform}`}><PlatformCell value={student.leetcode.total} href={`https://leetcode.com/${student.leetcode.handle}`} color="#FFD700" active={sortBy === 'leetcode'} /></td>
       <td className={`px-4 py-3 md:px-5 md:py-4 ${COL_WIDTHS.platform}`}><PlatformCell value={student.codeforces.rating} href={`https://codeforces.com/profile/${student.codeforces.handle}`} color="#339AF0" active={sortBy === 'codeforces'} suffix="pts" /></td>
-      <td className={`px-4 py-3 md:px-5 md:py-4 ${COL_WIDTHS.platform}`}><PlatformCell value={student.codechef.total} href={`https://www.codechef.com/users/${student.codechef.handle}`} color="#FF922B" active={sortBy === 'codechef'} /></td>
+      {/* <td className={`px-4 py-3 md:px-5 md:py-4 ${COL_WIDTHS.platform}`}><PlatformCell value={student.codechef.total} href={`https://www.codechef.com/users/${student.codechef.handle}`} color="#FF922B" active={sortBy === 'codechef'} /></td> */}
       <td className={`px-4 py-3 md:px-5 md:py-4 ${COL_WIDTHS.platform}`}><PlatformCell value={student.gfg.total} href={`https://www.geeksforgeeks.org/user/${student.gfg.handle}/`} color="#51CF66" active={sortBy === 'gfg'} /></td>
       <td className={`px-4 py-3 md:px-5 md:py-4 ${COL_WIDTHS.platform}`}><PlatformCell value={student.github.contributions} href={`https://github.com/${student.github.handle}`} color="#F8FAFC" active={sortBy === 'github'} /></td>
     </tr>
