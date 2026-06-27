@@ -2,7 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useGetStudentQuery, useTriggerFetchMutation, useGetRankHistoryQuery } from '../../store/apiSlice';
 import RankEvolutionChart from './components/RankEvolutionChart';
 import {
-  Github, Code, LayoutGrid, Trophy, RefreshCw,
+  LayoutGrid, RefreshCw,
   User as UserIcon, BookOpen, Star, Zap, ExternalLink, Linkedin
 } from 'lucide-react';
 import leetcodeIcon from '../../assets/icons/leetcode.png';
@@ -23,10 +23,75 @@ const Profile = () => {
   const [triggerFetch, { isLoading: isFetching }] = useTriggerFetchMutation();
 
   if (!token && !id) return <div className="p-20 text-center text-text-dim text-lg">Please login to view your profile.</div>;
-  if (isLoading) return <div className="p-20 text-center text-text-dim text-lg flex items-center justify-center gap-3">
-    <RefreshCw className="animate-spin text-primary" size={24} />
-    Loading profile data...
-  </div>;
+
+  if (isLoading) return (
+    <div className="flex flex-col gap-10 pb-16 pt-[100px] px-6 max-w-[1400px] mx-auto w-full">
+      <div className="grid grid-cols-1 lg:grid-cols-[350px_1fr] gap-8">
+        {/* Left: Profile Card Skeleton */}
+        <div className="glass-card p-12 bg-black/30 flex flex-col items-center gap-5 shimmer">
+          {/* Avatar */}
+          <div className="w-24 h-24 rounded-full bg-white/10 mb-2" />
+          {/* Name */}
+          <div className="h-6 w-40 rounded-lg bg-white/10" />
+          {/* Library ID */}
+          <div className="h-3 w-28 rounded bg-white/[0.06]" />
+          {/* Detail rows */}
+          <div className="w-full flex flex-col gap-3 mt-4">
+            <div className="h-10 w-full rounded-xl bg-white/[0.05]" />
+            <div className="grid grid-cols-2 gap-3">
+              <div className="h-10 rounded-xl bg-white/[0.05]" />
+              <div className="h-10 rounded-xl bg-white/[0.05]" />
+            </div>
+            <div className="h-10 w-full rounded-xl bg-white/[0.05]" />
+          </div>
+          {/* Buttons */}
+          <div className="w-full flex flex-col gap-3 mt-4">
+            <div className="h-12 w-full rounded-xl bg-white/[0.06]" />
+            <div className="h-12 w-full rounded-xl bg-white/[0.04]" />
+          </div>
+        </div>
+
+        {/* Right: Stats Skeleton */}
+        <div className="flex flex-col gap-8">
+          {/* Score card */}
+          <div className="glass-card p-10 bg-black/30 shimmer">
+            <div className="flex justify-between items-center">
+              <div className="flex flex-col gap-3">
+                <div className="h-3 w-40 rounded bg-white/[0.06]" />
+                <div className="h-16 w-32 rounded-xl bg-white/10" />
+              </div>
+              <div className="w-16 h-16 rounded-2xl bg-white/[0.06]" />
+            </div>
+          </div>
+
+          {/* Chart placeholder */}
+          <div className="glass-card p-8 bg-black/30 shimmer h-[200px] rounded-2xl" />
+
+          {/* Platform cards grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="glass-card bg-black/30 p-10 shimmer flex flex-col gap-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-white/10" />
+                    <div className="flex flex-col gap-2">
+                      <div className="h-5 w-24 rounded-lg bg-white/10" />
+                      <div className="h-3 w-20 rounded bg-white/[0.06]" />
+                    </div>
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-white/[0.06]" />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="h-10 rounded-xl bg-white/[0.06]" />
+                  <div className="h-10 rounded-xl bg-white/[0.06]" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 
   const student = studentData?.data;
 
