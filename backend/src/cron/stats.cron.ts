@@ -15,7 +15,7 @@ const jobNames = [
 export const startCronJobs = () => {
   // Schedule to run 3 times a day at 6 AM, 1 PM, and 9 PM (IST)
   cron.schedule(
-    '0 6,15,21 * * *',
+    '0 6,13,22 * * *',
     async () => {
       logger.info('Starting scheduled 3x daily cron job to enqueue all stats updates (6 AM / 1 PM / 9 PM IST)...');
       
