@@ -13,11 +13,11 @@ const jobNames = [
 ] as const;
 
 export const startCronJobs = () => {
-  // Schedule to run for testing at 6:30 AM (IST)
+  // Schedule to run 3 times a day at 6 AM, 1 PM, and 9 PM (IST)
   cron.schedule(
-    '30 6 * * *',
+    '0 6,15,21 * * *',
     async () => {
-      logger.info('Starting scheduled test cron job to enqueue all stats updates (6:30 AM IST)...');
+      logger.info('Starting scheduled 3x daily cron job to enqueue all stats updates (6 AM / 1 PM / 9 PM IST)...');
       
       try {
         const students = await prisma.student.findMany();
