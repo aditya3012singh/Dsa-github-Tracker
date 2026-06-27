@@ -1,20 +1,12 @@
-import React, { Suspense, lazy } from 'react';
+import React from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Layout/Navbar';
 import Footer from './components/Layout/Footer';
 import Particles from './components/Layout/Particles';
-
-// Lazy load pages for better performance
-const Leaderboard = lazy(() => import('./pages/Dashboard/Leaderboard'));
-const Login = lazy(() => import('./pages/Auth/Login'));
-const Profile = lazy(() => import('./pages/Profile/Profile'));
-const EditProfile = lazy(() => import('./pages/Profile/EditProfile'));
-
-const PageLoader = () => (
-  <div className="flex-1 flex items-center justify-center p-20">
-    <div className="w-full max-w-4xl h-[600px] glass-card shimmer" />
-  </div>
-);
+import Leaderboard from './pages/Dashboard/Leaderboard';
+import Login from './pages/Auth/Login';
+import Profile from './pages/Profile/Profile';
+import EditProfile from './pages/Profile/EditProfile';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const token = localStorage.getItem('token');
@@ -47,37 +39,35 @@ function App() {
       {!hideNavbar && <Navbar />}
       {/* No top padding here – each page handles its own spacing to account for the fixed navbar */}
       <main className="flex-1 w-full flex flex-col">
-        <Suspense fallback={<PageLoader />}>
-          <Routes>
-            <Route path="/" element={token ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />} />
-            <Route path="/login" element={!token ? <Login /> : <Navigate to="/dashboard" replace />} />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Leaderboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/profile/:id?"
-              element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/edit-profile"
-              element={
-                <ProtectedRoute>
-                  <EditProfile />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Suspense>
+        <Routes>
+          <Route path="/" element={token ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />} />
+          <Route path="/login" element={!token ? <Login /> : <Navigate to="/dashboard" replace />} />
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
+                <Leaderboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile/:id?"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/edit-profile"
+            element={
+              <ProtectedRoute>
+                <EditProfile />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </main>
       <Footer />
     </div>
