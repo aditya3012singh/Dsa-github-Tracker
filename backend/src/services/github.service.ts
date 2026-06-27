@@ -21,7 +21,14 @@ export const githubService = async (handle: string) => {
   try {
     const contribsUrl = `https://github-contributions-api.jogruber.de/v4/${handle}`;
     const contribsResponse = await axios.get(contribsUrl);
-    contributions = contribsResponse.data.total?.lastYear || contribsResponse.data.total?.thisYear || 0;
+    if (contribsResponse.data && Array.isArray(contribsResponse.data.contributions)) {
+      const oneYearAgo = new Date();
+      oneYearAgo.setDate(oneYearAgo.getDate() - 365);
+      contributions = contribsResponse.data.contributions.reduce((sum: number, item: any) => {
+        const itemDate = new Date(item.date);
+        return itemDate >= oneYearAgo ? sum + (item.count || 0) : sum;
+      }, 0);
+    }
   } catch (err) {
     console.error(`[GitHub] Failed to fetch contributions for ${handle}:`, err);
   }
