@@ -13,7 +13,10 @@
     "prisma:generate": "prisma generate",
     "prisma:push": "prisma db push",
     "seed": "ts-node src/scripts/seed.ts",
-    "parse:students": "ts-node src/scripts/parse-students.ts"
+    "parse:students": "ts-node src/scripts/parse-students.ts",
+    "merge:data": "ts-node src/scripts/merge-data.ts",
+    "seed:all": "ts-node src/scripts/seed_all.ts",
+    "seed:all:clear": "ts-node src/scripts/seed_all.ts --clear"
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
@@ -29,7 +32,8 @@
     "jsonwebtoken": "^9.0.3",
     "morgan": "^1.10.1",
     "node-cron": "^3.0.3",
-    "winston": "^3.12.0"
+    "winston": "^3.12.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
