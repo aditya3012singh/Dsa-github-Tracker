@@ -7,7 +7,7 @@ import { logger } from '../utils/logger';
 const jobNames = [
   { name: 'leetcode', handleField: 'leetcodeHandle' },
   { name: 'codeforces', handleField: 'codeforcesHandle' },
-  { name: 'codechef', handleField: 'codechefHandle' },
+  // { name: 'codechef', handleField: 'codechefHandle' },
   { name: 'gfg', handleField: 'gfgHandle' },
   { name: 'github', handleField: 'githubHandle' }
 ] as const;
