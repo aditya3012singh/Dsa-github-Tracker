@@ -139,35 +139,37 @@ const Profile = () => {
             )}
 
             <div className="flex flex-col gap-3">
-              <button
-                className={`w-full flex items-center justify-center gap-3 p-4 rounded-xl font-bold border transition-all ${isFetching ? 'bg-primary/20 border-primary/40 text-primary cursor-not-allowed' :
-                  'bg-transparent border-primary text-primary hover:bg-primary hover:text-white cursor-pointer'
-                  }`}
-                onClick={async () => {
-                  try {
-                    await triggerFetch(student.id).unwrap();
-                    // Sync queued — spinner feedback is sufficient
-                  } catch (err) {
-                    console.error('Sync failed:', err);
-                  }
-                }}
-                disabled={isFetching}
-              >
-                <RefreshCw className={`${isFetching ? 'animate-spin' : ''}`} size={18} />
-                <span>{isFetching ? 'Syncing...' : 'Sync All Stats'}</span>
-              </button>
-
-              {/* Edit Profile Button (Only for owner) */}
+              {/* Sync + Edit buttons — only visible to the profile owner */}
               {(id === loggedInUser.id || !id) && (
-                <button
-                  onClick={() => navigate('/edit-profile')}
-                  className="w-full flex items-center justify-center gap-3 p-4 rounded-xl font-bold bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all cursor-pointer"
-                >
-                  <UserIcon size={18} />
-                  <span>Edit Profile</span>
-                </button>
+                <>
+                  <button
+                    className={`w-full flex items-center justify-center gap-3 p-4 rounded-xl font-bold border transition-all ${isFetching ? 'bg-primary/20 border-primary/40 text-primary cursor-not-allowed' :
+                      'bg-transparent border-primary text-primary hover:bg-primary hover:text-white cursor-pointer'
+                      }`}
+                    onClick={async () => {
+                      try {
+                        await triggerFetch(student.id).unwrap();
+                      } catch (err) {
+                        console.error('Sync failed:', err);
+                      }
+                    }}
+                    disabled={isFetching}
+                  >
+                    <RefreshCw className={`${isFetching ? 'animate-spin' : ''}`} size={18} />
+                    <span>{isFetching ? 'Syncing...' : 'Sync All Stats'}</span>
+                  </button>
+
+                  <button
+                    onClick={() => navigate('/edit-profile')}
+                    className="w-full flex items-center justify-center gap-3 p-4 rounded-xl font-bold bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all cursor-pointer"
+                  >
+                    <UserIcon size={18} />
+                    <span>Edit Profile</span>
+                  </button>
+                </>
               )}
             </div>
+
           </div>
         </section>
 
