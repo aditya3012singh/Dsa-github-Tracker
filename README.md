@@ -30,7 +30,6 @@ Designed with scalability in mind, the platform leverages asynchronous processin
 * **LeetCode**
 * **Codeforces**
 * **GeeksforGeeks**
-* **CodeChef**
 * **GitHub**
 * **LinkedIn**
 
