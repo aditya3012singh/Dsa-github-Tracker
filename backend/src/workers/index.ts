@@ -23,7 +23,7 @@ const platformDelays: Record<string, number> = {
   github: 200,
 };
 
-const worker = new Worker('statsFetchQueue', async (job: Job) => {
+const processJob = async (job: Job) => {
   const { platform } = job.data;
   
   // Enforce artificial delay for basic rate limiting in worker
@@ -52,20 +52,35 @@ const worker = new Worker('statsFetchQueue', async (job: Job) => {
     default:
       throw new Error(`Unknown platform: ${platform}`);
   }
-}, {
+};
+
+const worker = new Worker('statsFetchQueue', processJob, {
   connection: redisConnection as any,
   concurrency: 3 // Reduced for free tier (512MB RAM) stability
 });
 
+const userSyncWorker = new Worker('userSyncFetchQueue', processJob, {
+  connection: redisConnection as any,
+  concurrency: 5 // Slightly higher concurrency for user syncs for responsiveness
+});
+
 worker.on('completed', async (job: Job) => {
-  logger.info(`Job ${job.id} completed successfully`);
+  logger.info(`Background job ${job.id} completed successfully`);
 });
 
 worker.on('failed', (job: Job | undefined, err: Error) => {
-  logger.error(`Job ${job?.id} failed with error ${err.message}`);
+  logger.error(`Background job ${job?.id} failed with error ${err.message}`);
 });
 
-logger.info('Worker initialized and listening to statsFetchQueue.');
+userSyncWorker.on('completed', async (job: Job) => {
+  logger.info(`User-triggered job ${job.id} completed successfully`);
+});
+
+userSyncWorker.on('failed', (job: Job | undefined, err: Error) => {
+  logger.error(`User-triggered job ${job?.id} failed with error ${err.message}`);
+});
+
+logger.info('Workers initialized: statsFetchQueue (background) and userSyncFetchQueue (user-triggered).');
 
 // Start DB writer and event consumers
 const stopDbWriter = startDbWriter();
@@ -73,15 +88,21 @@ startConsumers();
 
 // Handle graceful shutdown
 process.on('SIGTERM', async () => {
-  logger.info('SIGTERM received. Shutting down worker gracefully.');
+  logger.info('SIGTERM received. Shutting down workers gracefully.');
   stopDbWriter();
-  await worker.close();
+  await Promise.all([
+    worker.close(),
+    userSyncWorker.close()
+  ]);
   process.exit(0);
 });
 
 process.on('SIGINT', async () => {
-  logger.info('SIGINT received. Shutting down worker gracefully.');
+  logger.info('SIGINT received. Shutting down workers gracefully.');
   stopDbWriter();
-  await worker.close();
+  await Promise.all([
+    worker.close(),
+    userSyncWorker.close()
+  ]);
   process.exit(0);
 });

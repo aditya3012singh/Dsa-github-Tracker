@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import { prisma } from '../config/db';
 import { redisConnection } from '../config/redis';
-import { statsQueue } from '../queues/stats.queue';
+import { statsQueue, userSyncQueue } from '../queues/stats.queue';
 import { logger } from '../utils/logger';
 import { sanitizeHandle } from '../utils/sanitizer';
 
@@ -60,7 +60,7 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
 
       for (const p of platforms) {
         if (p.handle) {
-          await statsQueue.add(p.name as any, {
+          await userSyncQueue.add(p.name as any, {
             studentId: student.id,
             platform: p.name as any,
             handle: p.handle,

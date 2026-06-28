@@ -24,3 +24,20 @@ export const statsQueue = new Queue<StatsJobData>('statsFetchQueue', {
     },
   },
 });
+
+// Dedicated queue for manual/user-triggered syncs
+export const userSyncQueue = new Queue<StatsJobData>('userSyncFetchQueue', {
+  connection: redisConnection as any,
+  defaultJobOptions: {
+    attempts: 3,
+    backoff: {
+      type: 'exponential',
+      delay: 5000,
+    },
+    removeOnComplete: true,
+    removeOnFail: {
+      count: 100, // Keep last 100 failures for debugging
+      age: 24 * 3600 // or keep for 24 hours
+    },
+  },
+});

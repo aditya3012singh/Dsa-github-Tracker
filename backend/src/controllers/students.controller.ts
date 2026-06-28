@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../config/db';
 import { redisConnection } from '../config/redis';
-import { statsQueue } from '../queues/stats.queue';
+import { statsQueue, userSyncQueue } from '../queues/stats.queue';
 import { logger } from '../utils/logger';
 import { AuthRequest } from '../middleware/auth';
 import { calculateOverallScore } from '../utils/scoring';
@@ -198,7 +198,7 @@ export const triggerFetch = async (req: AuthRequest, res: Response, next: NextFu
     let enqueued = 0;
     for (const p of platforms) {
       if (p.handle) {
-        await statsQueue.add(p.name as any, {
+        await userSyncQueue.add(p.name as any, {
           studentId: student.id,
           platform: p.name as any,
           handle: p.handle,
