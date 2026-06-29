@@ -7,6 +7,8 @@ import Leaderboard from './pages/Dashboard/Leaderboard';
 import Login from './pages/Auth/Login';
 import Profile from './pages/Profile/Profile';
 import EditProfile from './pages/Profile/EditProfile';
+import AdminLogin from './pages/Auth/AdminLogin';
+import AdminDashboard from './pages/Auth/AdminDashboard';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const token = localStorage.getItem('token');
@@ -14,10 +16,17 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+const AdminRoute = ({ children }: { children: React.ReactNode }) => {
+  const adminKey = localStorage.getItem('adminKey');
+  if (!adminKey) return <Navigate to="/admin/login" replace />;
+  return <>{children}</>;
+};
+
 function App() {
   const token = localStorage.getItem('token');
+  const adminKey = localStorage.getItem('adminKey');
   const location = useLocation();
-  const hideNavbar = location.pathname === '/login';
+  const hideNavbar = location.pathname === '/login' || location.pathname === '/admin/login';
 
   return (
     <div className="min-h-screen flex flex-col bg- text-text-main font-sans selection:bg-primary/30 relative">
@@ -42,6 +51,15 @@ function App() {
         <Routes>
           <Route path="/" element={token ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />} />
           <Route path="/login" element={!token ? <Login /> : <Navigate to="/dashboard" replace />} />
+          <Route path="/admin/login" element={!adminKey ? <AdminLogin /> : <Navigate to="/admin/dashboard" replace />} />
+          <Route
+            path="/admin/dashboard"
+            element={
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
+            }
+          />
           <Route
             path="/dashboard"
             element={

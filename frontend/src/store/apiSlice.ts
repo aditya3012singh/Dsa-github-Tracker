@@ -9,6 +9,10 @@ export const apiSlice = createApi({
       if (token) {
         headers.set('authorization', `Bearer ${token}`);
       }
+      const adminKey = localStorage.getItem('adminKey');
+      if (adminKey) {
+        headers.set('x-admin-key', adminKey);
+      }
       return headers;
     },
   }),
@@ -69,6 +73,14 @@ export const apiSlice = createApi({
       query: (studentId) => `/leaderboard/rank-history/${studentId}`,
       providesTags: (result, error, id) => [{ type: 'Student', id: `${id}-history` }],
     }),
+    adminRegisterStudents: builder.mutation({
+      query: (payload) => ({
+        url: '/admin/students',
+        method: 'POST',
+        body: payload,
+      }),
+      invalidatesTags: ['Leaderboard'],
+    }),
   }),
 });
 
@@ -82,4 +94,5 @@ export const {
   useSyncAllMutation,
   useGetRankHistoryQuery,
   useGetOnlineStudentsQuery,
+  useAdminRegisterStudentsMutation,
 } = apiSlice;

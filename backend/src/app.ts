@@ -5,6 +5,7 @@ import { errorHandler } from './middleware/errorHandler';
 import studentRoutes from './routes/student.routes';
 import leaderboardRoutes from './routes/leaderboard.routes';
 import authRoutes from './routes/auth.routes';
+import adminRoutes from './routes/admin.routes';
 import morgan from 'morgan';
 import { logger } from './utils/logger';
 
@@ -23,6 +24,7 @@ app.use(express.json());
 app.use('/api/students', studentRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
