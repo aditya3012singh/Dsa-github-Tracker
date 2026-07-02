@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAdminRegisterStudentsMutation } from '../../store/apiSlice';
-import { UserPlus, Users, LogOut, CheckCircle, XCircle, FileText, AlertCircle } from 'lucide-react';
+import { UserPlus, Users, LogOut, CheckCircle, XCircle, FileText, AlertCircle, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { BRANCHES } from '../../constants/branches';
 
 interface ResultItem {
   libraryId: string;
@@ -16,6 +17,63 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const [registerStudents, { isLoading }] = useAdminRegisterStudentsMutation();
   const [activeTab, setActiveTab] = useState<'single' | 'bulk'>('single');
+
+  // Export Center state
+  const [exportFilters, setExportFilters] = useState({
+    year: 'All',
+    branch: 'All',
+    section: 'All',
+    sortBy: 'score',
+    order: 'desc',
+    onlineOnly: false,
+  });
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExportExcel = async () => {
+    setIsExporting(true);
+    try {
+      const adminKey = localStorage.getItem('adminKey');
+      
+      const queryParams = new URLSearchParams({
+        sortBy: exportFilters.sortBy,
+        order: exportFilters.order,
+        year: exportFilters.year,
+        section: exportFilters.section,
+        branch: exportFilters.branch,
+        online: exportFilters.onlineOnly ? 'true' : 'false',
+      });
+      
+      const headers: Record<string, string> = {};
+      if (adminKey) {
+        headers['x-admin-key'] = adminKey;
+      }
+      
+      const baseUrl = (import.meta as any).env.VITE_API_BASE_URL || '/api';
+      const response = await fetch(`${baseUrl}/leaderboard/export?${queryParams.toString()}`, {
+        method: 'GET',
+        headers
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to export leaderboard');
+      }
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `leaderboard_${exportFilters.year}_${exportFilters.branch}_${exportFilters.section}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (err: any) {
+      console.error('Export failed:', err);
+      alert('Failed to export leaderboard: ' + (err.message || err));
+    } finally {
+      setIsExporting(false);
+    }
+  };
   
   // Single student form state
   const [singleStudent, setSingleStudent] = useState({
@@ -495,6 +553,105 @@ Jane Doe,2428CSIT1057,202401100500177,,CSE,2,D,janedoe_lc,janedoe_gh`}
 
         {/* Right Side: Response Report/Status Logs (Column Span 5) */}
         <div className="lg:col-span-5 flex flex-col gap-6">
+          {/* Export Leaderboard Card */}
+          <div className="glass-card bg-black/30 backdrop-blur-2xl border-white/5 p-8 flex flex-col gap-6">
+            <h3 className="text-lg font-bold text-white border-b border-white/5 pb-2 flex items-center gap-2">
+              <Download className="text-purple-500" size={20} />
+              Export Center
+            </h3>
+            <p className="text-text-dim text-xs leading-relaxed">
+              Generate and download an Excel spreadsheet of student leaderboard rankings with full platform statistics.
+            </p>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-black uppercase text-text-dim tracking-wider ml-1">Year</label>
+                <select
+                  value={exportFilters.year}
+                  onChange={(e) => setExportFilters({ ...exportFilters, year: e.target.value })}
+                  className="w-full bg-black/60 border border-white/5 rounded-xl py-3 px-4 text-white font-bold outline-none focus:border-purple-500 transition-all text-sm cursor-pointer"
+                >
+                  <option value="All">All Years</option>
+                  <option value="1">1st Year</option>
+                  <option value="2">2nd Year</option>
+                  <option value="3">3rd Year</option>
+                  <option value="4">4th Year</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-black uppercase text-text-dim tracking-wider ml-1">Branch</label>
+                <select
+                  value={exportFilters.branch}
+                  onChange={(e) => setExportFilters({ ...exportFilters, branch: e.target.value })}
+                  className="w-full bg-black/60 border border-white/5 rounded-xl py-3 px-4 text-white font-bold outline-none focus:border-purple-500 transition-all text-sm cursor-pointer"
+                >
+                  <option value="All">All Branches</option>
+                  {BRANCHES.map(b => (
+                    <option key={b} value={b}>{b}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-black uppercase text-text-dim tracking-wider ml-1">Section</label>
+                <select
+                  value={exportFilters.section}
+                  onChange={(e) => setExportFilters({ ...exportFilters, section: e.target.value })}
+                  className="w-full bg-black/60 border border-white/5 rounded-xl py-3 px-4 text-white font-bold outline-none focus:border-purple-500 transition-all text-sm cursor-pointer"
+                >
+                  <option value="All">All Sections</option>
+                  <option value="A">A</option>
+                  <option value="B">B</option>
+                  <option value="C">C</option>
+                  <option value="D">D</option>
+                  <option value="E">E</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-black uppercase text-text-dim tracking-wider ml-1">Sort By</label>
+                <select
+                  value={exportFilters.sortBy}
+                  onChange={(e) => setExportFilters({ ...exportFilters, sortBy: e.target.value })}
+                  className="w-full bg-black/60 border border-white/5 rounded-xl py-3 px-4 text-white font-bold outline-none focus:border-purple-500 transition-all text-sm cursor-pointer"
+                >
+                  <option value="score">Overall Score</option>
+                  <option value="totalSolved">Total Solved</option>
+                  <option value="leetcode">LeetCode</option>
+                  <option value="codeforces">Codeforces</option>
+                  <option value="gfg">GeeksforGeeks</option>
+                  <option value="github">GitHub</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-2 text-xs font-semibold text-text-dim cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={exportFilters.onlineOnly}
+                  onChange={(e) => setExportFilters({ ...exportFilters, onlineOnly: e.target.checked })}
+                  className="rounded border-white/10 bg-white/[0.02] text-purple-600 focus:ring-purple-500"
+                />
+                Online Only
+              </label>
+            </div>
+
+            <button
+              onClick={handleExportExcel}
+              disabled={isExporting}
+              className={`w-full py-4 mt-2 bg-purple-600 hover:bg-purple-500 text-white rounded-2xl font-bold tracking-wide uppercase transition-all flex items-center justify-center gap-3 shadow-lg shadow-purple-600/20 cursor-pointer ${
+                isExporting ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+            >
+              <Download size={20} />
+              <span>{isExporting ? 'Exporting...' : 'Export to Excel'}</span>
+            </button>
+          </div>
+
           <div className="glass-card bg-black/30 backdrop-blur-2xl border-white/5 p-8 flex flex-col gap-6 min-h-[400px]">
             <h3 className="text-lg font-bold text-white border-b border-white/5 pb-2">Status Log Report</h3>
 
