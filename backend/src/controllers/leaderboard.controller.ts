@@ -4,6 +4,7 @@ import { redisConnection } from '../config/redis';
 import { calculateOverallScore } from '../utils/scoring';
 import { AuthRequest } from '../middleware/auth';
 import { logger } from '../utils/logger';
+import * as XLSX from 'xlsx';
 
 // Global map to track active database queries for specific cache keys (Single Flight)
 const activeLeaderboardQueries = new Map<string, Promise<{ data: any[]; total: number }>>();
@@ -349,6 +350,140 @@ export const getRankHistory = async (req: Request, res: Response, next: NextFunc
       status: 'success',
       data: history.reverse() // Chronological order for charts
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Export leaderboard data as Excel sheet
+ */
+export const exportLeaderboard = async (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    const sortBy = (req.query.sortBy as string) || 'totalSolved';
+    const order = (req.query.order as string) || 'desc';
+    const search = (req.query.search as string) || '';
+    const yearFilter = req.query.year as string;
+    const branchFilter = req.query.branch as string;
+    const sectionFilter = req.query.section as string;
+    const onlineFilter = req.query.online === 'true';
+
+    // 1. Build the Prisma Where Clause for filtering
+    const where: any = {
+      codingStats: { isNot: null }
+    };
+
+    if (yearFilter && yearFilter !== 'All') {
+      where.year = parseInt(yearFilter);
+    }
+
+    if (branchFilter && branchFilter !== 'All') {
+      where.branch = { contains: branchFilter, mode: 'insensitive' };
+    }
+
+    if (sectionFilter && sectionFilter !== 'All') {
+      where.section = { equals: sectionFilter, mode: 'insensitive' };
+    }
+
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { rollNo: { contains: search, mode: 'insensitive' } }
+      ];
+    }
+
+    if (onlineFilter) {
+      const twoMinutesAgo = Date.now() - 2 * 60 * 1000;
+      try {
+        await redisConnection.zremrangebyscore('online_users', '-inf', twoMinutesAgo);
+        const onlineIds = await redisConnection.zrevrange('online_users', 0, -1);
+        where.id = { in: onlineIds };
+      } catch (cacheErr) {
+        logger.error('[Export Online Filter] Failed to resolve online users from cache:', cacheErr);
+      }
+    }
+
+    // 2. Map SortBy to Prisma OrderBy
+    let orderBy: any = {};
+    const sortOrder = order.toLowerCase() === 'asc' ? 'asc' : 'desc';
+
+    switch (sortBy) {
+      case 'leetcode':
+        orderBy = { codingStats: { leetcodeSolved: sortOrder } };
+        break;
+      case 'codeforces':
+        orderBy = { codingStats: { codeforcesRating: sortOrder } };
+        break;
+      case 'codechef':
+        orderBy = { codingStats: { codechefRating: sortOrder } };
+        break;
+      case 'gfg':
+        orderBy = { codingStats: { gfgSolved: sortOrder } };
+        break;
+      case 'github':
+        orderBy = { codingStats: { githubContributions: sortOrder } };
+        break;
+      case 'github_repos':
+        orderBy = { codingStats: { githubRepos: sortOrder } };
+        break;
+      case 'github_followers':
+        orderBy = { codingStats: { githubFollowers: sortOrder } };
+        break;
+      case 'totalSolved':
+        orderBy = { codingStats: { totalSolved: sortOrder } };
+        break;
+      case 'score':
+      default:
+        orderBy = { codingStats: { overallScore: sortOrder } };
+    }
+
+    // 3. Fetch all matching records without pagination
+    const students = await prisma.student.findMany({
+      where,
+      select: LEADERBOARD_SELECT,
+      orderBy,
+    });
+
+    const mappedData = students.map(mapStudentToLeaderboard);
+
+    // 4. Build Excel Worksheet structure
+    const worksheetData = mappedData.map((s: any, index: number) => ({
+      'Rank': index + 1,
+      'Name': s.name,
+      'Library ID': s.libraryId,
+      'Roll No': s.rollNo || '',
+      'Year': s.year || '',
+      'Branch': s.branch || '',
+      'Section': s.section || '',
+      'Total Solved': s.totalSolved || 0,
+      'LeetCode Solved': s.leetcode.total || 0,
+      'LeetCode Easy': s.leetcode.easy || 0,
+      'LeetCode Medium': s.leetcode.medium || 0,
+      'LeetCode Hard': s.leetcode.hard || 0,
+      'LeetCode Handle': s.leetcode.handle || '',
+      'Codeforces Rating': s.codeforces.rating || 0,
+      'Codeforces Max Rating': s.codeforces.maxRating || 0,
+      'Codeforces Handle': s.codeforces.handle || '',
+      'GFG Solved': s.gfg.total || 0,
+      'GFG Handle': s.gfg.handle || '',
+      'GitHub Contributions': s.github.contributions || 0,
+      'GitHub Repositories': s.github.repositories || 0,
+      'GitHub Followers': s.github.followers || 0,
+      'GitHub Following': s.github.following || 0,
+      'GitHub Handle': s.github.handle || '',
+      'LinkedIn Profile': s.linkedIn || '',
+    }));
+
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Leaderboard');
+
+    // 5. Stream Excel File Buffer
+    const buffer = XLSX.write(workbook, { type: 'buffer', bookType: 'xlsx' });
+
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', 'attachment; filename=leaderboard.xlsx');
+    res.send(buffer);
   } catch (error) {
     next(error);
   }
