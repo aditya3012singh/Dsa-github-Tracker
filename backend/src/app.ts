@@ -8,6 +8,7 @@ import authRoutes from './routes/auth.routes';
 import adminRoutes from './routes/admin.routes';
 import { requestLogger } from './middleware/requestLogger';
 import { metricsMiddleware } from './observability/metrics/metricsMiddleware';
+import { register } from './observability/metrics/registry';
 
 const app = express();
 app.use(requestLogger);
@@ -23,6 +24,16 @@ app.use('/api/students', studentRoutes);
 app.use('/api/leaderboard', leaderboardRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
+
+// Metrics endpoint
+app.get('/metrics', async (req, res) => {
+  try {
+    res.set('Content-Type', register.contentType);
+    res.end(await register.metrics());
+  } catch (err) {
+    res.status(500).end(err);
+  }
+});
 
 // Health check
 app.get('/health', (req, res) => {

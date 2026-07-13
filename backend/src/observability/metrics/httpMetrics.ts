@@ -56,3 +56,19 @@ export const inFlightRequests = new client.Gauge({
     registers: [register]
 
 });
+
+export const httpRequestErrorsTotal = new client.Counter({
+
+    name: "coding_analytics_http_request_errors_total",
+
+    help: "Total HTTP request errors (status >= 500)",
+
+    labelNames: [
+        "method",
+        "route",
+        "status"
+    ],
+
+    registers: [register]
+
+});

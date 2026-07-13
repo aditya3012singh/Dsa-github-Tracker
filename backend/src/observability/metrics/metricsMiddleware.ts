@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { httpRequestsTotal, httpRequestDuration, inFlightRequests } from "./httpMetrics";
+import { httpRequestsTotal, httpRequestDuration, inFlightRequests, httpRequestErrorsTotal } from "./httpMetrics";
 
 export function metricsMiddleware(
     req: Request,
@@ -9,30 +9,27 @@ export function metricsMiddleware(
     // 1. Increment the in-flight gauge immediately
     inFlightRequests.inc();
 
-    const start = process.hrtime();
+    const start = process.hrtime.bigint();
     let finished = false;
 
     const recordMetrics = () => {
         if (finished) return;
         finished = true;
 
-        const diff = process.hrtime(start);
-        const durationInSeconds = diff[0] + diff[1] / 1e9;
+        const durationInSeconds = Number(process.hrtime.bigint() - start) / 1e9;
 
         // Resolve route pattern (e.g. /api/students/:id instead of /api/students/1)
         // This avoids high-cardinality URL explosion in Prometheus.
-        let route = "unknown";
+        let route = "unmatched_route";
         if (req.route?.path) {
             route = `${req.baseUrl}${req.route.path}`;
-        } else if (res.statusCode === 404) {
-            route = "not_found";
         }
 
         const labels = {
             method: req.method,
             route,
-            status: res.statusCode.toString()
-        };
+            status: String(res.statusCode)
+        } as const;
 
         // 2. Increment the request counter
         httpRequestsTotal.inc(labels);
@@ -40,7 +37,12 @@ export function metricsMiddleware(
         // 3. Record the histogram duration in seconds
         httpRequestDuration.observe(labels, durationInSeconds);
 
-        // 4. Decrement the in-flight gauge
+        // 4. Increment the error counter if the status code is >= 500
+        if (res.statusCode >= 500) {
+            httpRequestErrorsTotal.inc(labels);
+        }
+
+        // 5. Decrement the in-flight gauge
         inFlightRequests.dec();
     };
 
