@@ -15,8 +15,12 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
+    command: node dist/server.js
     env_file:
       - ../.env
+    # environment:
+    #   - DATABASE_URL=postgresql://postgres:password@postgres:5432/coding_analytics?sslmode=disable
+    #   - REDIS_URL=redis://redis:6379
     depends_on:
       - postgres
       - redis
@@ -29,10 +33,22 @@ services:
     command: npm run worker:prod
     env_file:
       - ../.env
+    # environment:
+    #   - DATABASE_URL=postgresql://postgres:password@postgres:5432/coding_analytics?sslmode=disable
+    #   - REDIS_URL=redis://redis:6379
     depends_on:
       - postgres
       - redis
     restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - api
 
   postgres:
     image: postgres:15-alpine

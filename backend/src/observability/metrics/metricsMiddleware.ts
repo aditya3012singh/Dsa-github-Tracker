@@ -6,6 +6,17 @@ export function metricsMiddleware(
     res: Response,
     next: NextFunction
 ) {
+    const ignoredRoutes = [
+        "/metrics",
+        "/health",
+        "/ready",
+        "/live"
+    ];
+
+    if (ignoredRoutes.includes(req.path)) {
+        return next();
+    }
+
     // 1. Increment the in-flight gauge immediately
     inFlightRequests.inc();
 
