@@ -5,12 +5,7 @@ import { logger } from '../utils/logger';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-key';
 
-export interface AuthRequest extends Request {
-  user?: {
-    id: string;
-    rollNo: string;
-  };
-}
+export interface AuthRequest extends Request {}
 
 export const authenticate = (req: AuthRequest, res: Response, next: NextFunction) => {
   const token = req.headers.authorization?.split(' ')[1];

@@ -6,17 +6,13 @@ import studentRoutes from './routes/student.routes';
 import leaderboardRoutes from './routes/leaderboard.routes';
 import authRoutes from './routes/auth.routes';
 import adminRoutes from './routes/admin.routes';
-import morgan from 'morgan';
-import { logger } from './utils/logger';
+import { requestLogger } from './middleware/requestLogger';
 
 const app = express();
-
+app.use(requestLogger);
 app.set('trust proxy', true);
 
 app.use(compression());
-app.use(morgan('combined', { 
-  stream: { write: (message) => logger.info(message.trim()) } 
-}));
 app.use(cors());
 app.use(express.json());
 
