@@ -12,8 +12,9 @@ export function requestLogger(
 
     // Trace ID: extract from headers (x-trace-id or traceparent) or generate a 32-character hex string
     const traceparent = req.headers["traceparent"] as string;
+    const parts = traceparent?.split("-");
     const incomingTraceId = (req.headers["x-trace-id"] as string) || 
-                            (traceparent ? traceparent.split("-")[1] : undefined);
+                            (parts?.length === 4 ? parts[1] : undefined);
     
     req.traceId = incomingTraceId || uuid().replace(/-/g, "");
 
@@ -37,6 +38,13 @@ export function requestLogger(
 
             url: req.originalUrl,
 
+            query: req.query,
+
+            params: req.params,
+
+            host: req.hostname,
+
+           
             status: res.statusCode,
 
             duration_ms: duration,
@@ -47,8 +55,9 @@ export function requestLogger(
 
             userAgent: req.get("user-agent"),
 
-            userId: req.user?.id ?? null
+            userId: req.user?.id ?? null,
 
+            protocol: req.protocol,
         });
 
     });
