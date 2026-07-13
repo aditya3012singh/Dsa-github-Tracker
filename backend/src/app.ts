@@ -7,9 +7,11 @@ import leaderboardRoutes from './routes/leaderboard.routes';
 import authRoutes from './routes/auth.routes';
 import adminRoutes from './routes/admin.routes';
 import { requestLogger } from './middleware/requestLogger';
+import { metricsMiddleware } from './observability/metrics/metricsMiddleware';
 
 const app = express();
 app.use(requestLogger);
+app.use(metricsMiddleware);
 app.set('trust proxy', true);
 
 app.use(compression());
