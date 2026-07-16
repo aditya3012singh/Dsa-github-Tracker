@@ -37,3 +37,10 @@ export const redisErrorsTotal = new client.Counter({
     labelNames: ["operation"],
     registers: [register]
 });
+
+export const redisQueueLength = new client.Gauge({
+    name: "coding_analytics_redis_queue_length",
+    help: "Number of items currently waiting in a Redis queue",
+    labelNames: ["queue_name"],
+    registers: [register]
+});
