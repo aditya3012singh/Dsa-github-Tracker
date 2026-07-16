@@ -10,6 +10,12 @@ import {
     redisErrorsTotal,
     redisOperationDuration
 } from "./redisMetrics";
+import {
+    prismaQueriesTotal,
+    prismaQueryDuration,
+    prismaSlowQueriesTotal,
+    prismaErrorsTotal
+} from "./prismaMetrics";
 
 export type HttpLabels = {
     method: string;
@@ -54,14 +60,17 @@ export const metrics = {
     },
 
     prisma: {
-        recordQuery(durationSeconds: number) {
-            // TODO
+        recordQuery(model: string, operation: string, status: string) {
+            prismaQueriesTotal.inc({ model, operation, status });
         },
-        recordSlowQuery(durationSeconds: number) {
-            // TODO
+        recordDuration(model: string, operation: string, durationSeconds: number) {
+            prismaQueryDuration.observe({ model, operation }, durationSeconds);
         },
-        recordTransaction(durationSeconds: number) {
-            // TODO
+        recordSlowQuery(model: string, operation: string) {
+            prismaSlowQueriesTotal.inc({ model, operation });
+        },
+        recordError(model: string, operation: string) {
+            prismaErrorsTotal.inc({ model, operation });
         }
     },
 
