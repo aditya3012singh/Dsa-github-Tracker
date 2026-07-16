@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../config/db';
 import { redisConnection } from '../config/redis';
+import { cache } from '../services/cache/RedisCacheService';
 import { calculateOverallScore } from '../utils/scoring';
 import { AuthRequest } from '../middleware/auth';
 import { logger } from '../utils/logger';
@@ -172,10 +173,10 @@ export const getLeaderboard = async (req: AuthRequest, res: Response, next: Next
 
     try {
       // Fetch current cache version
-      const version = await redisConnection.get('leaderboard:version') || '0';
+      const version = await cache.get('leaderboard', 'leaderboard:version') || '0';
       const cacheKey = `leaderboard:v3:v${version}:${JSON.stringify({ page, limit, sortBy, order, search, yearFilter, branchFilter, sectionFilter })}`;
 
-      const cached = await redisConnection.get(cacheKey);
+      const cached = await cache.get('leaderboard', cacheKey);
       if (cached) {
         ({ data: leaderboardData, total: totalCount } = JSON.parse(cached));
         source = 'redis';
@@ -192,7 +193,7 @@ export const getLeaderboard = async (req: AuthRequest, res: Response, next: Next
                 select: LEADERBOARD_SELECT,
                 orderBy,
                 skip,
-                take: limit,
+                take: limit,// 4. Handle Authenticated User Rank
               }),
               prisma.student.count({ where })
             ]);
@@ -216,7 +217,7 @@ export const getLeaderboard = async (req: AuthRequest, res: Response, next: Next
             }));
 
             // Cache for 5 minutes (300s) to keep it fresh and reduce DB load
-            await redisConnection.setex(cacheKey, 300, JSON.stringify({ data: enrichedData, total: count }));
+            await cache.set('leaderboard', cacheKey, JSON.stringify({ data: enrichedData, total: count }), 300);
 
             return { data: enrichedData, total: count };
           })();

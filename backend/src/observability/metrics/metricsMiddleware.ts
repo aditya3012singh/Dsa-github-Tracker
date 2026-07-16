@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { httpRequestsTotal, httpRequestDuration, inFlightRequests, httpRequestErrorsTotal } from "./httpMetrics";
+import { metrics } from "./metrics";
 
 export function metricsMiddleware(
     req: Request,
@@ -18,7 +18,7 @@ export function metricsMiddleware(
     }
 
     // 1. Increment the in-flight gauge immediately
-    inFlightRequests.inc();
+    metrics.http.requestStarted();
 
     const start = process.hrtime.bigint();
     let finished = false;
@@ -40,21 +40,15 @@ export function metricsMiddleware(
             method: req.method,
             route,
             status: String(res.statusCode)
-        } as const;
+        };
 
-        // 2. Increment the request counter
-        httpRequestsTotal.inc(labels);
-
-        // 3. Record the histogram duration in seconds
-        httpRequestDuration.observe(labels, durationInSeconds);
+        // 2 & 3 & 5. Record request completion (decrements gauge, increments counter, observes duration)
+        metrics.http.requestCompleted(labels, durationInSeconds);
 
         // 4. Increment the error counter if the status code is >= 500
         if (res.statusCode >= 500) {
-            httpRequestErrorsTotal.inc(labels);
+            metrics.http.requestFailed(labels);
         }
-
-        // 5. Decrement the in-flight gauge
-        inFlightRequests.dec();
     };
 
     // Listen to both finish and close to prevent gauge leaks if the client disconnects prematurely

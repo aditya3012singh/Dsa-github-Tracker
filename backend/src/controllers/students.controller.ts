@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../config/db';
 import { redisConnection } from '../config/redis';
+import { cache } from '../services/cache/RedisCacheService';
 import { statsQueue, userSyncQueue } from '../queues/stats.queue';
 import { logger } from '../utils/logger';
 import { AuthRequest } from '../middleware/auth';
@@ -131,7 +132,7 @@ export const updateStudent = async (req: AuthRequest, res: Response, next: NextF
 
     // Invalidate cache
     await redisConnection.incr('leaderboard:version');
-    await redisConnection.del(`student:profile:${student.id}`);
+    await cache.del('student', `student:profile:${student.id}`);
 
     res.json({ status: 'success', data: { id: student.id, name: student.name, section: student.section } });
   } catch (error) {
@@ -165,7 +166,7 @@ export const updateProfile = async (req: AuthRequest, res: Response, next: NextF
 
     // Invalidate leaderboard cache
     await redisConnection.incr('leaderboard:version');
-    await redisConnection.del(`student:profile:${student.id}`);
+    await cache.del('student', `student:profile:${student.id}`);
 
     res.json({ status: 'success', data: student });
   } catch (error) {
@@ -230,7 +231,7 @@ export const getStudentById = async (req: Request, res: Response, next: NextFunc
 
     // Try Redis cache first
     try {
-      const cached = await redisConnection.get(cacheKey);
+      const cached = await cache.get('student', cacheKey);
       if (cached) {
         return res.json({ status: 'success', data: JSON.parse(cached), source: 'redis' });
       }
@@ -293,7 +294,7 @@ export const getStudentById = async (req: Request, res: Response, next: NextFunc
 
     // Cache in Redis for 5 minutes (300 seconds)
     try {
-      await redisConnection.setex(cacheKey, 300, JSON.stringify(data));
+      await cache.set('student', cacheKey, JSON.stringify(data), 300);
     } catch (cacheErr) {
       logger.error('Redis Profile Cache Write Error:', cacheErr);
     }

@@ -1,5 +1,5 @@
 import Redis from 'ioredis';
-import { logger } from '../utils/logger';
+import { logger } from '../observability/logger/logger';
 
 const rawRedisURL = process.env.REDIS_URL;
 const redisHost = process.env.REDIS_HOST || '127.0.0.1';
