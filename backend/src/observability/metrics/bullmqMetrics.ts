@@ -37,6 +37,14 @@ export const queueJobDuration = new client.Histogram({
     registers: [register]
 });
 
+export const queueJobWaitTime = new client.Histogram({
+    name: "coding_analytics_queue_job_wait_time_seconds",
+    help: "Queue job wait time before processing",
+    labelNames: ["queue"],
+    buckets: [0.1, 0.5, 1, 2, 5, 10, 30, 60, 120, 300],
+    registers: [register]
+});
+
 export const queueActiveJobs = new client.Gauge({
     name: "coding_analytics_queue_active_jobs",
     help: "Active jobs currently running",

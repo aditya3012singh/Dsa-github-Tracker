@@ -22,7 +22,8 @@ import {
     queueJobsFailedTotal,
     queueJobsRetriedTotal,
     queueJobDuration,
-    queueActiveJobs
+    queueActiveJobs,
+    queueJobWaitTime
 } from "./bullmqMetrics";
 
 export type HttpLabels = {
@@ -97,6 +98,9 @@ export const metrics = {
         },
         recordDuration(queue: string, durationSeconds: number) {
             queueJobDuration.observe({ queue }, durationSeconds);
+        },
+        recordWaitTime(queue: string, waitTimeSeconds: number) {
+            queueJobWaitTime.observe({ queue }, waitTimeSeconds);
         },
         incActiveJobs(queue: string) {
             queueActiveJobs.inc({ queue });

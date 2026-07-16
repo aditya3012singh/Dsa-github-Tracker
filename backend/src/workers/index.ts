@@ -55,34 +55,48 @@ const processJob = async (job: Job) => {
   }
 };
 
+function classifyError(error: any): string {
+    const msg = error?.message?.toLowerCase() || "";
+    if (msg.includes("timeout")) return "timeout";
+    if (msg.includes("redis") || msg.includes("ioredis")) return "redis_error";
+    if (msg.includes("fetch") || msg.includes("api") || msg.includes("axios")) return "api_error";
+    if (msg.includes("prisma") || msg.includes("db") || msg.includes("database")) return "db_error";
+    return error?.name || "unknown_error";
+}
+
 function createInstrumentedWorker(queueName: string, processor: Processor, options: Omit<WorkerOptions, 'connection'> & { connection?: any }) {
-    const wrappedProcessor = async (job: Job) => {
+    const executeJob = async (job: Job) => {
         metrics.queue.incActiveJobs(queueName);
         metrics.queue.jobStarted(queueName);
+        
+        if (job.timestamp) {
+            const waitTimeSeconds = (Date.now() - job.timestamp) / 1000;
+            metrics.queue.recordWaitTime(queueName, waitTimeSeconds);
+        }
+        
         const start = process.hrtime.bigint();
         
         try {
             const result = await processor(job);
-            const durationSeconds = Number(process.hrtime.bigint() - start) / 1e9;
-            
             metrics.queue.jobCompleted(queueName);
-            metrics.queue.recordDuration(queueName, durationSeconds);
-            
             return result;
         } catch (error: any) {
-            const durationSeconds = Number(process.hrtime.bigint() - start) / 1e9;
-            const reason = error.name || "UnknownError";
-            
+            const reason = classifyError(error);
             metrics.queue.jobFailed(queueName, reason);
-            metrics.queue.recordDuration(queueName, durationSeconds);
+            
+            if (job.attemptsMade > 0) {
+                metrics.queue.jobRetried(queueName);
+            }
             
             throw error;
         } finally {
+            const durationSeconds = Number(process.hrtime.bigint() - start) / 1e9;
+            metrics.queue.recordDuration(queueName, durationSeconds);
             metrics.queue.decActiveJobs(queueName);
         }
     };
 
-    const worker = new Worker(queueName, wrappedProcessor, {
+    const worker = new Worker(queueName, executeJob, {
         connection: options.connection || redisConnection,
         ...options
     });
