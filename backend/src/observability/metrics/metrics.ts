@@ -25,6 +25,24 @@ import {
     queueActiveJobs,
     queueJobWaitTime
 } from "./bullmqMetrics";
+import {
+    studentRefreshTotal,
+    studentRefreshDuration,
+    externalApiRequestsTotal,
+    externalApiDuration,
+    leaderboardRefreshTotal,
+    leaderboardRefreshDuration
+} from "./businessMetrics";
+
+// Moved types to types.ts to avoid circular dependencies if needed, or defined inline:
+export enum ExternalApiResult {
+    SUCCESS = "SUCCESS",
+    RATE_LIMIT = "RATE_LIMIT",
+    TIMEOUT = "TIMEOUT",
+    NOT_FOUND = "NOT_FOUND",
+    SERVER_ERROR = "SERVER_ERROR",
+    UNKNOWN = "UNKNOWN"
+}
 
 export type HttpLabels = {
     method: string;
@@ -111,17 +129,23 @@ export const metrics = {
     },
 
     business: {
-        studentSyncSuccess() {
-            // TODO
+        startStudentRefresh(platform: string) {
+            const start = process.hrtime.bigint();
+            return (success: boolean) => {
+                const durationSeconds = Number(process.hrtime.bigint() - start) / 1e9;
+                studentRefreshTotal.inc({ platform, status: success ? "success" : "failure" });
+                studentRefreshDuration.observe({ platform }, durationSeconds);
+            };
         },
-        studentSyncFailure() {
-            // TODO
+        externalApi(platform: string, status: ExternalApiResult | string) {
+            externalApiRequestsTotal.inc({ platform, status });
+        },
+        externalApiLatency(platform: string, durationSeconds: number) {
+            externalApiDuration.observe({ platform }, durationSeconds);
         },
         leaderboardRefresh(durationSeconds: number) {
-            // TODO
-        },
-        leetcodeApiFailure() {
-            // TODO
+            leaderboardRefreshTotal.inc();
+            leaderboardRefreshDuration.observe(durationSeconds);
         }
     }
 };

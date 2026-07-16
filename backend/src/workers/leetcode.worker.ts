@@ -2,18 +2,36 @@ import { Job } from 'bullmq';
 import { leetcodeService } from '../services/leetcode.service';
 import { logger } from '../utils/logger';
 import { sanitizeHandle } from '../utils/sanitizer';
-import { redisConnection } from '../config/redis';
+import { bufferService } from '../services/buffer/BufferService';
+import { metrics, ExternalApiResult } from '../observability/metrics/metrics';
 
 export const processLeetcode = async (job: Job) => {
   const { studentId, handle } = job.data;
+  const platform = 'leetcode';
+  const finishRefresh = metrics.business.startStudentRefresh(platform);
   
   try {
-    const cleanHandle = sanitizeHandle(handle, 'leetcode');
-    const stats = await leetcodeService(cleanHandle);
+    const cleanHandle = sanitizeHandle(handle, platform);
+    
+    const apiStart = process.hrtime.bigint();
+    let stats;
+    try {
+      stats = await leetcodeService(cleanHandle);
+      const apiDuration = Number(process.hrtime.bigint() - apiStart) / 1e9;
+      metrics.business.externalApiLatency(platform, apiDuration);
+      metrics.business.externalApi(platform, ExternalApiResult.SUCCESS);
+    } catch (apiError: any) {
+      const apiDuration = Number(process.hrtime.bigint() - apiStart) / 1e9;
+      metrics.business.externalApiLatency(platform, apiDuration);
+      
+      const isRateLimit = apiError.message?.includes('429') || apiError.message?.toLowerCase().includes('rate limit');
+      metrics.business.externalApi(platform, isRateLimit ? ExternalApiResult.RATE_LIMIT : ExternalApiResult.SERVER_ERROR);
+      throw apiError;
+    }
     
     const packet = {
       studentId,
-      platform: 'leetcode',
+      platform,
       status: 'COMPLETED',
       data: {
         leetcodeSolved: stats.leetcodeSolved,
@@ -23,19 +41,23 @@ export const processLeetcode = async (job: Job) => {
       }
     };
 
-    await redisConnection.lpush('db_write_buffer', JSON.stringify(packet));
+    await bufferService.enqueue('db_write_buffer', packet);
     logger.info(`Buffered LeetCode update for student ${studentId}`);
+    
+    finishRefresh(true);
   } catch (error: any) {
     logger.error(`Failed to process LeetCode for student ${studentId}: ${error.message}`);
     
     const packet = {
       studentId,
-      platform: 'leetcode',
+      platform,
       status: 'FAILED'
     };
-    await redisConnection.lpush('db_write_buffer', JSON.stringify(packet));
+    await bufferService.enqueue('db_write_buffer', packet);
     
     await backoffOnRateLimit(error);
+    
+    finishRefresh(false);
     throw error;
   }
 };
