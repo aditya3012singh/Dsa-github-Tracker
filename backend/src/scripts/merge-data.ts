@@ -7,7 +7,8 @@ interface StudentRecord {
   rollNo: string | null;
   email: string | null;
   branch: string;
-  year: number;
+  graduationYear: number;
+  courseDuration: number;
   section: string | null;
   leetcodeHandle: string | null;
   codeforcesHandle: string | null;
@@ -211,7 +212,7 @@ function addOrMergeStudent(rawStudent: Partial<StudentRecord>) {
     rollNo: rollNo,
     email: cleanEmail || (existing ? existing.email : null),
     branch: normalizeBranch(rawStudent.branch) || (existing ? existing.branch : 'Unknown'),
-    year: parseYear(String(rawStudent.year)) || (existing ? existing.year : 0),
+    graduationYear: 2027, courseDuration: 4, // year: parseYear(String(rawStudent.year)) || (existing ? existing.year : 0),
     section: cleanSection || (existing ? existing.section : null),
     leetcodeHandle: cleanHandle(rawStudent.leetcodeHandle) || (existing ? existing.leetcodeHandle : null),
     codeforcesHandle: cleanHandle(rawStudent.codeforcesHandle) || (existing ? existing.codeforcesHandle : null),
@@ -271,7 +272,7 @@ function processTSV(filename: string) {
       libraryId: libIdIdx !== -1 ? cols[libIdIdx] : undefined,
       rollNo: rollNoIdx !== -1 ? cols[rollNoIdx] : undefined,
       name: nameIdx !== -1 ? cols[nameIdx] : undefined,
-      year: yearIdx !== -1 ? parseYear(cols[yearIdx]) : undefined,
+      graduationYear: 2027, courseDuration: 4, // year: yearIdx !== -1 ? parseYear(cols[yearIdx]) : undefined,
       branch: branchIdx !== -1 ? cols[branchIdx] : undefined,
       section: secIdx !== -1 ? cols[secIdx] : undefined,
       email: emailIdx !== -1 ? cols[emailIdx] : undefined,
@@ -302,7 +303,7 @@ function processJSON(filename: string) {
       libraryId,
       name: item.name,
       branch: item.branch,
-      year: item.year,
+      graduationYear: 2027, courseDuration: 4, // year: item.year,
       leetcodeHandle: item.leetcodeHandle,
       codeforcesHandle: item.codeforcesHandle,
       gfgHandle: item.gfgHandle,
@@ -395,7 +396,7 @@ function processXLSX(filename: string) {
         name,
         email,
         branch,
-        year: year ? parseYear(year) : undefined,
+        graduationYear: 2027, courseDuration: 4, // year: year ? parseYear(year) : undefined,
         section,
         leetcodeHandle,
         codeforcesHandle,
@@ -481,7 +482,7 @@ function processCSV(filename: string) {
       name: nameIdx !== -1 ? cols[nameIdx] : undefined,
       email: email || undefined,
       branch: courseIdx !== -1 ? cols[courseIdx] : undefined,
-      year: 3, // Batch 2027 is 3rd Year
+      graduationYear: 2027, courseDuration: 4, // year: 3, // Batch 2027 is 3rd Year
       leetcodeHandle: leetcodeIdx !== -1 ? cols[leetcodeIdx] : undefined,
       codeforcesHandle: cfIdx !== -1 ? cols[cfIdx] : undefined,
       gfgHandle: gfgIdx !== -1 ? cols[gfgIdx] : undefined,

@@ -46,7 +46,7 @@ async function main() {
           libraryId,
           rollNo: student.rollNo,
           branch: student.branch,
-          year: student.year,
+          graduationYear: student.year ? 2026 + (4 - student.year) : 2027, courseDuration: 4,
           leetcodeHandle: student.leetcodeHandle || null,
           codeforcesHandle: student.codeforcesHandle || null,
           gfgHandle: student.gfgHandle || null,

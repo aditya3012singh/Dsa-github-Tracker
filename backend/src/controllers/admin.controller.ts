@@ -41,7 +41,7 @@ export const bulkRegisterStudents = async (req: Request, res: Response, next: Ne
 
     for (const raw of rawStudents) {
       const studentInput = raw as StudentInput;
-      const { name, libraryId, rollNo, email, branch, year: rawYear, section, leetcodeHandle, codeforcesHandle, gfgHandle, codechefHandle, githubHandle, linkedIn, password } = studentInput;
+      const { name, libraryId, rollNo, email, branch, year: rawYear, graduationYear, courseDuration, section, leetcodeHandle, codeforcesHandle, gfgHandle, codechefHandle, githubHandle, linkedIn, password } = studentInput;
 
       // 1. Validation
       if (!name || typeof name !== 'string' || !name.trim()) {

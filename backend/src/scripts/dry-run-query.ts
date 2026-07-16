@@ -7,7 +7,7 @@ const LEADERBOARD_SELECT = {
   rollNo: true,
   libraryId: true,
   branch: true,
-  year: true,
+  graduationYear: true,
   section: true,
   codingStats: {
     select: {

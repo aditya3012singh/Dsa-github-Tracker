@@ -66,7 +66,7 @@ async function main() {
       name: cols[2],             // Student Name
       rollNo: cols[3] || cols[1],// Library ID (fallback to Uni Roll)
       branch: cols[6],           // Branch
-      year: parseYear(cols[4]),  // Year
+      graduationYear: 2027, courseDuration: 4, // year: parseYear(cols[4]),
       leetcodeHandle: cleanHandle(cols[11]),
       codechefHandle: cleanHandle(cols[12]),
       codeforcesHandle: cleanHandle(cols[13]),

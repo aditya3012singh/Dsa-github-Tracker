@@ -112,7 +112,7 @@ async function main() {
           codechefHandle: cleanHandle(codechef),
           githubHandle: cleanHandle(github),
           branch: branch,
-          year: year,
+          graduationYear: year ? 2026 + (4 - year) : 2027, courseDuration: 4,
           // rollNo remains as is or set to null if it was the messy one
         },
         create: {
@@ -121,7 +121,7 @@ async function main() {
           rollNo: null, // User said "make that field empty"
           email: cleanHandle(email),
           branch: branch,
-          year: year,
+          graduationYear: year ? 2026 + (4 - year) : 2027, courseDuration: 4,
           section: cleanHandle(section),
           leetcodeHandle: cleanHandle(leetcode),
           codeforcesHandle: cleanHandle(codeforces),
