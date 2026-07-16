@@ -11,7 +11,7 @@ const Register = () => {
     email: '',
     password: '',
     branch: '',
-    year: '2',
+    graduationYear: '2027',
     leetcodeHandle: '',
     githubHandle: '',
     codeforcesHandle: '',
@@ -31,7 +31,7 @@ const Register = () => {
     try {
       await register({
         ...formData,
-        year: parseInt(formData.year)
+        graduationYear: parseInt(formData.graduationYear)
       }).unwrap();
       setTimeout(() => navigate('/login'), 2000);
     } catch (err) {
@@ -81,12 +81,14 @@ const Register = () => {
                 </select>
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-xs font-semibold text-text-dim uppercase tracking-wider">Year</label>
-                <select name="year" value={formData.year} onChange={handleChange} required className="w-full bg-bg-glass border border-border px-4 py-3 rounded-xl text-white outline-none focus:border-primary transition-all text-sm">
-                  <option value="1" className='bg-bg-dark'>1st Year</option>
-                  <option value="2" className='bg-bg-dark'>2nd Year</option>
-                  <option value="3" className='bg-bg-dark'>3rd Year</option>
-                  <option value="4" className='bg-bg-dark'>4th Year</option>
+                <label className="text-xs font-semibold text-text-dim uppercase tracking-wider">Passout Batch</label>
+                <select name="graduationYear" value={formData.graduationYear} onChange={handleChange} required className="w-full bg-bg-glass border border-border px-4 py-3 rounded-xl text-white outline-none focus:border-primary transition-all text-sm">
+                  <option value="2025" className='bg-bg-dark'>Batch 2025</option>
+                  <option value="2026" className='bg-bg-dark'>Batch 2026</option>
+                  <option value="2027" className='bg-bg-dark'>Batch 2027</option>
+                  <option value="2028" className='bg-bg-dark'>Batch 2028</option>
+                  <option value="2029" className='bg-bg-dark'>Batch 2029</option>
+                  <option value="2030" className='bg-bg-dark'>Batch 2030</option>
                 </select>
               </div>
             </div>

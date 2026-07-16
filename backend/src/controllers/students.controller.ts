@@ -25,7 +25,9 @@ export const getStudents = async (req: Request, res: Response, next: NextFunctio
         rollNo: student.rollNo,
         email: student.email,
         branch: student.branch,
-        year: student.year,
+        graduationYear: student.graduationYear,
+        courseDuration: student.courseDuration,
+        year: student.courseDuration ? student.courseDuration - (student.graduationYear - 2026) : 0,
         section: student.section,
         linkedIn: student.linkedIn,
         leetcode: {
@@ -75,7 +77,8 @@ export const createStudent = async (req: Request, res: Response, next: NextFunct
       rollNo, // Keep rollNo for creation if it's still a field in the DB
       libraryId, // Add libraryId for creation
       branch,
-      year,
+      graduationYear,
+      courseDuration,
       leetcodeHandle,
       codeforcesHandle,
       gfgHandle,
@@ -90,7 +93,8 @@ export const createStudent = async (req: Request, res: Response, next: NextFunct
         rollNo,
         libraryId, // Assign libraryId
         branch,
-        year,
+        graduationYear,
+        courseDuration,
         leetcodeHandle: sanitizeHandle(leetcodeHandle, 'leetcode'),
         codeforcesHandle: sanitizeHandle(codeforcesHandle, 'codeforces'),
         gfgHandle: sanitizeHandle(gfgHandle, 'gfg'),
@@ -256,7 +260,9 @@ export const getStudentById = async (req: Request, res: Response, next: NextFunc
       rollNo: student.rollNo,
       email: student.email,
       branch: student.branch,
-      year: student.year,
+      graduationYear: student.graduationYear,
+      courseDuration: student.courseDuration,
+      year: student.courseDuration ? student.courseDuration - (student.graduationYear - 2026) : 0,
       section: student.section,
       linkedIn: student.linkedIn,
       leetcode: {
@@ -411,7 +417,9 @@ export const getOnlineStudents = async (req: Request, res: Response, next: NextF
         rollNo: student.rollNo,
         email: student.email,
         branch: student.branch,
-        year: student.year,
+        graduationYear: student.graduationYear,
+        courseDuration: student.courseDuration,
+        year: student.courseDuration ? student.courseDuration - (student.graduationYear - 2026) : 0,
         section: student.section,
         linkedIn: student.linkedIn,
         leetcode: {

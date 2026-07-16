@@ -14,7 +14,8 @@ model Student {
   rollNo           String?
   email            String?   @unique
   branch           String
-  year             Int
+  graduationYear   Int       @default(2027)
+  courseDuration   Int       @default(4)
   section          String?
   leetcodeHandle   String?
   codeforcesHandle String?
@@ -29,7 +30,7 @@ model Student {
   // Relations
   codingStats      CodingStats?
 
-  @@index([year])
+  @@index([graduationYear])
   @@index([branch])
   @@index([section])
 }

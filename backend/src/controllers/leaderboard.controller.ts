@@ -16,7 +16,8 @@ const LEADERBOARD_SELECT = {
   rollNo: true,
   libraryId: true,
   branch: true,
-  year: true,
+  graduationYear: true,
+  courseDuration: true,
   section: true,
   linkedIn: true,
   leetcodeHandle: true,
@@ -57,7 +58,9 @@ const mapStudentToLeaderboard = (student: any) => {
     rollNo: student.rollNo,
     libraryId: student.libraryId,
     branch: student.branch,
-    year: student.year,
+    graduationYear: student.graduationYear,
+    courseDuration: student.courseDuration,
+    year: student.courseDuration ? student.courseDuration - (student.graduationYear - 2026) : 0,
     section: student.section,
     linkedIn: student.linkedIn,
     totalSolved: stats?.totalSolved || 0,
@@ -108,13 +111,31 @@ export const getLeaderboard = async (req: AuthRequest, res: Response, next: Next
     const branchFilter = req.query.branch as string;
     const sectionFilter = req.query.section as string;
 
+    const academicYear = 2026;
+    
     // 1. Build the Prisma Where Clause for filtering
     const where: any = {
-      codingStats: { isNot: null }
+      codingStats: { isNot: null },
+      graduationYear: { gte: academicYear } // Filter out Alumni
     };
 
     if (yearFilter && yearFilter !== 'All') {
-      where.year = parseInt(yearFilter);
+      const yearInt = parseInt(yearFilter);
+      const btechGradYear = academicYear + (4 - yearInt);
+      const mcaGradYear = academicYear + (2 - yearInt);
+      
+      const yearConditions = [
+        { courseDuration: 4, graduationYear: btechGradYear },
+        { courseDuration: 2, graduationYear: mcaGradYear }
+      ];
+      
+      // If there's already an OR (unlikely at this stage, but safe practice)
+      if (where.OR) {
+         where.AND = [ { OR: where.OR }, { OR: yearConditions } ];
+         delete where.OR;
+      } else {
+         where.OR = yearConditions;
+      }
     }
 
     if (branchFilter && branchFilter !== 'All') {
@@ -369,13 +390,30 @@ export const exportLeaderboard = async (req: AuthRequest, res: Response, next: N
     const sectionFilter = req.query.section as string;
     const onlineFilter = req.query.online === 'true';
 
+    const academicYear = 2026;
+    
     // 1. Build the Prisma Where Clause for filtering
     const where: any = {
-      codingStats: { isNot: null }
+      codingStats: { isNot: null },
+      graduationYear: { gte: academicYear } // Filter out Alumni
     };
 
     if (yearFilter && yearFilter !== 'All') {
-      where.year = parseInt(yearFilter);
+      const yearInt = parseInt(yearFilter);
+      const btechGradYear = academicYear + (4 - yearInt);
+      const mcaGradYear = academicYear + (2 - yearInt);
+      
+      const yearConditions = [
+        { courseDuration: 4, graduationYear: btechGradYear },
+        { courseDuration: 2, graduationYear: mcaGradYear }
+      ];
+      
+      if (where.OR) {
+         where.AND = [ { OR: where.OR }, { OR: yearConditions } ];
+         delete where.OR;
+      } else {
+         where.OR = yearConditions;
+      }
     }
 
     if (branchFilter && branchFilter !== 'All') {
@@ -453,7 +491,8 @@ export const exportLeaderboard = async (req: AuthRequest, res: Response, next: N
       'Name': s.name,
       'Library ID': s.libraryId,
       'Roll No': s.rollNo || '',
-      'Year': s.year || '',
+      'Batch/Graduation': s.graduationYear || '',
+      'Current Year': s.year || '',
       'Branch': s.branch || '',
       'Section': s.section || '',
       'Total Solved': s.totalSolved || 0,

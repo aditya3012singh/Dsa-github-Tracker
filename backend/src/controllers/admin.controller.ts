@@ -11,7 +11,9 @@ interface StudentInput {
   rollNo?: string;
   email?: string;
   branch: string;
-  year: number | string;
+  year?: number | string;
+  graduationYear?: number | string;
+  courseDuration?: number | string;
   section?: string;
   leetcodeHandle?: string;
   codeforcesHandle?: string;
@@ -60,9 +62,22 @@ export const bulkRegisterStudents = async (req: Request, res: Response, next: Ne
         continue;
       }
 
-      const year = parseInt(rawYear as string, 10);
-      if (isNaN(year)) {
-        results.push({ libraryId, name, status: 'failed', error: 'Year is required and must be a valid integer' });
+      const cleanBranch = branch.trim();
+      let finalGraduationYear = 2027;
+      let finalCourseDuration = parseInt(courseDuration as string, 10) || (cleanBranch.toUpperCase() === 'MCA' ? 2 : 4);
+
+      if (graduationYear !== undefined) {
+        finalGraduationYear = parseInt(graduationYear as string, 10);
+      } else if (rawYear !== undefined) {
+        // Fallback for old CSVs containing 'year'
+        const parsedYear = parseInt(rawYear as string, 10);
+        if (!isNaN(parsedYear)) {
+          finalGraduationYear = 2026 + (finalCourseDuration - parsedYear);
+        }
+      }
+
+      if (isNaN(finalGraduationYear)) {
+        results.push({ libraryId, name, status: 'failed', error: 'Graduation Year (or legacy year) is required and must be a valid integer' });
         failedCount++;
         continue;
       }
@@ -109,8 +124,9 @@ export const bulkRegisterStudents = async (req: Request, res: Response, next: Ne
             libraryId: libraryId.trim(),
             rollNo: rollNo ? rollNo.trim() : null,
             email: email ? email.trim() : null,
-            branch: branch.trim(),
-            year,
+            branch: cleanBranch,
+            graduationYear: finalGraduationYear,
+            courseDuration: finalCourseDuration,
             section: section ? section.trim() : null,
             leetcodeHandle: cleanLeetcode,
             codeforcesHandle: cleanCodeforces,

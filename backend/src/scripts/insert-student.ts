@@ -22,15 +22,16 @@ async function main() {
   const rollNo = getArgValue('rollNo') || null;
   const email = getArgValue('email') || null;
   const branch = getArgValue('branch') || 'CS';
-  const yearStr = getArgValue('year') || '3';
-  const year = parseInt(yearStr, 10);
+  const graduationYearStr = getArgValue('graduationYear') || '2027';
+  const graduationYear = parseInt(graduationYearStr, 10);
   const section = getArgValue('section') || null;
   const leetcodeHandle = getArgValue('leetcodeHandle') || null;
   const linkedIn = getArgValue('linkedIn') || null;
   const rawPassword = getArgValue('password') || 'password123';
 
-  if (isNaN(year)) {
-    throw new Error('Year must be a valid integer.');
+  if (isNaN(graduationYear)) {
+    console.error('Error: graduationYear must be a number.');
+    process.exit(1);
   }
 
   console.log('Connecting to database and hashing password...');
@@ -42,7 +43,7 @@ async function main() {
   console.log(`- Roll No: ${rollNo}`);
   console.log(`- Email: ${email}`);
   console.log(`- Branch: ${branch}`);
-  console.log(`- Year: ${year}`);
+  console.log(`- Graduation Year: ${graduationYear}`);
   console.log(`- Section: ${section}`);
   console.log(`- Leetcode: ${leetcodeHandle}`);
   console.log(`- LinkedIn: ${linkedIn}`);
@@ -55,7 +56,8 @@ async function main() {
       rollNo,
       email,
       branch,
-      year,
+      graduationYear,
+      courseDuration: branch.toUpperCase() === 'MCA' ? 2 : 4,
       section,
       leetcodeHandle,
       linkedIn,

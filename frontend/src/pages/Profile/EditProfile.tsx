@@ -20,7 +20,7 @@ const EditProfile = () => {
     rollNo: '',
     libraryId: '',
     branch: '',
-    year: '',
+    graduationYear: '',
     section: '',
     leetcodeHandle: '',
     githubHandle: '',
@@ -38,7 +38,7 @@ const EditProfile = () => {
         rollNo: s.rollNo || '',
         libraryId: s.libraryId || '',
         branch: s.branch || '',
-        year: s.year?.toString() || '',
+        graduationYear: s.graduationYear?.toString() || '',
         section: s.section || '',
         leetcodeHandle: s.leetcode?.handle || '',
         githubHandle: s.github?.handle || '',
@@ -59,7 +59,7 @@ const EditProfile = () => {
     try {
       await updateProfile({
         ...formData,
-        year: parseInt(formData.year) || 0
+        graduationYear: parseInt(formData.graduationYear) || 2027
       }).unwrap();
       navigate(`/profile/${userId}`);
     } catch (err) {
@@ -120,16 +120,18 @@ const EditProfile = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <SelectGroup
-                label="Year"
+                label="Graduation Batch"
                 icon={<GraduationCap size={18} />}
-                name="year"
-                value={formData.year}
+                name="graduationYear"
+                value={formData.graduationYear}
                 onChange={handleChange}
                 options={[
-                  { value: '1', label: '1st Year' },
-                  { value: '2', label: '2nd Year' },
-                  { value: '3', label: '3rd Year' },
-                  { value: '4', label: '4th Year' },
+                  { value: '2025', label: 'Batch 2025' },
+                  { value: '2026', label: 'Batch 2026' },
+                  { value: '2027', label: 'Batch 2027' },
+                  { value: '2028', label: 'Batch 2028' },
+                  { value: '2029', label: 'Batch 2029' },
+                  { value: '2030', label: 'Batch 2030' },
                 ]}
               />
               <InputGroup label="Section" icon={<Grid size={18} />} name="section" value={formData.section} onChange={handleChange} placeholder="e.g. A" />
