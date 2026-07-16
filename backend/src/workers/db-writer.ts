@@ -154,9 +154,15 @@ export const processBufferBatch = async () => {
       );
     }
 
-    // Execute bulk write
+    // Execute bulk write concurrently in chunks instead of sequential $transaction
+    // This avoids the 9+ second latency bottleneck over remote DB connections.
     if (dbOperations.length > 0) {
-      await prisma.$transaction(dbOperations);
+      const chunkSize = 50;
+      for (let i = 0; i < dbOperations.length; i += chunkSize) {
+        // await prisma.$transaction(dbOperations);
+        const chunkOps = dbOperations.slice(i, i + chunkSize);
+        await Promise.all(chunkOps);
+      }
       logger.info(`Bulk DB write succeeded: updated ${Object.keys(updatedStatsMap).length} student stats and ${Object.keys(latestFetchJobs).length} fetch jobs.`);
     }
 
