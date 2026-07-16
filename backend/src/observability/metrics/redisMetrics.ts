@@ -17,7 +17,7 @@ export const cacheMissesTotal = new client.Counter({
 
 export const redisOperationDuration = new client.Histogram({
     name: "coding_analytics_redis_operation_duration_seconds",
-    help: "Redis operation latency",
+    help: "Redis operation duration",
     labelNames: ["operation"],
     buckets: [
         0.001,
@@ -33,7 +33,7 @@ export const redisOperationDuration = new client.Histogram({
 
 export const redisErrorsTotal = new client.Counter({
     name: "coding_analytics_redis_errors_total",
-    help: "Redis errors",
+    help: "Total Redis errors",
     labelNames: ["operation"],
     registers: [register]
 });

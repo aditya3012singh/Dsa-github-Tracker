@@ -4,6 +4,12 @@ import {
     inFlightRequests,
     httpRequestErrorsTotal
 } from "./httpMetrics";
+import {
+    cacheHitsTotal,
+    cacheMissesTotal,
+    redisErrorsTotal,
+    redisOperationDuration
+} from "./redisMetrics";
 
 export type HttpLabels = {
     method: string;
@@ -29,17 +35,21 @@ export const metrics = {
     },
 
     redis: {
-        recordHit(key: string) {
-            // TODO
+        recordHit(cache: string) {
+            cacheHitsTotal.inc({ cache });
         },
-        recordMiss(key: string) {
-            // TODO
-        },
-        recordLatency(operation: string, durationSeconds: number) {
-            // TODO
+        recordMiss(cache: string) {
+            cacheMissesTotal.inc({ cache });
         },
         recordError(operation: string) {
-            // TODO
+            redisErrorsTotal.inc({ operation });
+        },
+        startTimer(operation: string) {
+            const start = process.hrtime.bigint();
+            return () => {
+                const duration = Number(process.hrtime.bigint() - start) / 1e9;
+                redisOperationDuration.observe({ operation }, duration);
+            };
         }
     },
 
