@@ -1,6 +1,7 @@
-import { Worker, Job } from 'bullmq';
+import { Worker, Job, WorkerOptions, Processor } from 'bullmq';
 import { redisConnection } from '../config/redis';
-import { logger } from '../utils/logger';
+import { logger } from '../observability/logger/logger';
+import { metrics } from '../observability/metrics/metrics';
 
 import { processLeetcode } from './leetcode.worker';
 import { processCodeforces } from './codeforces.worker';
@@ -54,30 +55,55 @@ const processJob = async (job: Job) => {
   }
 };
 
-const worker = new Worker('statsFetchQueue', processJob, {
-  connection: redisConnection as any,
-  concurrency: 3 // Reduced for free tier (512MB RAM) stability
+function createInstrumentedWorker(queueName: string, processor: Processor, options: Omit<WorkerOptions, 'connection'> & { connection?: any }) {
+    const wrappedProcessor = async (job: Job) => {
+        metrics.queue.incActiveJobs(queueName);
+        metrics.queue.jobStarted(queueName);
+        const start = process.hrtime.bigint();
+        
+        try {
+            const result = await processor(job);
+            const durationSeconds = Number(process.hrtime.bigint() - start) / 1e9;
+            
+            metrics.queue.jobCompleted(queueName);
+            metrics.queue.recordDuration(queueName, durationSeconds);
+            
+            return result;
+        } catch (error: any) {
+            const durationSeconds = Number(process.hrtime.bigint() - start) / 1e9;
+            const reason = error.name || "UnknownError";
+            
+            metrics.queue.jobFailed(queueName, reason);
+            metrics.queue.recordDuration(queueName, durationSeconds);
+            
+            throw error;
+        } finally {
+            metrics.queue.decActiveJobs(queueName);
+        }
+    };
+
+    const worker = new Worker(queueName, wrappedProcessor, {
+        connection: options.connection || redisConnection,
+        ...options
+    });
+    
+    worker.on('completed', (job: Job) => {
+        logger.info(`Job ${job.id} on queue ${queueName} completed successfully`);
+    });
+
+    worker.on('failed', (job: Job | undefined, err: Error) => {
+        logger.error(`Job ${job?.id} on queue ${queueName} failed`, { error: err.message });
+    });
+    
+    return worker;
+}
+
+const worker = createInstrumentedWorker('statsFetchQueue', processJob, {
+  concurrency: 3
 });
 
-const userSyncWorker = new Worker('userSyncFetchQueue', processJob, {
-  connection: redisConnection as any,
-  concurrency: 5 // Slightly higher concurrency for user syncs for responsiveness
-});
-
-worker.on('completed', async (job: Job) => {
-  logger.info(`Background job ${job.id} completed successfully`);
-});
-
-worker.on('failed', (job: Job | undefined, err: Error) => {
-  logger.error(`Background job ${job?.id} failed with error ${err.message}`);
-});
-
-userSyncWorker.on('completed', async (job: Job) => {
-  logger.info(`User-triggered job ${job.id} completed successfully`);
-});
-
-userSyncWorker.on('failed', (job: Job | undefined, err: Error) => {
-  logger.error(`User-triggered job ${job?.id} failed with error ${err.message}`);
+const userSyncWorker = createInstrumentedWorker('userSyncFetchQueue', processJob, {
+  concurrency: 5
 });
 
 logger.info('Workers initialized: statsFetchQueue (background) and userSyncFetchQueue (user-triggered).');

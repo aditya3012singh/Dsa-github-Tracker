@@ -16,6 +16,14 @@ import {
     prismaSlowQueriesTotal,
     prismaErrorsTotal
 } from "./prismaMetrics";
+import {
+    queueJobsStartedTotal,
+    queueJobsCompletedTotal,
+    queueJobsFailedTotal,
+    queueJobsRetriedTotal,
+    queueJobDuration,
+    queueActiveJobs
+} from "./bullmqMetrics";
 
 export type HttpLabels = {
     method: string;
@@ -75,17 +83,26 @@ export const metrics = {
     },
 
     queue: {
-        jobStarted() {
-            // TODO
+        jobStarted(queue: string) {
+            queueJobsStartedTotal.inc({ queue });
         },
-        jobCompleted() {
-            // TODO
+        jobCompleted(queue: string) {
+            queueJobsCompletedTotal.inc({ queue });
         },
-        jobFailed() {
-            // TODO
+        jobFailed(queue: string, reason: string) {
+            queueJobsFailedTotal.inc({ queue, reason });
         },
-        jobRetried() {
-            // TODO
+        jobRetried(queue: string) {
+            queueJobsRetriedTotal.inc({ queue });
+        },
+        recordDuration(queue: string, durationSeconds: number) {
+            queueJobDuration.observe({ queue }, durationSeconds);
+        },
+        incActiveJobs(queue: string) {
+            queueActiveJobs.inc({ queue });
+        },
+        decActiveJobs(queue: string) {
+            queueActiveJobs.dec({ queue });
         }
     },
 
