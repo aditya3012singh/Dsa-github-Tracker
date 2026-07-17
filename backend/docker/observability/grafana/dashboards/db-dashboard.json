@@ -1,0 +1,240 @@
+{
+  "title": "🗄️ PostgreSQL / Prisma Dashboard",
+  "uid": "prisma-dashboard",
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "version": 1,
+  "timezone": "browser",
+  "editable": true,
+  "tags": [
+    "prisma",
+    "postgres",
+    "observability",
+    "coding-analytics"
+  ],
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "model",
+        "type": "query",
+        "query": "label_values(coding_analytics_prisma_queries_total, model)",
+        "refresh": 1,
+        "includeAll": true,
+        "multi": true,
+        "allValue": ".*"
+      },
+      {
+        "name": "operation",
+        "type": "query",
+        "query": "label_values(coding_analytics_prisma_queries_total, operation)",
+        "refresh": 1,
+        "includeAll": true,
+        "multi": true,
+        "allValue": ".*"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Queries / sec",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(coding_analytics_prisma_queries_total{model=~\"$model\", operation=~\"$operation\"}[$__rate_interval]))",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "reqps" } },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" }
+    },
+    {
+      "id": 2,
+      "title": "Avg Latency",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 0 },
+      "targets": [
+        {
+          "expr": "(sum(rate(coding_analytics_prisma_query_duration_seconds_sum{model=~\"$model\", operation=~\"$operation\"}[$__rate_interval])) / clamp_min(sum(rate(coding_analytics_prisma_query_duration_seconds_count{model=~\"$model\", operation=~\"$operation\"}[$__rate_interval])), 1)) * 1000",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 20 },
+              { "color": "red", "value": 100 }
+            ]
+          }
+        }
+      },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" }
+    },
+    {
+      "id": 3,
+      "title": "Slow Queries",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(coding_analytics_prisma_slow_queries_total{model=~\"$model\", operation=~\"$operation\"}[$__rate_interval]))",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1 },
+              { "color": "red", "value": 5 }
+            ]
+          }
+        }
+      },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" }
+    },
+    {
+      "id": 4,
+      "title": "Error Rate",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 0 },
+      "targets": [
+        {
+          "expr": "100 * sum(rate(coding_analytics_prisma_errors_total{model=~\"$model\", operation=~\"$operation\"}[$__rate_interval])) / clamp_min(sum(rate(coding_analytics_prisma_queries_total{model=~\"$model\", operation=~\"$operation\"}[$__rate_interval])), 1)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1 },
+              { "color": "red", "value": 5 }
+            ]
+          }
+        }
+      },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" }
+    },
+    {
+      "id": 5,
+      "title": "Query Throughput Over Time",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 6 },
+      "targets": [
+        {
+          "expr": "sum(rate(coding_analytics_prisma_queries_total{model=~\"$model\", operation=~\"$operation\"}[$__rate_interval]))",
+          "refId": "A",
+          "legendFormat": "Queries/sec"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "reqps" } }
+    },
+    {
+      "id": 6,
+      "title": "Query Latency by Model",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 14 },
+      "targets": [
+        {
+          "expr": "(sum by(model)(rate(coding_analytics_prisma_query_duration_seconds_sum{model=~\"$model\", operation=~\"$operation\"}[$__rate_interval])) / clamp_min(sum by(model)(rate(coding_analytics_prisma_query_duration_seconds_count{model=~\"$model\", operation=~\"$operation\"}[$__rate_interval])), 1)) * 1000",
+          "refId": "A",
+          "legendFormat": "{{model}}"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ms" } }
+    },
+    {
+      "id": 7,
+      "title": "Query Latency by Operation",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 14 },
+      "targets": [
+        {
+          "expr": "(sum by(operation)(rate(coding_analytics_prisma_query_duration_seconds_sum{model=~\"$model\", operation=~\"$operation\"}[$__rate_interval])) / clamp_min(sum by(operation)(rate(coding_analytics_prisma_query_duration_seconds_count{model=~\"$model\", operation=~\"$operation\"}[$__rate_interval])), 1)) * 1000",
+          "refId": "A",
+          "legendFormat": "{{operation}}"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ms" } }
+    },
+    {
+      "id": 8,
+      "title": "Top Queried Models",
+      "type": "barchart",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 22 },
+      "targets": [
+        {
+          "expr": "topk(10, sum by(model)(rate(coding_analytics_prisma_queries_total{model=~\"$model\", operation=~\"$operation\"}[$__rate_interval])))",
+          "refId": "A",
+          "legendFormat": "{{model}}"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "reqps" } },
+      "options": { "orientation": "horizontal" }
+    },
+    {
+      "id": 9,
+      "title": "Slow Queries by Model",
+      "type": "barchart",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 22 },
+      "targets": [
+        {
+          "expr": "sum by(model)(rate(coding_analytics_prisma_slow_queries_total{model=~\"$model\", operation=~\"$operation\"}[$__rate_interval]))",
+          "refId": "A",
+          "legendFormat": "{{model}}"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short" } },
+      "options": { "orientation": "horizontal" }
+    },
+    {
+      "id": 10,
+      "title": "Errors by Operation",
+      "type": "barchart",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 30 },
+      "targets": [
+        {
+          "expr": "sum by(operation)(rate(coding_analytics_prisma_errors_total{model=~\"$model\", operation=~\"$operation\"}[$__rate_interval]))",
+          "refId": "A",
+          "legendFormat": "{{operation}}"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short" } },
+      "options": { "orientation": "horizontal" }
+    },
+    {
+      "id": 11,
+      "title": "Errors by Model",
+      "type": "barchart",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 30 },
+      "targets": [
+        {
+          "expr": "sum by(model)(rate(coding_analytics_prisma_errors_total{model=~\"$model\", operation=~\"$operation\"}[$__rate_interval]))",
+          "refId": "A",
+          "legendFormat": "{{model}}"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short" } },
+      "options": { "orientation": "horizontal" }
+    }
+  ]
+}
