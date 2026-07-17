@@ -3,7 +3,7 @@
   "uid": "prisma-dashboard",
   "refresh": "5s",
   "schemaVersion": 38,
-  "version": 1,
+  "version": 2,
   "timezone": "browser",
   "editable": true,
   "tags": [
@@ -109,12 +109,12 @@
     },
     {
       "id": 4,
-      "title": "Error Rate",
+      "title": "Success Rate",
       "type": "stat",
       "gridPos": { "h": 6, "w": 6, "x": 18, "y": 0 },
       "targets": [
         {
-          "expr": "100 * sum(rate(coding_analytics_prisma_errors_total{model=~\"$model\", operation=~\"$operation\"}[$__rate_interval])) / clamp_min(sum(rate(coding_analytics_prisma_queries_total{model=~\"$model\", operation=~\"$operation\"}[$__rate_interval])), 1)",
+          "expr": "100 - (100 * sum(rate(coding_analytics_prisma_errors_total{model=~\"$model\", operation=~\"$operation\"}[$__rate_interval])) / clamp_min(sum(rate(coding_analytics_prisma_queries_total{model=~\"$model\", operation=~\"$operation\"}[$__rate_interval])), 1))",
           "refId": "A"
         }
       ],
@@ -125,9 +125,9 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "yellow", "value": 1 },
-              { "color": "red", "value": 5 }
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 95 },
+              { "color": "green", "value": 99 }
             ]
           }
         }
@@ -136,9 +136,9 @@
     },
     {
       "id": 5,
-      "title": "Query Throughput Over Time",
+      "title": "Query Throughput",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 6 },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 6 },
       "targets": [
         {
           "expr": "sum(rate(coding_analytics_prisma_queries_total{model=~\"$model\", operation=~\"$operation\"}[$__rate_interval]))",
@@ -149,10 +149,62 @@
       "fieldConfig": { "defaults": { "unit": "reqps" } }
     },
     {
+      "id": 12,
+      "title": "Throughput by Model",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 6 },
+      "targets": [
+        {
+          "expr": "sum by(model)(rate(coding_analytics_prisma_queries_total{model=~\"$model\", operation=~\"$operation\"}[$__rate_interval]))",
+          "refId": "A",
+          "legendFormat": "{{model}}"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "reqps" } }
+    },
+    {
+      "id": 13,
+      "title": "Throughput by Operation",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 6 },
+      "targets": [
+        {
+          "expr": "sum by(operation)(rate(coding_analytics_prisma_queries_total{model=~\"$model\", operation=~\"$operation\"}[$__rate_interval]))",
+          "refId": "A",
+          "legendFormat": "{{operation}}"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "reqps" } }
+    },
+    {
+      "id": 14,
+      "title": "Latency Percentiles",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 14 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(coding_analytics_prisma_query_duration_seconds_bucket{model=~\"$model\", operation=~\"$operation\"}[$__rate_interval])) by(le)) * 1000",
+          "refId": "P50",
+          "legendFormat": "P50"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(coding_analytics_prisma_query_duration_seconds_bucket{model=~\"$model\", operation=~\"$operation\"}[$__rate_interval])) by(le)) * 1000",
+          "refId": "P95",
+          "legendFormat": "P95"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(coding_analytics_prisma_query_duration_seconds_bucket{model=~\"$model\", operation=~\"$operation\"}[$__rate_interval])) by(le)) * 1000",
+          "refId": "P99",
+          "legendFormat": "P99"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ms" } }
+    },
+    {
       "id": 6,
       "title": "Query Latency by Model",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 14 },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 22 },
       "targets": [
         {
           "expr": "(sum by(model)(rate(coding_analytics_prisma_query_duration_seconds_sum{model=~\"$model\", operation=~\"$operation\"}[$__rate_interval])) / clamp_min(sum by(model)(rate(coding_analytics_prisma_query_duration_seconds_count{model=~\"$model\", operation=~\"$operation\"}[$__rate_interval])), 1)) * 1000",
@@ -166,7 +218,7 @@
       "id": 7,
       "title": "Query Latency by Operation",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 14 },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 22 },
       "targets": [
         {
           "expr": "(sum by(operation)(rate(coding_analytics_prisma_query_duration_seconds_sum{model=~\"$model\", operation=~\"$operation\"}[$__rate_interval])) / clamp_min(sum by(operation)(rate(coding_analytics_prisma_query_duration_seconds_count{model=~\"$model\", operation=~\"$operation\"}[$__rate_interval])), 1)) * 1000",
@@ -177,10 +229,24 @@
       "fieldConfig": { "defaults": { "unit": "ms" } }
     },
     {
+      "id": 15,
+      "title": "Slow Query Trend",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 30 },
+      "targets": [
+        {
+          "expr": "sum(rate(coding_analytics_prisma_slow_queries_total{model=~\"$model\", operation=~\"$operation\"}[$__rate_interval]))",
+          "refId": "A",
+          "legendFormat": "Slow Queries"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short" } }
+    },
+    {
       "id": 8,
       "title": "Top Queried Models",
       "type": "barchart",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 22 },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 30 },
       "targets": [
         {
           "expr": "topk(10, sum by(model)(rate(coding_analytics_prisma_queries_total{model=~\"$model\", operation=~\"$operation\"}[$__rate_interval])))",
@@ -195,7 +261,7 @@
       "id": 9,
       "title": "Slow Queries by Model",
       "type": "barchart",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 22 },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 30 },
       "targets": [
         {
           "expr": "sum by(model)(rate(coding_analytics_prisma_slow_queries_total{model=~\"$model\", operation=~\"$operation\"}[$__rate_interval]))",
@@ -210,7 +276,7 @@
       "id": 10,
       "title": "Errors by Operation",
       "type": "barchart",
-      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 30 },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 38 },
       "targets": [
         {
           "expr": "sum by(operation)(rate(coding_analytics_prisma_errors_total{model=~\"$model\", operation=~\"$operation\"}[$__rate_interval]))",
@@ -225,7 +291,7 @@
       "id": 11,
       "title": "Errors by Model",
       "type": "barchart",
-      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 30 },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 38 },
       "targets": [
         {
           "expr": "sum by(model)(rate(coding_analytics_prisma_errors_total{model=~\"$model\", operation=~\"$operation\"}[$__rate_interval]))",
