@@ -3,7 +3,7 @@
   "uid": "api-health",
   "refresh": "5s",
   "schemaVersion": 38,
-  "version": 1,
+  "version": 2,
   "timezone": "browser",
   "editable": true,
   "tags": [
@@ -15,218 +15,117 @@
     "from": "now-1h",
     "to": "now"
   },
+  "templating": {
+    "list": [
+      {
+        "name": "method",
+        "type": "query",
+        "query": "label_values(coding_analytics_http_requests_total, method)",
+        "refresh": 1,
+        "includeAll": true,
+        "multi": true,
+        "allValue": ".*"
+      },
+      {
+        "name": "route",
+        "type": "query",
+        "query": "label_values(coding_analytics_http_requests_total, route)",
+        "refresh": 1,
+        "includeAll": true,
+        "multi": true,
+        "allValue": ".*"
+      },
+      {
+        "name": "status",
+        "type": "query",
+        "query": "label_values(coding_analytics_http_requests_total, status)",
+        "refresh": 1,
+        "includeAll": true,
+        "multi": true,
+        "allValue": ".*"
+      }
+    ]
+  },
   "panels": [
     {
       "id": 1,
       "title": "Request Rate",
       "description": "Number of HTTP requests processed per second.",
       "type": "stat",
-      "gridPos": {
-        "h": 6,
-        "w": 6,
-        "x": 0,
-        "y": 0
-      },
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
       "targets": [
         {
-          "expr": "sum(rate(coding_analytics_http_requests_total[1m]))",
+          "expr": "sum(rate(coding_analytics_http_requests_total{method=~\"$method\", route=~\"$route\", status=~\"$status\"}[$__rate_interval]))",
           "refId": "A"
         }
       ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "reqps",
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 100
-              },
-              {
-                "color": "red",
-                "value": 300
-              }
-            ]
-          }
-        }
-      },
-      "options": {
-        "reduceOptions": {
-          "calcs": ["lastNotNull"]
-        },
-        "colorMode": "value",
-        "graphMode": "area"
-      }
+      "fieldConfig": { "defaults": { "unit": "reqps", "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "yellow", "value": 100 }, { "color": "red", "value": 300 } ] } } },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" }
     },
     {
       "id": 2,
       "title": "Error Rate",
       "description": "Percentage of HTTP requests returning status 5xx.",
       "type": "stat",
-      "gridPos": {
-        "h": 6,
-        "w": 6,
-        "x": 6,
-        "y": 0
-      },
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 0 },
       "targets": [
         {
-          "expr": "100 * sum(rate(coding_analytics_http_request_errors_total[5m])) / clamp_min(sum(rate(coding_analytics_http_requests_total[5m])), 1)",
+          "expr": "100 * sum(rate(coding_analytics_http_request_errors_total{method=~\"$method\", route=~\"$route\", status=~\"$status\"}[$__rate_interval])) / clamp_min(sum(rate(coding_analytics_http_requests_total{method=~\"$method\", route=~\"$route\", status=~\"$status\"}[$__rate_interval])), 1)",
           "refId": "A"
         }
       ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "percent",
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 1
-              },
-              {
-                "color": "red",
-                "value": 5
-              }
-            ]
-          }
-        }
-      },
-      "options": {
-        "reduceOptions": {
-          "calcs": ["lastNotNull"]
-        },
-        "colorMode": "value",
-        "graphMode": "area"
-      }
+      "fieldConfig": { "defaults": { "unit": "percent", "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "yellow", "value": 1 }, { "color": "red", "value": 5 } ] } } },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" }
     },
     {
       "id": 3,
       "title": "P95 Latency",
       "description": "95% of HTTP requests finish within this time.",
       "type": "stat",
-      "gridPos": {
-        "h": 6,
-        "w": 6,
-        "x": 12,
-        "y": 0
-      },
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 0 },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(coding_analytics_http_request_duration_seconds_bucket{status!~\"5..\"}[5m])) by(le)) * 1000",
+          "expr": "histogram_quantile(0.95, sum(rate(coding_analytics_http_request_duration_seconds_bucket{method=~\"$method\", route=~\"$route\", status!~\"5..\", status=~\"$status\"}[$__rate_interval])) by(le)) * 1000",
           "refId": "A"
         }
       ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "ms",
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 300
-              },
-              {
-                "color": "red",
-                "value": 800
-              }
-            ]
-          }
-        }
-      },
-      "options": {
-        "reduceOptions": {
-          "calcs": ["lastNotNull"]
-        },
-        "colorMode": "value",
-        "graphMode": "area"
-      }
+      "fieldConfig": { "defaults": { "unit": "ms", "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "yellow", "value": 300 }, { "color": "red", "value": 800 } ] } } },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" }
     },
     {
       "id": 4,
       "title": "In-Flight Requests",
       "description": "Current number of requests being processed by the server.",
       "type": "stat",
-      "gridPos": {
-        "h": 6,
-        "w": 6,
-        "x": 18,
-        "y": 0
-      },
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 0 },
       "targets": [
         {
           "expr": "max(coding_analytics_http_requests_in_flight)",
           "refId": "A"
         }
       ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "short",
-          "color": {
-            "mode": "thresholds"
-          },
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "yellow",
-                "value": 50
-              },
-              {
-                "color": "red",
-                "value": 200
-              }
-            ]
-          }
-        }
-      },
-      "options": {
-        "reduceOptions": {
-          "calcs": ["lastNotNull"]
-        },
-        "colorMode": "value",
-        "graphMode": "area"
-      }
+      "fieldConfig": { "defaults": { "unit": "short", "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null }, { "color": "yellow", "value": 50 }, { "color": "red", "value": 200 } ] } } },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" }
     },
     {
       "id": 5,
       "title": "Traffic over time",
       "type": "timeseries",
-      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 6 },
+      "gridPos": { "h": 8, "w": 16, "x": 0, "y": 6 },
       "targets": [
-        { "expr": "sum(rate(coding_analytics_http_requests_total[1m]))", "refId": "A", "legendFormat": "Requests per second" }
+        { "expr": "sum(rate(coding_analytics_http_requests_total{method=~\"$method\", route=~\"$route\", status=~\"$status\"}[$__rate_interval]))", "refId": "A", "legendFormat": "Requests per second" }
       ],
-      "fieldConfig": {
-        "defaults": { "unit": "reqps" }
-      }
+      "fieldConfig": { "defaults": { "unit": "reqps" } }
+    },
+    {
+      "id": 9,
+      "title": "Traffic by Method",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 6 },
+      "targets": [
+        { "expr": "sum by(method)(rate(coding_analytics_http_requests_total{method=~\"$method\", route=~\"$route\", status=~\"$status\"}[$__rate_interval]))", "refId": "A", "legendFormat": "{{method}}" }
+      ],
+      "fieldConfig": { "defaults": { "unit": "reqps", "custom": { "fillOpacity": 80, "stacked": { "mode": "normal" } } } }
     },
     {
       "id": 6,
@@ -234,12 +133,22 @@
       "type": "timeseries",
       "gridPos": { "h": 8, "w": 24, "x": 0, "y": 14 },
       "targets": [
-        { "expr": "histogram_quantile(0.50, sum(rate(coding_analytics_http_request_duration_seconds_bucket[5m])) by(le)) * 1000", "refId": "P50", "legendFormat": "P50" },
-        { "expr": "histogram_quantile(0.95, sum(rate(coding_analytics_http_request_duration_seconds_bucket{status!~\"5..\"}[5m])) by(le)) * 1000", "refId": "P95", "legendFormat": "P95 (Successful)" },
-        { "expr": "histogram_quantile(0.99, sum(rate(coding_analytics_http_request_duration_seconds_bucket{status!~\"5..\"}[5m])) by(le)) * 1000", "refId": "P99", "legendFormat": "P99 (Successful)" }
+        { "expr": "histogram_quantile(0.50, sum(rate(coding_analytics_http_request_duration_seconds_bucket{method=~\"$method\", route=~\"$route\", status=~\"$status\"}[$__rate_interval])) by(le)) * 1000", "refId": "P50", "legendFormat": "P50" },
+        { "expr": "histogram_quantile(0.95, sum(rate(coding_analytics_http_request_duration_seconds_bucket{method=~\"$method\", route=~\"$route\", status!~\"5..\", status=~\"$status\"}[$__rate_interval])) by(le)) * 1000", "refId": "P95", "legendFormat": "P95 (Successful)" },
+        { "expr": "histogram_quantile(0.99, sum(rate(coding_analytics_http_request_duration_seconds_bucket{method=~\"$method\", route=~\"$route\", status!~\"5..\", status=~\"$status\"}[$__rate_interval])) by(le)) * 1000", "refId": "P99", "legendFormat": "P99 (Successful)" }
       ],
       "fieldConfig": {
-        "defaults": { "unit": "ms" }
+        "defaults": { 
+          "unit": "ms",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 300 },
+              { "color": "red", "value": 800 }
+            ]
+          }
+        }
       }
     },
     {
@@ -248,11 +157,9 @@
       "type": "barchart",
       "gridPos": { "h": 8, "w": 12, "x": 0, "y": 22 },
       "targets": [
-        { "expr": "sum by(route)(rate(coding_analytics_http_requests_total[5m]))", "refId": "A", "legendFormat": "{{route}}" }
+        { "expr": "topk(10, sum by(route)(rate(coding_analytics_http_requests_total{method=~\"$method\", route=~\"$route\", status=~\"$status\"}[$__rate_interval])))", "refId": "A", "legendFormat": "{{route}}" }
       ],
-      "options": {
-        "orientation": "horizontal"
-      }
+      "options": { "orientation": "horizontal" }
     },
     {
       "id": 8,
@@ -260,11 +167,9 @@
       "type": "piechart",
       "gridPos": { "h": 8, "w": 12, "x": 12, "y": 22 },
       "targets": [
-        { "expr": "sum by(status)(rate(coding_analytics_http_requests_total[5m]))", "refId": "A", "legendFormat": "{{status}}" }
+        { "expr": "sum by (class) (label_replace(rate(coding_analytics_http_requests_total{method=~\"$method\", route=~\"$route\", status=~\"$status\"}[$__rate_interval]), \"class\", \"${1}xx\", \"status\", \"([0-9])..\"))", "refId": "A", "legendFormat": "{{class}}" }
       ],
-      "options": {
-        "pieType": "donut"
-      }
+      "options": { "pieType": "donut" }
     }
   ]
 }
