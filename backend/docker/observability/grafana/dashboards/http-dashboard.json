@@ -215,6 +215,56 @@
         "colorMode": "value",
         "graphMode": "area"
       }
+    },
+    {
+      "id": 5,
+      "title": "Traffic over time",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 6 },
+      "targets": [
+        { "expr": "sum(rate(coding_analytics_http_requests_total[1m]))", "refId": "A", "legendFormat": "Requests per second" }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "reqps" }
+      }
+    },
+    {
+      "id": 6,
+      "title": "Latency",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 14 },
+      "targets": [
+        { "expr": "histogram_quantile(0.50, sum(rate(coding_analytics_http_request_duration_seconds_bucket[5m])) by(le)) * 1000", "refId": "P50", "legendFormat": "P50" },
+        { "expr": "histogram_quantile(0.95, sum(rate(coding_analytics_http_request_duration_seconds_bucket{status!~\"5..\"}[5m])) by(le)) * 1000", "refId": "P95", "legendFormat": "P95 (Successful)" },
+        { "expr": "histogram_quantile(0.99, sum(rate(coding_analytics_http_request_duration_seconds_bucket{status!~\"5..\"}[5m])) by(le)) * 1000", "refId": "P99", "legendFormat": "P99 (Successful)" }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "ms" }
+      }
+    },
+    {
+      "id": 7,
+      "title": "Top Routes",
+      "type": "barchart",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 22 },
+      "targets": [
+        { "expr": "sum by(route)(rate(coding_analytics_http_requests_total[5m]))", "refId": "A", "legendFormat": "{{route}}" }
+      ],
+      "options": {
+        "orientation": "horizontal"
+      }
+    },
+    {
+      "id": 8,
+      "title": "Status Code Breakdown",
+      "type": "piechart",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 22 },
+      "targets": [
+        { "expr": "sum by(status)(rate(coding_analytics_http_requests_total[5m]))", "refId": "A", "legendFormat": "{{status}}" }
+      ],
+      "options": {
+        "pieType": "donut"
+      }
     }
   ]
 }
