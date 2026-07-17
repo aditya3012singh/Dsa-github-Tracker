@@ -7,6 +7,7 @@ import { logger } from '../utils/logger';
 import { AuthRequest } from '../middleware/auth';
 import { calculateOverallScore } from '../utils/scoring';
 import { sanitizeHandle } from '../utils/sanitizer';
+import { getCurrentAcademicYear } from '../utils/academicYear';
 
 export const getStudents = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -27,7 +28,7 @@ export const getStudents = async (req: Request, res: Response, next: NextFunctio
         branch: student.branch,
         graduationYear: student.graduationYear,
         courseDuration: student.courseDuration,
-        year: student.courseDuration ? student.courseDuration - (student.graduationYear - 2026) : 0,
+        year: student.courseDuration ? student.courseDuration - (student.graduationYear - getCurrentAcademicYear()) : 0,
         section: student.section,
         linkedIn: student.linkedIn,
         leetcode: {
@@ -262,7 +263,7 @@ export const getStudentById = async (req: Request, res: Response, next: NextFunc
       branch: student.branch,
       graduationYear: student.graduationYear,
       courseDuration: student.courseDuration,
-      year: student.courseDuration ? student.courseDuration - (student.graduationYear - 2026) : 0,
+      year: student.courseDuration ? student.courseDuration - (student.graduationYear - getCurrentAcademicYear()) : 0,
       section: student.section,
       linkedIn: student.linkedIn,
       leetcode: {
@@ -419,7 +420,7 @@ export const getOnlineStudents = async (req: Request, res: Response, next: NextF
         branch: student.branch,
         graduationYear: student.graduationYear,
         courseDuration: student.courseDuration,
-        year: student.courseDuration ? student.courseDuration - (student.graduationYear - 2026) : 0,
+        year: student.courseDuration ? student.courseDuration - (student.graduationYear - getCurrentAcademicYear()) : 0,
         section: student.section,
         linkedIn: student.linkedIn,
         leetcode: {

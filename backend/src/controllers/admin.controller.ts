@@ -4,6 +4,7 @@ import { prisma } from '../config/db';
 import { userSyncQueue } from '../queues/stats.queue';
 import { sanitizeHandle } from '../utils/sanitizer';
 import { logger } from '../utils/logger';
+import { getCurrentAcademicYear } from '../utils/academicYear';
 
 interface StudentInput {
   name: string;
@@ -63,7 +64,7 @@ export const bulkRegisterStudents = async (req: Request, res: Response, next: Ne
       }
 
       const cleanBranch = branch.trim();
-      let finalGraduationYear = 2027;
+      let finalGraduationYear = getCurrentAcademicYear() + 1;
       let finalCourseDuration = parseInt(courseDuration as string, 10) || (cleanBranch.toUpperCase() === 'MCA' ? 2 : 4);
 
       if (graduationYear !== undefined) {
@@ -72,7 +73,7 @@ export const bulkRegisterStudents = async (req: Request, res: Response, next: Ne
         // Fallback for old CSVs containing 'year'
         const parsedYear = parseInt(rawYear as string, 10);
         if (!isNaN(parsedYear)) {
-          finalGraduationYear = 2026 + (finalCourseDuration - parsedYear);
+          finalGraduationYear = getCurrentAcademicYear() + (finalCourseDuration - parsedYear);
         }
       }
 

@@ -6,6 +6,7 @@ import { calculateOverallScore } from '../utils/scoring';
 import { AuthRequest } from '../middleware/auth';
 import { logger } from '../utils/logger';
 import * as XLSX from 'xlsx';
+import { getCurrentAcademicYear } from '../utils/academicYear';
 
 // Global map to track active database queries for specific cache keys (Single Flight)
 const activeLeaderboardQueries = new Map<string, Promise<{ data: any[]; total: number }>>();
@@ -60,7 +61,7 @@ const mapStudentToLeaderboard = (student: any) => {
     branch: student.branch,
     graduationYear: student.graduationYear,
     courseDuration: student.courseDuration,
-    year: student.courseDuration ? student.courseDuration - (student.graduationYear - 2026) : 0,
+    year: student.courseDuration ? student.courseDuration - (student.graduationYear - getCurrentAcademicYear()) : 0,
     section: student.section,
     linkedIn: student.linkedIn,
     totalSolved: stats?.totalSolved || 0,
@@ -111,7 +112,7 @@ export const getLeaderboard = async (req: AuthRequest, res: Response, next: Next
     const branchFilter = req.query.branch as string;
     const sectionFilter = req.query.section as string;
 
-    const academicYear = 2026;
+    const academicYear = getCurrentAcademicYear();
     
     // 1. Build the Prisma Where Clause for filtering
     const where: any = {
@@ -391,7 +392,7 @@ export const exportLeaderboard = async (req: AuthRequest, res: Response, next: N
     const sectionFilter = req.query.section as string;
     const onlineFilter = req.query.online === 'true';
 
-    const academicYear = 2026;
+    const academicYear = getCurrentAcademicYear();
     
     // 1. Build the Prisma Where Clause for filtering
     const where: any = {
