@@ -193,8 +193,9 @@ export const getLeaderboard = async (req: AuthRequest, res: Response, next: Next
     let source = 'db';
 
     try {
+      // const version = await cache.get('leaderboard', 'leaderboard:version') || '0';
       // Fetch current cache version
-      const version = await cache.get('leaderboard', 'leaderboard:version') || '0';
+      const version = await redisConnection.get('leaderboard:version') || '0';
       const cacheKey = `leaderboard:v3:v${version}:${JSON.stringify({ page, limit, sortBy, order, search, yearFilter, branchFilter, sectionFilter })}`;
 
       const cached = await cache.get('leaderboard', cacheKey);

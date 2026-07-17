@@ -1,0 +1,291 @@
+{
+  "title": "🚀 Redis Dashboard",
+  "uid": "redis-health",
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "version": 1,
+  "timezone": "browser",
+  "editable": true,
+  "description": "Monitor Redis cache efficiency, latency, operation throughput and failures. Answers the question: 'Is Redis reducing database load, or has cache effectiveness degraded?'",
+  "tags": [
+    "redis",
+    "observability",
+    "coding-analytics",
+    "cache"
+  ],
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "cache",
+        "type": "query",
+        "query": "label_values(coding_analytics_cache_hits_total, cache)",
+        "refresh": 1,
+        "includeAll": true,
+        "multi": true,
+        "allValue": ".*"
+      },
+      {
+        "name": "operation",
+        "type": "query",
+        "query": "label_values(coding_analytics_redis_operation_duration_seconds_count, operation)",
+        "refresh": 1,
+        "includeAll": true,
+        "multi": true,
+        "allValue": ".*"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Hit Ratio %",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "100 * sum(rate(coding_analytics_cache_hits_total{cache=~\"$cache\"}[$__rate_interval])) / clamp_min(sum(rate(coding_analytics_cache_hits_total{cache=~\"$cache\"}[$__rate_interval])) + sum(rate(coding_analytics_cache_misses_total{cache=~\"$cache\"}[$__rate_interval])), 1)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 70 },
+              { "color": "green", "value": 90 }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "value",
+        "graphMode": "area"
+      }
+    },
+    {
+      "id": 2,
+      "title": "Miss Ratio %",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 0 },
+      "targets": [
+        {
+          "expr": "100 * sum(rate(coding_analytics_cache_misses_total{cache=~\"$cache\"}[$__rate_interval])) / clamp_min(sum(rate(coding_analytics_cache_hits_total{cache=~\"$cache\"}[$__rate_interval])) + sum(rate(coding_analytics_cache_misses_total{cache=~\"$cache\"}[$__rate_interval])), 1)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 10 },
+              { "color": "red", "value": 30 }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "value",
+        "graphMode": "area"
+      }
+    },
+    {
+      "id": 3,
+      "title": "Avg Latency",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "(sum(rate(coding_analytics_redis_operation_duration_seconds_sum{operation=~\"$operation\"}[$__rate_interval])) / clamp_min(sum(rate(coding_analytics_redis_operation_duration_seconds_count{operation=~\"$operation\"}[$__rate_interval])), 1)) * 1000",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 5 },
+              { "color": "red", "value": 20 }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "value",
+        "graphMode": "area"
+      }
+    },
+    {
+      "id": 4,
+      "title": "Redis Errors",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(coding_analytics_redis_errors_total{operation=~\"$operation\"}[$__rate_interval]))",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.1 },
+              { "color": "red", "value": 2 }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "value",
+        "graphMode": "area"
+      }
+    },
+    {
+      "id": 5,
+      "title": "Cache Hits vs Misses Over Time",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+      "targets": [
+        {
+          "expr": "sum(rate(coding_analytics_cache_hits_total{cache=~\"$cache\"}[$__rate_interval]))",
+          "refId": "A",
+          "legendFormat": "Hits/sec"
+        },
+        {
+          "expr": "sum(rate(coding_analytics_cache_misses_total{cache=~\"$cache\"}[$__rate_interval]))",
+          "refId": "B",
+          "legendFormat": "Misses/sec"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        }
+      }
+    },
+    {
+      "id": 10,
+      "title": "Hit Ratio % Over Time",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
+      "targets": [
+        {
+          "expr": "100 * sum(rate(coding_analytics_cache_hits_total{cache=~\"$cache\"}[$__rate_interval])) / clamp_min(sum(rate(coding_analytics_cache_hits_total{cache=~\"$cache\"}[$__rate_interval])) + sum(rate(coding_analytics_cache_misses_total{cache=~\"$cache\"}[$__rate_interval])), 1)",
+          "refId": "A",
+          "legendFormat": "Hit Ratio %"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100
+        }
+      }
+    },
+    {
+      "id": 6,
+      "title": "GET / SET / DEL Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 14 },
+      "targets": [
+        {
+          "expr": "topk(10, sum by(operation)(rate(coding_analytics_redis_operation_duration_seconds_count{operation=~\"$operation\"}[$__rate_interval])))",
+          "refId": "A",
+          "legendFormat": "{{operation}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps"
+        }
+      }
+    },
+    {
+      "id": 7,
+      "title": "Latency by Operation",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 14 },
+      "targets": [
+        {
+          "expr": "(sum by(operation)(rate(coding_analytics_redis_operation_duration_seconds_sum{operation=~\"$operation\"}[$__rate_interval])) / clamp_min(sum by(operation)(rate(coding_analytics_redis_operation_duration_seconds_count{operation=~\"$operation\"}[$__rate_interval])), 1)) * 1000",
+          "refId": "A",
+          "legendFormat": "{{operation}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms"
+        }
+      }
+    },
+    {
+      "id": 8,
+      "title": "Hit Ratio by Namespace",
+      "type": "barchart",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 22 },
+      "targets": [
+        {
+          "expr": "100 * sum by(cache)(rate(coding_analytics_cache_hits_total{cache=~\"$cache\"}[$__rate_interval])) / clamp_min(sum by(cache)(rate(coding_analytics_cache_hits_total{cache=~\"$cache\"}[$__rate_interval])) + sum by(cache)(rate(coding_analytics_cache_misses_total{cache=~\"$cache\"}[$__rate_interval])), 1)",
+          "refId": "A",
+          "legendFormat": "{{cache}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100
+        }
+      },
+      "options": {
+        "orientation": "horizontal"
+      }
+    },
+    {
+      "id": 9,
+      "title": "Errors by Operation",
+      "type": "barchart",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 22 },
+      "targets": [
+        {
+          "expr": "sum by(operation)(rate(coding_analytics_redis_errors_total{operation=~\"$operation\"}[$__rate_interval]))",
+          "refId": "A",
+          "legendFormat": "{{operation}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        }
+      },
+      "options": {
+        "orientation": "horizontal"
+      }
+    }
+  ]
+}
