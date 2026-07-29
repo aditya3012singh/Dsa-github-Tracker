@@ -1,0 +1,316 @@
+{
+  "title": "📊 Student Refresh Dashboard",
+  "uid": "business-dashboard",
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "version": 2,
+  "timezone": "browser",
+  "editable": true,
+  "tags": [
+    "business",
+    "refresh",
+    "observability",
+    "coding-analytics"
+  ],
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "templating": {
+    "list": [
+      {
+        "name": "platform",
+        "type": "query",
+        "query": "label_values(coding_analytics_student_refresh_total, platform)",
+        "refresh": 1,
+        "includeAll": true,
+        "multi": true,
+        "allValue": ".*"
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 12,
+      "title": "Business SLO",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 5, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "100 * sum(rate(coding_analytics_student_refresh_total{status=\"success\"}[$__rate_interval])) / clamp_min(sum(rate(coding_analytics_student_refresh_total[$__rate_interval])), 1)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 99.5 },
+              { "color": "green", "value": 99.9 }
+            ]
+          }
+        }
+      },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" }
+    },
+    {
+      "id": 1,
+      "title": "Refresh / sec",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 5, "x": 5, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(coding_analytics_student_refresh_total{platform=~\"$platform\"}[$__rate_interval]))",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "reqps" } },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" }
+    },
+    {
+      "id": 2,
+      "title": "Success %",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 5, "x": 10, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(coding_analytics_student_refresh_total{platform=~\"$platform\", status=\"success\"}[$__rate_interval])) / clamp_min(sum(rate(coding_analytics_student_refresh_total{platform=~\"$platform\"}[$__rate_interval])), 1) * 100",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 90 },
+              { "color": "green", "value": 95 }
+            ]
+          }
+        }
+      },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" }
+    },
+    {
+      "id": 3,
+      "title": "Avg Duration",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 5, "x": 15, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(coding_analytics_student_refresh_duration_seconds_sum{platform=~\"$platform\"}[$__rate_interval])) / clamp_min(sum(rate(coding_analytics_student_refresh_duration_seconds_count{platform=~\"$platform\"}[$__rate_interval])), 1) * 1000",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 3000 },
+              { "color": "red", "value": 8000 }
+            ]
+          }
+        }
+      },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" }
+    },
+    {
+      "id": 4,
+      "title": "Failures / sec",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 4, "x": 20, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(coding_analytics_student_refresh_total{platform=~\"$platform\", status=\"failure\"}[$__rate_interval]))",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.1 },
+              { "color": "red", "value": 1 }
+            ]
+          }
+        }
+      },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "colorMode": "value", "graphMode": "area" }
+    },
+    {
+      "id": 5,
+      "title": "Student Refreshes Over Time",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 16, "x": 0, "y": 6 },
+      "targets": [
+        {
+          "expr": "sum(rate(coding_analytics_student_refresh_total{platform=~\"$platform\", status=\"success\"}[$__rate_interval]))",
+          "refId": "success",
+          "legendFormat": "Success"
+        },
+        {
+          "expr": "sum(rate(coding_analytics_student_refresh_total{platform=~\"$platform\", status=\"failure\"}[$__rate_interval]))",
+          "refId": "failure",
+          "legendFormat": "Failure"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "reqps" } }
+    },
+    {
+      "id": 13,
+      "title": "Success Rate by Platform",
+      "type": "barchart",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 6 },
+      "targets": [
+        {
+          "expr": "sum by (platform)(rate(coding_analytics_student_refresh_total{platform=~\"$platform\", status=\"success\"}[$__rate_interval])) / clamp_min(sum by (platform)(rate(coding_analytics_student_refresh_total{platform=~\"$platform\"}[$__rate_interval])), 1) * 100",
+          "refId": "A",
+          "legendFormat": "{{platform}}"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "percent" } },
+      "options": { "orientation": "horizontal" }
+    },
+    {
+      "id": 6,
+      "title": "Platform Success Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 14 },
+      "targets": [
+        {
+          "expr": "sum by (platform)(rate(coding_analytics_student_refresh_total{platform=~\"$platform\", status=\"success\"}[$__rate_interval])) / clamp_min(sum by (platform)(rate(coding_analytics_student_refresh_total{platform=~\"$platform\"}[$__rate_interval])), 1) * 100",
+          "refId": "A",
+          "legendFormat": "{{platform}}"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "percent" } }
+    },
+    {
+      "id": 7,
+      "title": "Platform Failure Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 14 },
+      "targets": [
+        {
+          "expr": "sum by (platform)(rate(coding_analytics_student_refresh_total{platform=~\"$platform\", status=\"failure\"}[$__rate_interval])) / clamp_min(sum by (platform)(rate(coding_analytics_student_refresh_total{platform=~\"$platform\"}[$__rate_interval])), 1) * 100",
+          "refId": "A",
+          "legendFormat": "{{platform}}"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "percent" } }
+    },
+    {
+      "id": 8,
+      "title": "External API Latency (P95 by Platform)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 22 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(coding_analytics_external_api_duration_seconds_bucket{platform=~\"$platform\"}[$__rate_interval])) by (le, platform)) * 1000",
+          "refId": "A",
+          "legendFormat": "{{platform}} (P95)"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ms" } }
+    },
+    {
+      "id": 9,
+      "title": "External API Requests by Status",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 22 },
+      "targets": [
+        {
+          "expr": "sum by (platform, status)(rate(coding_analytics_external_api_requests_total{platform=~\"$platform\"}[$__rate_interval]))",
+          "refId": "A",
+          "legendFormat": "{{platform}} - {{status}}"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "reqps" } }
+    },
+    {
+      "id": 14,
+      "title": "External API Error Rate",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 22 },
+      "targets": [
+        {
+          "expr": "100 * sum by(platform)(rate(coding_analytics_external_api_requests_total{platform=~\"$platform\", status!=\"SUCCESS\"}[$__rate_interval])) / clamp_min(sum by(platform)(rate(coding_analytics_external_api_requests_total{platform=~\"$platform\"}[$__rate_interval])), 1)",
+          "refId": "A",
+          "legendFormat": "{{platform}}"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "percent" } }
+    },
+    {
+      "id": 10,
+      "title": "Refresh Duration Distribution (P50 P95 P99)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 30 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(coding_analytics_student_refresh_duration_seconds_bucket{platform=~\"$platform\"}[$__rate_interval])) by (le, platform)) * 1000",
+          "refId": "P50",
+          "legendFormat": "{{platform}} (P50)"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(coding_analytics_student_refresh_duration_seconds_bucket{platform=~\"$platform\"}[$__rate_interval])) by (le, platform)) * 1000",
+          "refId": "P95",
+          "legendFormat": "{{platform}} (P95)"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(coding_analytics_student_refresh_duration_seconds_bucket{platform=~\"$platform\"}[$__rate_interval])) by (le, platform)) * 1000",
+          "refId": "P99",
+          "legendFormat": "{{platform}} (P99)"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ms" } }
+    },
+    {
+      "id": 11,
+      "title": "Leaderboard Refresh Time",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 30 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(coding_analytics_leaderboard_refresh_duration_seconds_bucket[$__rate_interval])) by (le)) * 1000",
+          "refId": "P95",
+          "legendFormat": "P95"
+        },
+        {
+          "expr": "sum(rate(coding_analytics_leaderboard_refresh_duration_seconds_sum[$__rate_interval])) / clamp_min(sum(rate(coding_analytics_leaderboard_refresh_duration_seconds_count[$__rate_interval])), 1) * 1000",
+          "refId": "avg",
+          "legendFormat": "Average"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ms" } }
+    },
+    {
+      "id": 15,
+      "title": "External API Status Breakdown",
+      "type": "piechart",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 30 },
+      "targets": [
+        {
+          "expr": "sum by (status)(increase(coding_analytics_external_api_requests_total{platform=~\"$platform\"}[$__rate_interval]))",
+          "refId": "A",
+          "legendFormat": "{{status}}"
+        }
+      ]
+    }
+  ]
+}
