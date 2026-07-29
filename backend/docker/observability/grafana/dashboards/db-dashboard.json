@@ -1,9 +1,9 @@
 {
-  "title": "🗄️ PostgreSQL / Prisma Dashboard",
+  "title": "🗄️ Database Health",
   "uid": "prisma-dashboard",
   "refresh": "5s",
   "schemaVersion": 38,
-  "version": 2,
+  "version": 3,
   "timezone": "browser",
   "editable": true,
   "tags": [
@@ -301,6 +301,192 @@
       ],
       "fieldConfig": { "defaults": { "unit": "short" } },
       "options": { "orientation": "horizontal" }
+    },
+    {
+      "id": 16,
+      "title": "PostgreSQL Engine Metrics",
+      "type": "row",
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 46 },
+      "collapsed": false,
+      "panels": []
+    },
+    {
+      "id": 17,
+      "title": "Active Connections",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 47 },
+      "targets": [
+        {
+          "expr": "sum(pg_stat_database_numbackends)",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 50 },
+              { "color": "red", "value": 90 }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "value",
+        "graphMode": "area"
+      }
+    },
+    {
+      "id": 18,
+      "title": "Cache Hit Ratio",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 47 },
+      "targets": [
+        {
+          "expr": "sum(rate(pg_stat_database_blks_hit[$__rate_interval])) / clamp_min(sum(rate(pg_stat_database_blks_hit[$__rate_interval]) + rate(pg_stat_database_blks_read[$__rate_interval])), 1) * 100",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 90 },
+              { "color": "green", "value": 95 }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "value",
+        "graphMode": "area"
+      }
+    },
+    {
+      "id": 19,
+      "title": "Database Deadlocks",
+      "type": "stat",
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 47 },
+      "targets": [
+        {
+          "expr": "sum(rate(pg_stat_database_deadlocks[$__rate_interval]))",
+          "refId": "A"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1 },
+              { "color": "red", "value": 5 }
+            ]
+          }
+        }
+      },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "colorMode": "value",
+        "graphMode": "area"
+      }
+    },
+    {
+      "id": 20,
+      "title": "Transactions / sec",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 53 },
+      "targets": [
+        {
+          "expr": "sum(rate(pg_stat_database_xact_commit[$__rate_interval]))",
+          "refId": "commits",
+          "legendFormat": "Commits"
+        },
+        {
+          "expr": "sum(rate(pg_stat_database_xact_rollback[$__rate_interval]))",
+          "refId": "rollbacks",
+          "legendFormat": "Rollbacks"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "reqps" } }
+    },
+    {
+      "id": 21,
+      "title": "Database Locks by Mode",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 53 },
+      "targets": [
+        {
+          "expr": "sum by (mode)(pg_locks_count)",
+          "refId": "A",
+          "legendFormat": "{{mode}}"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short" } }
+    },
+    {
+      "id": 22,
+      "title": "Disk Reads & Buffer Hits (blocks/sec)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 61 },
+      "targets": [
+        {
+          "expr": "sum(rate(pg_stat_database_blks_read[$__rate_interval]))",
+          "refId": "reads",
+          "legendFormat": "Disk Reads"
+        },
+        {
+          "expr": "sum(rate(pg_stat_database_blks_hit[$__rate_interval]))",
+          "refId": "hits",
+          "legendFormat": "Buffer Hits"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ops" } }
+    },
+    {
+      "id": 23,
+      "title": "Checkpoints (Timed vs Requested)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 61 },
+      "targets": [
+        {
+          "expr": "sum(rate(pg_stat_bgwriter_checkpoints_timed[$__rate_interval]))",
+          "refId": "timed",
+          "legendFormat": "Timed Checkpoints"
+        },
+        {
+          "expr": "sum(rate(pg_stat_bgwriter_checkpoints_req[$__rate_interval]))",
+          "refId": "requested",
+          "legendFormat": "Requested Checkpoints"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ops" } }
+    },
+    {
+      "id": 24,
+      "title": "Replication Lag",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 61 },
+      "targets": [
+        {
+          "expr": "pg_replication_lag_seconds",
+          "refId": "lag",
+          "legendFormat": "Replication Lag"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s" } }
     }
   ]
 }
