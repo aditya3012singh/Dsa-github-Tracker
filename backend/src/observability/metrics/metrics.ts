@@ -17,13 +17,13 @@ import {
     prismaErrorsTotal
 } from "./prismaMetrics";
 import {
-    queueJobsStartedTotal,
-    queueJobsCompletedTotal,
-    queueJobsFailedTotal,
-    queueJobsRetriedTotal,
-    queueJobDuration,
+    queueJobsTotal,
+    queueCompletedTotal,
+    queueFailuresTotal,
+    queueRetriesTotal,
+    queueDuration,
     queueActiveJobs,
-    queueJobWaitTime
+    queueWaitTime
 } from "./bullmqMetrics";
 import {
     studentRefreshTotal,
@@ -103,22 +103,22 @@ export const metrics = {
 
     queue: {
         jobStarted(queue: string) {
-            queueJobsStartedTotal.inc({ queue });
+            queueJobsTotal.inc({ queue });
         },
         jobCompleted(queue: string) {
-            queueJobsCompletedTotal.inc({ queue });
+            queueCompletedTotal.inc({ queue });
         },
         jobFailed(queue: string, reason: string) {
-            queueJobsFailedTotal.inc({ queue, reason });
+            queueFailuresTotal.inc({ queue, reason });
         },
         jobRetried(queue: string) {
-            queueJobsRetriedTotal.inc({ queue });
+            queueRetriesTotal.inc({ queue });
         },
         recordDuration(queue: string, durationSeconds: number) {
-            queueJobDuration.observe({ queue }, durationSeconds);
+            queueDuration.observe({ queue }, durationSeconds);
         },
         recordWaitTime(queue: string, waitTimeSeconds: number) {
-            queueJobWaitTime.observe({ queue }, waitTimeSeconds);
+            queueWaitTime.observe({ queue }, waitTimeSeconds);
         },
         incActiveJobs(queue: string) {
             queueActiveJobs.inc({ queue });
